@@ -17,23 +17,18 @@ export class ProductoFacController {
   }
 
   @Get('products/admin/tes')
-  // findAllAdm( @Query() paginationDto: PaginationDto ) {
   findAll(@Query() query: any) {
     return this.productoFacService.findAll(query);
   }
+  @Get('/products/xpv')
+  findAllvie(@Query() query: any) {
+    return this.productoFacService.findAll(query);
+  }
 
-  // @Get('products')
-  // // findAllAdm( @Query() paginationDto: PaginationDto ) {
-  // findAllvie() {
-  //   return this.productoFacService.findAll();
-  // }
 
 
   @Get('tes/products/:_id')
   findOne(@Param('_id') id: string) {
-        console.log("data")
-        // console.log(data)
-        console.log("data")
 
     return this.productoFacService.findOne(id);
   }

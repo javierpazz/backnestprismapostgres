@@ -39,11 +39,32 @@ export class ComprobanteService extends PrismaClient implements OnModuleInit {
 
   }
 
-  async findAll() {
-  // isAuth,
+  async findAll(query: any) {
+console.log(query)
+    // isAuth,
   // // isAdmin,
+    const {
+      isHaber,
+      id_config,
+    } = query;
+    const Haber = JSON.parse(isHaber) || '';
+      const HaberFilter =
+        Haber && Haber !== 'all'
+          ? {
+            isHaber: Haber
+            }
+          : {};
+
+    const configuracion = id_config;
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { codConId: String(configuracion) } : {codConId: null};
+
 
     const comprobantes = await this.comprobante.findMany({
+        where: {
+        ...HaberFilter,
+        ...configuracionFilter,
+      },
         orderBy: {
           nameCom: 'asc',
         },
