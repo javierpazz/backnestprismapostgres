@@ -17,13 +17,14 @@ export class ComprobanteService extends PrismaClient implements OnModuleInit {
 
   async create(createComprobanteDto: CreateComprobanteDto, comprobante:Comprobante) {
     // createComprobanteDto.nameCus = createComprobanteDto.nameCus.toLocaleLowerCase();
-    const { _id, codCon, ...rest } = createComprobanteDto;
+    const { _id, codCon, codCom, ...rest } = createComprobanteDto;
     try {
       const comprobante = await 
       this.comprobante.create({
 
         data: {
         ...rest,
+        codComC: createComprobanteDto.codCom,
         codCon: codCon
           ? { connect: { id: codCon } } // 🔗 Prisma busca el UUID del Configuration
           : undefined,
@@ -40,15 +41,17 @@ export class ComprobanteService extends PrismaClient implements OnModuleInit {
   }
 
   async findAll(query: any) {
-console.log(query)
     // isAuth,
-  // // isAdmin,
+    // // isAdmin,
     const {
       isHaber,
       id_config,
     } = query;
-    const Haber = JSON.parse(isHaber) || '';
-      const HaberFilter =
+    // console.log(isHaber)
+    // const Haber = JSON.parse(isHaber) || '';
+    // console.log(Haber)
+    const Haber = isHaber ? JSON.parse(isHaber) : '';
+    const HaberFilter =
         Haber && Haber !== 'all'
           ? {
             isHaber: Haber
@@ -71,6 +74,7 @@ console.log(query)
       })
       return comprobantes.map(c => ({
         _id: c.id,  // duplicamos el id en _id
+        codCom: c.codComC,
         ...c,
       }));
 
@@ -89,6 +93,8 @@ console.log(query)
       throw new NotFoundException(`Comprobante with id, name or no "${ id }" not found`);
     
     (comprobante as any)._id = comprobante.id;
+    (comprobante as any).codCom = comprobante.codComC;
+
     return comprobante;
   }
 
@@ -105,6 +111,7 @@ console.log("updateComprobanteDto")
       where: { id: _id },
       data: {
             nameCom: updateComprobanteDto.nameCom,
+            codComC: updateComprobanteDto.codCom,
             claCom: updateComprobanteDto.claCom,
             isHaber: updateComprobanteDto.isHaber,
             noDisc: updateComprobanteDto.noDisc,

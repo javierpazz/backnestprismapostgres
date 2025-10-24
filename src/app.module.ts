@@ -19,9 +19,10 @@ import { EncargadosModule } from './encargados/encargados.module';
 import { EstadosordenModule } from './estadosorden/estadosorden.module';
 import { ComprobanteModule } from './comprobante/comprobante.module';
 import { ProductoFacModule } from './producto-fac/producto-fac.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
-  imports: [ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule],
+  imports: [ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule],
   controllers: [],
   providers: [],
 })

@@ -144,6 +144,53 @@ async update(updateProductoFacDto: UpdateProductoFacDto) {
   }
 }
 
+async downstock(id: string, updateProductoFacDto: any) {
+
+
+        const product = await this.product.findUnique(
+          {
+            where: { id: id },
+          }
+        );
+        if (product) {
+          await this.product.update(
+            {
+              where: { id: id },
+              data: {
+                inStock: { decrement: updateProductoFacDto.quantitys },
+              },
+            }
+          );
+        } else {
+          throw new Error('Product no encontrada');
+        }
+  
+};
+async upstock(id: string, updateProductoFacDto: any) {
+
+
+        const product = await this.product.findUnique(
+          {
+            where: { id: id },
+          }
+        );
+        if (product) {
+          await this.product.update(
+            {
+              where: { id: id },
+              data: {
+                inStock: { increment: updateProductoFacDto.quantitys },
+              },
+            }
+          );
+        } else {
+          throw new Error('Product no encontrada');
+        }
+  
+};
+
+
+
 
 // async remove(id: string) {
 //   try {

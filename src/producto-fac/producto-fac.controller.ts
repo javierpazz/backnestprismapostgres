@@ -33,6 +33,20 @@ export class ProductoFacController {
     return this.productoFacService.findOne(id);
   }
 
+  @Put('products/downstock/:_id')
+  downstock(@Param('_id') id: string,
+  @Body() updateProductDto: any
+  ) {
+    return this.productoFacService.downstock(id, updateProductDto);
+  }
+
+  @Put('products/upstock/:_id')
+  upstock(@Param('_id') id: string,
+  @Body() updateProductDto: any
+  ) {
+    return this.productoFacService.upstock(id, updateProductDto);
+  }
+
   @Put('tes/admin/productsfac')
   update(@Body() updateProductDto: UpdateProductoFacDto) {
   // update(@Body() updateProductDto: any) {

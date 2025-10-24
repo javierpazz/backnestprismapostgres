@@ -1,14 +1,15 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+
 import { OnModuleInit } from '@nestjs/common';
 import { PrismaClient, Order, Prisma, Configuration } from '@prisma/client';
-import { CreateEntradaDto } from './dto/create-entrada.dto';
-import { UpdateEntradaDto } from './dto/update-entrada.dto';
+import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
 
 
 
 @Injectable()
-export class EntradasService extends PrismaClient implements OnModuleInit {
+export class InvoiceService extends PrismaClient implements OnModuleInit {
 
   constructor(private readonly configurationsService: ConfigurationsService) {
     super();
@@ -17,17 +18,8 @@ export class EntradasService extends PrismaClient implements OnModuleInit {
     await this.$connect();
   }
 
-// @Injectable()
-// export class EntradasService {
-//   constructor(
-//     private readonly configurationsService: ConfigurationsService,
-//   ) {}
-
-
-
-
-async create(createEntradaDto: any) {
-  const { orderItems, shippingAddress, ...orderData } = createEntradaDto;
+async create(createInvoiceDto: any) {
+  const { orderItems, shippingAddress, ...orderData } = createInvoiceDto;
 
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
     try {
@@ -69,41 +61,43 @@ async create(createEntradaDto: any) {
 
             const invoice = await this.order.create({
           data: {
-            paymentMethod: orderData.paymentMethod,
-            subTotal: orderData.subTotal,
-            shippingPrice: orderData.shippingPrice,
-            tax: orderData.tax,
-            total: orderData.total,
-            totalBuy: orderData.totalBuy,
-            libNum: orderData.libNum,
-            folNum: orderData.folNum,
-            asiNum: orderData.asiNum,
-            asiDat: safeDate(orderData.asiDat),
-            escNum: orderData.escNum,
-            asieNum: orderData.asieNum,
-            asieDat: safeDate(orderData.asieDat),
-            terminado: orderData.terminado,
-            movpvNum: orderData.movpvNum,
-            movpvDat: safeDate(orderData.movpvDat),
-            codConNum: orderData.codConNum,
-            // codCom: orderData.codCom,
-            supplier: orderData.supplier,
-            remNum: orderData.remNum,
-            // remNum: 1234,
-            remDat: safeDate(orderData.remDat),
-            dueDat: safeDate(orderData.dueDat),
-            invNum: orderData.invNum,
-            invDat: safeDate(orderData.invDat),
-            recNum: orderData.recNum,
-            recDat: safeDate(orderData.recDat),
-            desVal: orderData.desVal,
-            notes: orderData.notes,
-            salbuy: orderData.salbuy,
+      shippingAddress: orderData.shippingAddress,
+      paymentMethod: orderData.paymentMethod,
+      subTotal: orderData.subTotal,
+      shippingPrice: orderData.shippingPrice,
+      tax: orderData.tax,
+      total: orderData.total,
+      totalBuy: orderData.totalBuy,
+      // user: orderData.codUse,
+      // id_client: orderData.codCus,
+      // id_config: orderData.codCon,
+      // user: orderData.user,
+      id_config2: orderData.codCon2,
+      movpvNum: orderData.movpvNum,
+      movpvDat: safeDate(orderData.movpvDat),
+      codConNum: orderData.codConNum,
+      // codCom: orderData.codCom,
+      supplier: orderData.codSup,
+      //////////  numera remito /////////////////
+      remNum: orderData.remNumero,
+      //////////  numera remito /////////////////
+      remDat: safeDate(orderData.remDat),
+      dueDat: safeDate(orderData.dueDat),
+      invNum: orderData.invNum,
+      invDat: safeDate(orderData.invDat),
+      recNum: orderData.recNum,
+      recDat: safeDate(orderData.recDat),
+      desVal: orderData.desVal,
+      notes: orderData.notes,
+      salbuy: orderData.salbuy,
+/////////////
+
+
 
             // relaciones
             customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
-            parte: orderData.codPar ? { connect: { id: orderData.codPar } } : undefined,
-            instrumento: orderData.codIns ? { connect: { id: orderData.codIns } } : undefined,
+            comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
+            // instrumento: orderData.codIns ? { connect: { id: orderData.codIns } } : undefined,
             configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
             user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
 
@@ -135,8 +129,14 @@ async create(createEntradaDto: any) {
           include: { orderItems: true }, // incluye los items en la respuesta
         });
 
-        return { invoice };
-            
+        // return { invoice };
+      const invoiceWithMongoId = {
+        ...invoice,
+        _id: invoice.id,
+      };
+
+      return { invoice: invoiceWithMongoId };            
+
     } catch (error) {
       this.handleExceptions( error );
     }
@@ -217,10 +217,7 @@ const obserFilter: Prisma.OrderWhereInput =
         ? { terminado: true }
         : {};
 
-    const existeIns =
-          { "id_instru": { not : null} };
-
-          // --- Registro ---
+    // --- Registro ---
     const registroFilter =
       registro === 'TOD'
         ? {}
@@ -256,7 +253,6 @@ const obserFilter: Prisma.OrderWhereInput =
         ...obserFilter,
         ...estadoFilter,
         ...registroFilter,
-        ...existeIns,
       },
         orderBy: sortOrder,
 
@@ -472,153 +468,6 @@ async findOne(id: string) {
   };
   return formattedInvoice;
 }
-
-
-
-  async update(updateEntradaDto: any, id : string) {
-  
-
-
-    const invoice = await this.order.findUnique({
-    where: { id },
-    include: {
-      customer: true,       // id_client
-      configuration: true,  // id_config
-      instrumento: true,    // id_instru
-      parte: true,          // id_parte
-      user1: true,          // usuario
-      orderItems: true,
-    },
-  });
-  if (!invoice) throw new NotFoundException(`Entrada with id "${id}" not found`);
-  
-  // Mapear el resultado al formato deseado
-  const formattedInvoice = {
-    _id: invoice.id,
-    ...invoice,
-
-    id_client: typeof updateEntradaDto.codCus === 'object'
-    ? updateEntradaDto.codCus._id
-    : updateEntradaDto.codCus,
-    id_config: typeof updateEntradaDto.codCon === 'object'
-    ? updateEntradaDto.codCon._id
-    : updateEntradaDto.codCon,
-    id_instru: typeof updateEntradaDto.codIns === 'object'
-    ? updateEntradaDto.codIns._id
-    : updateEntradaDto.codIns,
-    // id_parte: typeof updateEntradaDto.codPar === 'object'
-    // ? updateEntradaDto.codPar._id
-    // : updateEntradaDto.codPar,
-    id_parte: !updateEntradaDto.codPar
-      ? null
-      : typeof updateEntradaDto.codPar === 'object'
-        ? updateEntradaDto.codPar._id
-        : updateEntradaDto.codPar,
-    user: typeof updateEntradaDto.user === 'object'
-    ? updateEntradaDto.user._id
-    : updateEntradaDto.user,
-
-
-    // orderItems: updateEntradaDto.orderItems.map(item => ({
-    //   slug: item.slug,
-    //   title: item.title,
-    //   medPro: item.medPro,
-    //   quantity: item.quantity,
-    //   price: item.price,
-    //   porIva: item.porIva,
-    //   venDat: item.venDat,
-    //   size: item.size,
-    //   observ: item.observ,
-    //   terminado: item.terminado,
-    //   productId: item.productId,
-    // })),
-  };
-
-  // console.log(formattedInvoice)
-
-    const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-
-
-
-    try {
-            // console.log(formattedInvoice.orderItems)
-            // console.log('ID del order:', id);
-            // console.log('IDs de productos:', formattedInvoice.orderItems.map(i => i.productId));
-
-      await this.order.update(
-            ({
-          where: { id: id }, // Prisma usa 'id'
-        data: {
-          paymentMethod: updateEntradaDto.paymentMethod,
-          subTotal: updateEntradaDto.subTotal,
-          shippingPrice: updateEntradaDto.shippingPrice,
-          tax: updateEntradaDto.tax,
-          total: updateEntradaDto.total,
-          totalBuy: updateEntradaDto.totalBuy,
-          libNum: updateEntradaDto.libNum,
-          folNum: updateEntradaDto.folNum,
-          asiNum: updateEntradaDto.asiNum,
-          asiDat: safeDate(updateEntradaDto.asiDat),
-          escNum: updateEntradaDto.escNum,
-          asieNum: updateEntradaDto.asieNum,
-          asieDat: safeDate(updateEntradaDto.asieDat),
-          terminado: updateEntradaDto.terminado,
-          movpvNum: updateEntradaDto.movpvNum,
-          movpvDat: safeDate(updateEntradaDto.movpvDat),
-          codConNum: updateEntradaDto.codConNum,
-          // codCom: updateEntradaDto.codCom,
-          supplier: updateEntradaDto.supplier,
-          // remNum: updateEntradaDto.remNum,
-          // remNum: 1234,
-          remDat: safeDate(updateEntradaDto.remDat),
-          dueDat: safeDate(updateEntradaDto.dueDat),
-          invNum: updateEntradaDto.invNum,
-          invDat: safeDate(updateEntradaDto.invDat),
-          recNum: updateEntradaDto.recNum,
-          recDat: safeDate(updateEntradaDto.recDat),
-          desVal: updateEntradaDto.desVal,
-          notes: updateEntradaDto.notes,
-          salbuy: updateEntradaDto.salbuy,
-
-      // customer: { connect: { id: formattedInvoice.id_client } },
-      // parte: { connect: { id: formattedInvoice.id_parte } },
-      // instrumento: { connect: { id: formattedInvoice.id_instru } },
-      // configuration: { connect: { id: formattedInvoice.id_config } },
-      // user1: { connect: { id: formattedInvoice.user } },
-      id_client: formattedInvoice.id_client ,
-      id_parte: formattedInvoice.id_parte,
-      id_instru: formattedInvoice.id_instru,
-      id_config: formattedInvoice.id_config,
-      user: formattedInvoice.user,
-
-
-          orderItems: {
-            deleteMany: {orderId: id}, // borra todos los actuales
-            create: updateEntradaDto.orderItems?.map((oi) => ({
-              title: oi.title,
-              medPro: oi.medPro,
-              quantity: oi.quantity,
-              price: oi.price,
-              porIva: oi.porIva,
-              venDat: safeDate(oi.venDat),
-              observ: oi.observ,
-              slug: oi.slug,
-              size: oi.size,
-              terminado: oi.terminado,
-              // productId: oi.productId,  // en lugar de oi._id
-              productId: oi._id,
-            })),
-          },
-        },
-       })
-      );
-      return { updateEntradaDto };
-      
-    } catch (error) {
-      this.handleExceptions( error );
-    }
-  }
-
 
 
 

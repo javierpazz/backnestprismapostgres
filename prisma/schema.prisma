@@ -75,7 +75,7 @@ model Encargado {
 
 model Comprobante {
   id            String    @id @default(uuid())
-  codCom     String?
+  codComC    String?
   nameCom    String?
   claCom     String?
   isHaber    Boolean       @default(true)
@@ -84,14 +84,15 @@ model Comprobante {
   itDisc     Boolean       @default(false)
   interno    Boolean       @default(false)
   numInt     Int?
-
+  
   codConId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
   codCon      Configuration?  @relation(fields: [codConId], references: [id])
+  order  Order[]   // 👈 Relación 
   
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 
-  @@unique([codCom, codConId])
+  @@unique([codComC, codConId])
 }
 
 model Parte {
@@ -252,6 +253,7 @@ model Order {
   id_config2     String?
   codConNum      String?
   codCom         String?
+  comprobante  Comprobante?   @relation(fields: [codCom], references: [id])
 
   libNum         Int?
   folNum         Int?
