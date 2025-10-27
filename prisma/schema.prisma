@@ -19,7 +19,8 @@ model User {
   isActive  Boolean  @default(true)
   role      String   @default("user")
   roles     String[] @default(["user"])
-  order  Order[]   // 👈 Relación con OrderItem
+  order  Order[]  
+  receipt  Receipt[]   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -32,7 +33,8 @@ model Customer {
   domcomer  String?
   cuit      String?
   coniva    String?
-  order  Order[]   // 👈 Relación con OrderItem
+  order  Order[]   // 👈 Relación 
+  receipt  Receipt[]   
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -47,6 +49,9 @@ model Supplier {
   cuit      String?
   coniva    String?
   products   Product[]
+  order  Order[]   // 👈 Relación 
+  receipt  Receipt[]   
+
   updatedAt DateTime @updatedAt
 }
 
@@ -54,6 +59,8 @@ model Valuee {
   id            String    @id @default(uuid())
   codVal        String   @unique
   desVal        String   @unique
+  receiptItem  ReceiptItem[] 
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -69,6 +76,8 @@ model Encargado {
   codEnc        String   @unique
   name          String   @unique
   email         String?   
+  receipt  Receipt[]   
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -124,7 +133,9 @@ model Configuration {
   numIntCaj   Int      @default(0)
   numIntMov   Int      @default(0)
   numIntCli   Int      @default(0)
-  order  Order[]   // 👈 Relación con OrderItem
+  orders1       Order[]     @relation("Config1")
+  orders2       Order[]     @relation("Config2")
+  receipt  Receipt[]   
   comprobantes Comprobante[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -244,13 +255,19 @@ model Order {
 
   id_client      String?      // relación con Customer
   customer     Customer?   @relation(fields: [id_client], references: [id])
+  supplier      String?      // relación con Customer
+  supplier1     Supplier?   @relation(fields: [supplier], references: [id])
   id_parte       String?      // relación con Parte
   parte        Parte?   @relation(fields: [id_parte], references: [id])
   id_instru      String?      // relación con Instrumento
   instrumento  Instrumento?   @relation(fields: [id_instru], references: [id])
-  id_config      String?
-  configuration  Configuration?   @relation(fields: [id_config], references: [id])
-  id_config2     String?
+
+  id_config       String?
+  configuration   Configuration?  @relation("Config1", fields: [id_config], references: [id])
+
+  id_config2      String?
+  configuration2  Configuration?  @relation("Config2", fields: [id_config2], references: [id])
+
   codConNum      String?
   codCom         String?
   comprobante  Comprobante?   @relation(fields: [codCom], references: [id])
@@ -270,7 +287,6 @@ model Order {
   user1  User?   @relation(fields: [user], references: [id])
   id_delivery    String?
   id_address     String?
-  supplier       String?
 
   isPaid         Boolean      @default(false)
   paidAt         DateTime?
@@ -330,4 +346,55 @@ model PaymentResult {
   email_address String?
   orderId       String   @unique
   order         Order    @relation(fields: [orderId], references: [id])
+}
+
+
+model Receipt {
+  id             String          @id @default(uuid())
+  receiptItems   ReceiptItem[]   // relación 1:N
+  subTotal       Float?
+  total          Float?
+  totalBuy       Float?
+  codConNum      Int?
+  isPaid         Boolean?        @default(false)
+  paidAt         DateTime?
+  recNum         Int?
+  recDat         DateTime?
+  cajNum         Int?
+  cajDat         DateTime?
+  desval         String?
+  ordNum         Int?
+  notes          String?
+  salbuy         String?
+
+  // Relaciones
+  id_client    String? 
+  customer      Customer?       @relation(fields: [id_client], references: [id])
+
+  id_config    String?
+  configuration      Configuration?  @relation(fields: [id_config], references: [id])
+
+  id_encarg    String?
+  encargado      Encargado?      @relation(fields: [id_encarg], references: [id])
+
+  user         String?
+  user1           User?           @relation(fields: [user], references: [id])
+
+  supplier     String?
+  supplier1       Supplier?       @relation(fields: [supplier], references: [id])
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model ReceiptItem {
+  id          String   @id @default(uuid())
+  desval      String
+  numval      Float?
+  amountval   Float
+  receiptId   String
+  receipt     Receipt  @relation(fields: [receiptId], references: [id])
+
+  valuee    String
+  valuee1      Valuee   @relation(fields: [valuee], references: [id])
 }

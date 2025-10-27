@@ -5,5 +5,6 @@ import { ProductoFacController } from './producto-fac.controller';
 @Module({
   controllers: [ProductoFacController],
   providers: [ProductoFacService],
+  exports: [ProductoFacService], 
 })
 export class ProductoFacModule {}

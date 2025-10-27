@@ -87,7 +87,7 @@ async create(createEntradaDto: any) {
             movpvDat: safeDate(orderData.movpvDat),
             codConNum: orderData.codConNum,
             // codCom: orderData.codCom,
-            supplier: orderData.supplier,
+            // supplier: orderData.supplier,
             remNum: orderData.remNum,
             // remNum: 1234,
             remDat: safeDate(orderData.remDat),

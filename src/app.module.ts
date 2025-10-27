@@ -20,9 +20,10 @@ import { EstadosordenModule } from './estadosorden/estadosorden.module';
 import { ComprobanteModule } from './comprobante/comprobante.module';
 import { ProductoFacModule } from './producto-fac/producto-fac.module';
 import { InvoiceModule } from './invoice/invoice.module';
+import { ReceiptModule } from './receipt/receipt.module';
 
 @Module({
-  imports: [ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule],
+  imports: [ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule, ReceiptModule],
   controllers: [],
   providers: [],
 })
