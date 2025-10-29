@@ -309,22 +309,133 @@ const obserFilter: Prisma.OrderWhereInput =
 
 
   async findAlldil(query: any) {
+  const {
+    order,
+    fech1,
+    fech2,
+    configuracion,
+    usuario,
+    customer,
+    instru,
+    parte,
+    product,
+    estado,
+    registro,
+    obser,
+  } = query;
 
-// Traemos todos los OrderItems con sus Order relacionados
-const orderItemsWithOrder = await this.orderItem.findMany({
-  include: {
-    order: {
-      include: {
-        shippingAddress: true,
-        customer: true,
-        parte: true,
-        instrumento: true,
-        configuration: true,
-        user1: true,
+  // --- Fechas ---
+  const fechasFilter =
+    !fech1 && !fech2
+      ? {}
+      : !fech1 && fech2
+      ? { remDat: { lte: new Date(fech2) } }
+      : fech1 && !fech2
+      ? { remDat: { gte: new Date(fech1) } }
+      : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+  // --- Filtros por relaciones (dentro de order)
+  const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+  const instruFilter = instru && instru !== 'all' ? { id_instru: String(instru) } : {};
+  const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+  const configuracionFilter =
+    configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+  const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+  // --- Filtro por producto (en el mismo OrderItem)
+  const productFilter =
+    product && product !== 'all' ? { productId: String(product) } : {};
+
+  // --- Filtro por observaciones ---
+  const obserFilter: Prisma.OrderItemWhereInput =
+    obser && obser !== 'all'
+      ? {
+          OR: [
+            { observ: { contains: obser, mode: 'insensitive' } },
+            {
+              order: {
+                notes: { contains: obser, mode: 'insensitive' },
+              },
+            },
+          ],
+        }
+      : {};
+
+  // --- Estado ---
+  const estadoFilter =
+    estado === 'TOD'
+      ? {}
+      : estado === 'EST'
+      ? { order: { terminado: false } }
+      : estado === 'ET'
+      ? { order: { terminado: true } }
+      : {};
+
+  // --- Registro ---
+  const registroFilter =
+    registro === 'TOD'
+      ? {}
+      : registro === 'REGI'
+      ? { order: { libNum: { gt: 0 } } }
+      : registro === 'NREGI'
+      ? { order: { libNum: 0 } }
+      : registro === 'PROT'
+      ? { order: { asiNum: { gt: 0 } } }
+      : registro === 'NPROT'
+      ? { order: { asiNum: 0 } }
+      : {};
+
+  // --- Instrumentos existentes ---
+  const existeIns = { id_instru: { not: null } };
+    // const existeIns = { 
+    //   orderId: { not: null },  // aseguro que tenga orden
+    //   order: { id_instru: { not: null } },
+    // };
+
+  // --- Ordenamiento ---
+  const sortOrder =
+    order === 'newest'
+      ? { order: { remDat: 'desc' as const } }
+      : { order: { remDat: 'asc' as const } };
+
+  // --- Query final ---
+  const orderItemsWithOrder = await this.orderItem.findMany({
+
+    where: {
+      ...productFilter,
+      ...obserFilter,
+      ...estadoFilter,
+      ...registroFilter,
+      order: {
+        is: {
+          // id_instru: { not: null }, // ✅ el filtro se mantiene
+          ...existeIns,
+          ...fechasFilter,
+          ...parteFilter,
+          ...instruFilter,
+          ...customerFilter,
+          ...configuracionFilter,
+          ...usuarioFilter,
+        },
       },
     },
-  },
-});
+
+    orderBy: sortOrder,
+    include: {
+      order: {
+        include: {
+          shippingAddress: true,
+          customer: true,
+          parte: true,
+          instrumento: true,
+          configuration: true,
+          user1: true,
+        },
+      },
+      product: true,
+    },
+  });
+// Traemos todos los OrderItems con sus Order relacionados
 
 // Mapeamos cada OrderItem a un objeto tipo invoice
 const invoices = orderItemsWithOrder.map(item => ({
@@ -417,7 +528,10 @@ async findOne(id: string) {
     where: { id },
     include: {
       customer: true,       // id_client
+      comprobante: true,      
+      supplier1: true,      
       configuration: true,  // id_config
+      configuration2: true,  // id_config
       instrumento: true,    // id_instru
       parte: true,          // id_parte
       user1: true,          // usuario
@@ -434,27 +548,54 @@ async findOne(id: string) {
     id_client: invoice.customer
       ? { _id: invoice.customer.id,
         codCus: invoice.customer.codCus,
-        nameCus: invoice.customer.nameCus}
+        nameCus: invoice.customer.nameCus,
+        cuit: invoice.customer.cuit,
+        coniva: invoice.customer.coniva,
+        domcomer: invoice.customer.domcomer}
       : null,
+      codCom: invoice.comprobante
+      ? { _id: invoice.comprobante.id,
+        codCom: invoice.comprobante.codComC,
+        nameCom: invoice.comprobante.nameCom,
+        noDisc: invoice.comprobante.noDisc,
+        toDisc: invoice.comprobante.toDisc,
+        itDisc: invoice.comprobante.itDisc}
+        : null,
+    supplier: invoice.supplier1
+          ? { _id: invoice.supplier1.id,
+            codSup: invoice.supplier1.codSup,
+            name: invoice.supplier1.name,
+            cuit: invoice.supplier1.cuit,
+            coniva: invoice.supplier1.coniva,
+            domcomer: invoice.supplier1.domcomer}
+          : null,
     id_config: invoice.configuration
       ? { _id: invoice.configuration.id,
          codCon: invoice.configuration.codCon,
          name: invoice.configuration.name }
          : null,
-         id_instru: invoice.instrumento
-         ? { _id: invoice.instrumento.id,
-          codIns: invoice.instrumento.codIns,
-          name: invoice.instrumento.name }
-          : null,
-          id_parte: invoice.parte
-          ? { _id: invoice.parte.id,
-            codPar: invoice.parte.codPar,
-            name: invoice.parte.name }
-            : null,
-            user: invoice.user1
-            ? { _id: invoice.user1.id,
-              name: invoice.user1.name }
+    id_config2: invoice.configuration2
+      ? { _id: invoice.configuration2.id,
+         codCon: invoice.configuration2.codCon,
+         name: invoice.configuration2.name,
+         cuit: invoice.configuration2.cuit,
+         coniva: invoice.configuration2.coniva,
+         domcomer: invoice.configuration2.domcomer}
+         : null,
+    id_instru: invoice.instrumento
+      ? { _id: invoice.instrumento.id,
+      codIns: invoice.instrumento.codIns,
+      name: invoice.instrumento.name }
       : null,
+    id_parte: invoice.parte
+      ? { _id: invoice.parte.id,
+      codPar: invoice.parte.codPar,
+      name: invoice.parte.name }
+      : null,
+    user: invoice.user1
+      ? { _id: invoice.user1.id,
+      name: invoice.user1.name }
+    : null,
     orderItems: invoice.orderItems.map(item => ({
       _id: item.productId,
       slug: item.slug,
@@ -470,6 +611,8 @@ async findOne(id: string) {
       productId: item.productId,
     })),
   };
+
+  console.log(formattedInvoice);
   return formattedInvoice;
 }
 
@@ -631,10 +774,10 @@ async remove(id: string) {
     await this.order.delete({
       where: { id },
     });
-    return { message: `Order con id ${id} eliminado` };
+    return { message: `Documento con id ${id} eliminado` };
   } catch (error) {
     if (error.code === 'P2025') {
-      throw new BadRequestException(`Order con id "${id}" no encontrado`);
+      throw new BadRequestException(`Documento con id "${id}" no encontrado`);
     }
     throw error; // otros errores
   }
@@ -642,13 +785,11 @@ async remove(id: string) {
 
   private handleExceptions( error: any ) {
     if ( error.code === 11000 ) {
-      throw new BadRequestException(`Order exists in db ${ JSON.stringify( error.keyValue ) }`);
+      throw new BadRequestException(`Documento exists in db ${ JSON.stringify( error.keyValue ) }`);
     }
     console.log(error);
-    throw new InternalServerErrorException(`Can't create Order - Check server logs`);
+    throw new InternalServerErrorException(`Can't create Documento - Check server logs`);
   }
-
-
 
 
 }

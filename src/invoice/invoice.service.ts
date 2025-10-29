@@ -40,66 +40,89 @@ async createInv(createInvoiceDto: any) {
 
 ""    // console.log("recibo")
 
-    // console.log(req.body.receiptAux.recDat)
-    // console.log(req.body.receiptAux.desVal)
-    // console.log(req.body.receiptAux.receiptItems)
-    // console.log("recibo")
-  //   if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
-  //     //////////  numera RECIBO /////////////////
+    console.log(receiptAux.recDat)
+    console.log(receiptAux.desVal)
+    console.log(receiptAux.receiptItems)
+    console.log("recibo")
+    if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
+      //////////  numera RECIBO /////////////////
       
-  //     if (receiptAux.recNum > 0)
-  //       {recNumero = receiptAux.recNum }
-  //       else {
-  //         const configId = receiptAux.codCon;
-  //         const configuracion = await this.configuration.findUnique(
-  //         {
-  //           where: { id: configId },
-  //         }
-  //       );
+      if (receiptAux.recNum > 0)
+        {recNumero = receiptAux.recNum }
+        else {
+          const configId = receiptAux.codCon;
+          const configuracion = await this.configuration.findUnique(
+          {
+            where: { id: configId },
+          }
+        );
 
-  //         if (configuracion) {
-  //           await this.configuration.update(
-  //                         {
-  //             where: { id: configId },
-  //             data: {
-  //               numIntRec: { increment: 1 },
-  //             },
-  //           }
+          if (configuracion) {
+            await this.configuration.update(
+                          {
+              where: { id: configId },
+              data: {
+                numIntRec: { increment: 1 },
+              },
+            }
 
-  //           );
-  //         }
-  //         recNumero = configuracion.numIntRec;
-  //       };
-  //       //////////  numera RECIBO /////////////////
+            );
+          }
+          recNumero = configuracion.numIntRec;
+        };
+        //////////  numera RECIBO /////////////////
   
-  //   const newReceipt = new Receipt({
-  //     receiptItems: req.body.receiptAux.receiptItems.map((x) => ({
-  //       ...x,
-  //       valuee: x._id,
-  //     })),
-  //     subTotal: req.body.receiptAux.subTotal,
-  //     total: req.body.receiptAux.total,
-  //     totalBuy: req.body.receiptAux.totalBuy,
-  //     user: req.body.receiptAux.user,
-  //     id_client: req.body.receiptAux.codCus,
-  //     id_config: req.body.receiptAux.codCon,
-  //     codConNum: req.body.receiptAux.codConNum,
-  //     supplier: req.body.receiptAux.codSup,
-  //     //////////  numera recibo /////////////////
-  //     recNum: recNumero,
-  //     //////////  numera recibo /////////////////
-  //     recDat: req.body.receiptAux.recDat,
-  //     desVal: req.body.receiptAux.desVal,
-  //     notes: req.body.receiptAux.notes,
-  //     salbuy: req.body.receiptAux.salbuy,
-  //   });
-  //   const receipt = await newReceipt.save();
-  //   recAux = receipt.recNum;
-  //   console.log(recAux);
-  // }else{
-  //   recAux = 0;  
-  //   recDat = null;
-  // }
+      const receipt = await this.receipt.create({
+          data: {
+      subTotal: receiptAux.subTotal,
+      total: receiptAux.total,
+      totalBuy: receiptAux.totalBuy,
+      // user: receiptAux.codUse,
+      // id_client: receiptAux.codCus,
+      // id_config: receiptAux.codCon,
+      // user: receiptAux.user,
+      // id_config2: receiptAux.codCon2,
+      codConNum: +receiptAux.codConNum,
+      // codCom: receiptAux.codCom,
+      // supplier: receiptAux.codSup,
+      //////////  numera remito /////////////////
+      recNum: recNumero,
+      //////////  numera remito /////////////////
+      recDat: safeDate(receiptAux.recDat),
+      desval: receiptAux.desVal,
+      notes: receiptAux.notes,
+      salbuy: receiptAux.salbuy,
+/////////////
+
+
+
+            // relaciones
+            customer: receiptAux.codCus ? { connect: { id: receiptAux.codCus } } : undefined,
+            configuration: receiptAux.codCon ? { connect: { id: receiptAux.codCon } } : undefined,
+            supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
+            user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
+
+
+            
+            // order items
+            receiptItems: {
+              create: receiptAux.receiptItems.map(item => ({
+                desval: item.desval,
+                numval: +item.numval,
+                amountval: +item.amountval,
+                // venDat: safeDate(item.venDat),
+                // productId: item.productId,
+                valuee: item._id,
+              }))
+            }
+          },
+          include: { receiptItems: true }, // incluye los items en la respuesta
+        });
+    console.log(recAux);
+  }else{
+    recAux = 0;  
+    // recDat = null;
+  }
       //////////  GENERA RECIBO /////////////////
       //////////  MODIFICA STOCK /////////////////
       
@@ -1564,9 +1587,107 @@ async findOne(id: string) {
   return formattedInvoice;
 }
 
+async nullinvoice(updateInvoiceDto: any, id: string) {
+  // const { _id, ...rest } = updateInvoiceDto;
+  // Prepara los datos para Prisma
+  // const data: any = {
+  //   ...rest,
+  // };
+
+  try {
+    const updated = await this.order.update({
+      where: { id: id},
+      data: {
+          remNum : null,
+          invNum : null,
+          invDat : null,
+          recNum : null,
+          recDat : null,
+          desVal : null,
+          notes : null,
+          salbuy : null,
+      },
+    });
+
+    // Devolver _id para compatibilidad con frontend
+    return updated;
+  } catch (error: any) {
+      this.handleExceptions( error );
+  }
+
+}
+async nullremit(updateInvoiceDto: any, id: string) {
+  // const { _id, ...rest } = updateInvoiceDto;
+  // Prepara los datos para Prisma
+  // const data: any = {
+  //   ...rest,
+  // };
+
+  try {
+    const updated = await this.order.update({
+      where: { id: id},
+      data: {
+            remNum: null,
+            },
+    });
+
+    // Devolver _id para compatibilidad con frontend
+    return updated;
+  } catch (error: any) {
+      this.handleExceptions( error );
+  }
+
+}
 
 
+async updateS(updateInvoiceDto: any, id: string) {
+  // const { _id, ...rest } = updateInvoiceDto;
+  // Prepara los datos para Prisma
+  // const data: any = {
+  //   ...rest,
+  // };
 
+  try {
+    const updated = await this.order.updateMany({
+      where: { recNum: updateInvoiceDto.recNum, id_client: updateInvoiceDto.customer },
+      data: {
+            recNum: 0,
+            recDat: '',
+            desVal: '',
+            },
+    });
+
+    // Devolver _id para compatibilidad con frontend
+    return updated;
+  } catch (error: any) {
+      this.handleExceptions( error );
+  }
+
+}
+async updateB(updateInvoiceDto: any, id: string) {
+  // const { _id, ...rest } = updateInvoiceDto;
+  // // Prepara los datos para Prisma
+  // const data: any = {
+  //   ...rest,
+  // };
+
+  try {
+    const updated = await this.order.updateMany({
+      where: { recNum: updateInvoiceDto.recNum, supplier: updateInvoiceDto.supplier },
+      data: {
+            recNum: 0,
+            recDat: '',
+            desVal: '',
+            },
+    });
+
+    // Devolver _id para compatibilidad con frontend
+    return updated;
+  } catch (error: any) {
+      this.handleExceptions( error );
+  }
+
+}
 
 
 async remove(id: string) {
@@ -1577,10 +1698,10 @@ async remove(id: string) {
     await this.order.delete({
       where: { id },
     });
-    return { message: `Remito con id ${id} eliminado` };
+    return { message: `Documento con id ${id} eliminado` };
   } catch (error) {
     if (error.code === 'P2025') {
-      throw new BadRequestException(`Remito con id "${id}" no encontrado`);
+      throw new BadRequestException(`Documento con id "${id}" no encontrado`);
     }
     throw error; // otros errores
   }
@@ -1588,10 +1709,10 @@ async remove(id: string) {
 
   private handleExceptions( error: any ) {
     if ( error.code === 11000 ) {
-      throw new BadRequestException(`Order exists in db ${ JSON.stringify( error.keyValue ) }`);
+      throw new BadRequestException(`Documento exists in db ${ JSON.stringify( error.keyValue ) }`);
     }
     console.log(error);
-    throw new InternalServerErrorException(`Can't create Order - Check server logs`);
+    throw new InternalServerErrorException(`Can't create Documento - Check server logs`);
   }
 
 

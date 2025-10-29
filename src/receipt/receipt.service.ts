@@ -637,7 +637,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
 
 
       include: {
-        customer: true,       // id_client
+        supplier1: true,       // id_client
         configuration: true,  // id_config
         user1: true,          // usuario si quieres incluirlo
         receiptItems: true,
@@ -646,8 +646,8 @@ const obserFilter: Prisma.ReceiptWhereInput =
   const receipts = receiptsAll.map((receipt) => ({
     _id: receipt.id,
     ...receipt,
-    id_client: receipt.customer
-      ? { _id: receipt.customer.id, nameCus: receipt.customer.nameCus }
+    supplier: receipt.supplier1
+      ? { _id: receipt.supplier1.id, name: receipt.supplier1.name }
       : null,
     id_config: receipt.configuration
       ? { _id: receipt.configuration.id, name: receipt.configuration.name }
@@ -668,6 +668,91 @@ const obserFilter: Prisma.ReceiptWhereInput =
   }));
 
   return { receipts };}
+
+async findOne(id: string) {
+  if (!id) throw new NotFoundException(`Entrada with id "${id}" not found`);
+
+  const receipt = await this.receipt.findUnique({
+    where: { id },
+    include: {
+      customer: true,       // id_client
+      encargado: true,   
+      supplier1: true,      
+      configuration: true,  // id_config
+      user1: true,          // usuario
+      receiptItems: true,
+    },
+  });
+
+  if (!receipt) throw new NotFoundException(`Entrada with id "${id}" not found`);
+
+  // Mapear el resultado al formato deseado
+  const formattedInvoice = {
+    _id: receipt.id,
+    ...receipt,
+    id_client: receipt.customer
+      ? { _id: receipt.customer.id,
+        codCus: receipt.customer.codCus,
+        nameCus: receipt.customer.nameCus,
+        cuit: receipt.customer.cuit,
+        coniva: receipt.customer.coniva,
+        domcomer: receipt.customer.domcomer}
+      : null,
+    id_encarg: receipt.encargado
+      ? { _id: receipt.encargado.id,
+        codEnc: receipt.encargado.codEnc,
+        name: receipt.encargado.name}
+      : null,
+    supplier: receipt.supplier1
+          ? { _id: receipt.supplier1.id,
+            codSup: receipt.supplier1.codSup,
+            name: receipt.supplier1.name,
+            cuit: receipt.supplier1.cuit,
+            coniva: receipt.supplier1.coniva,
+            domcomer: receipt.supplier1.domcomer}
+          : null,
+    id_config: receipt.configuration
+      ? { _id: receipt.configuration.id,
+         codCon: receipt.configuration.codCon,
+         name: receipt.configuration.name }
+         : null,
+    user: receipt.user1
+      ? { _id: receipt.user1.id,
+      name: receipt.user1.name }
+    : null,
+    orderItems: receipt.receiptItems.map(item => ({
+      id: item.id,
+      desval: item.desval,
+      numval: item.numval,
+      amountval: item.amountval,
+      receiptId: item.receiptId,
+    })),
+  };
+
+  return formattedInvoice;
+}
+
+
+
+
+async remove(id: string) {
+  try {
+    await this.receiptItem.deleteMany({
+      where: { receiptId: id },
+    });
+    await this.receipt.delete({
+      where: { id },
+    });
+    return { message: `Recibo con id ${id} eliminado` };
+  } catch (error) {
+    if (error.code === 'P2025') {
+      throw new BadRequestException(`Recibo con id "${id}" no encontrado`);
+    }
+    throw error; // otros errores
+  }
+}
+
+
 
 
   private handleExceptions( error: any ) {

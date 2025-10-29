@@ -38,10 +38,20 @@ export class ReceiptController {
   }
 
 
+  @Get('receipts/:_id')
+  findOne(@Param('_id') id: string) {
+    return this.receiptService.findOne(id);
+  }
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateReceiptDto: UpdateReceiptDto) {
   //   return this.receiptService.update(+id, updateReceiptDto);
   // }
+
+
+  @Delete('receipts/:_id')
+  remove(@Param('_id') id: string) {
+    return this.receiptService.remove(id);
+  }
 
 }
 

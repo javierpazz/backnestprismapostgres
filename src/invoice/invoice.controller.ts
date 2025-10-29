@@ -62,10 +62,24 @@ export class InvoiceController {
   //   return this.invoiceService.findOne(id);
   // }
 
-  // @Put('invoices/remModEsc/:_id')
-  // update(@Param('_id') id: string, @Body() updateEntradaDto: any) {
-  //   return this.invoiceService.update(updateEntradaDto, id as any);
-  // }
+  @Put('invoices/:_id/deleteremit')
+  deleteremit(@Param('_id') id: string, @Body() updateInvoiceDto: any) {
+    return this.invoiceService.nullremit(updateInvoiceDto, id as any);
+  }
+  @Put('invoices/:_id/deleteinvoice')
+  deleteinvoice(@Param('_id') id: string, @Body() updateInvoiceDto: any) {
+    return this.invoiceService.nullinvoice(updateInvoiceDto, id as any);
+  }
+
+  @Put('invoices/:_id/unapplyrecS')
+  updateS(@Param('_id') id: string, @Body() updateInvoiceDto: any) {
+    return this.invoiceService.updateS(updateInvoiceDto, id as any);
+  }
+
+  @Put('invoices/:_id/unapplyrecB')
+  updateB(@Param('_id') id: string, @Body() updateInvoiceDto: any) {
+    return this.invoiceService.updateB(updateInvoiceDto, id as any);
+  }
 
   @Delete('invoices/:_id')
   remove(@Param('_id') id: string) {
