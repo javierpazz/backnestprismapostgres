@@ -21,6 +21,181 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
     await this.$connect();
   }
 
+async geninvRem(createInvoiceDto: any, id:any) {
+  const {invoiceAux, receiptAux} = createInvoiceDto;
+  const { orderItems, shippingAddress } = invoiceAux;
+    console.log(invoiceAux)
+  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+
+
+    try {
+//////////////inv
+    //////////  GENERA RECIBO /////////////////
+    let recAux = 0;
+    let recNumero = 0;
+    let invNumero = 0;
+    let remNumero = 0;
+    let invrecNum = 0;
+    let invrecDat = "";
+
+
+    console.log(receiptAux.recDat)
+    console.log(receiptAux.desVal)
+    console.log(receiptAux.receiptItems)
+    console.log("recibo")
+    if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
+      //////////  numera RECIBO /////////////////
+      
+      if (receiptAux.recNum > 0)
+        {recNumero = receiptAux.recNum }
+        else {
+          const configId = receiptAux.codCon;
+          const configuracion = await this.configuration.findUnique(
+          {
+            where: { id: configId },
+          }
+        );
+
+          if (configuracion) {
+            await this.configuration.update(
+                          {
+              where: { id: configId },
+              data: {
+                numIntRec: { increment: 1 },
+              },
+            }
+
+            );
+          }
+          recNumero = configuracion.numIntRec + 1;
+        };
+        //////////  numera RECIBO /////////////////
+  
+      const receipt = await this.receipt.create({
+          data: {
+      subTotal: receiptAux.subTotal,
+      total: receiptAux.total,
+      totalBuy: receiptAux.totalBuy,
+      // user: receiptAux.codUse,
+      // id_client: receiptAux.codCus,
+      // id_config: receiptAux.codCon,
+      // user: receiptAux.user,
+      // id_config2: receiptAux.codCon2,
+      codConNum: +receiptAux.codConNum,
+      // codCom: receiptAux.codCom,
+      // supplier: receiptAux.codSup,
+      //////////  numera remito /////////////////
+      recNum: recNumero,
+      //////////  numera remito /////////////////
+      recDat: safeDate(receiptAux.recDat),
+      desval: receiptAux.desVal,
+      notes: receiptAux.notes,
+      salbuy: receiptAux.salbuy,
+/////////////
+
+
+
+            // relaciones
+            customer: receiptAux.codCus ? { connect: { id: receiptAux.codCus } } : undefined,
+            configuration: receiptAux.codCon ? { connect: { id: receiptAux.codCon } } : undefined,
+            supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
+            user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
+
+
+            
+            // order items
+            receiptItems: {
+              create: receiptAux.receiptItems.map(item => ({
+                desval: item.desval,
+                numval: +item.numval,
+                amountval: +item.amountval,
+                // venDat: safeDate(item.venDat),
+                // productId: item.productId,
+                valuee: item._id,
+              }))
+            }
+          },
+          include: { receiptItems: true }, // incluye los items en la respuesta
+        });
+    console.log(recAux);
+  }else{
+    recAux = 0;  
+    // recDat = null;
+  }
+      //////////  GENERA RECIBO /////////////////
+        //////////  numera factura /////////////////
+      
+      if (invoiceAux.invNum > 0)
+        {invNumero = invoiceAux.invNum }
+        else {
+          const comproId = invoiceAux.codCom;
+          // const comprobante = await this.comprobante.findById(comproId);
+          const comprobante = await this.comprobante.findUnique(
+          {
+            where: { id: comproId },
+          }
+        );
+          // if (comprobante) {
+          //   comprobante.numInt = comprobante.numInt + 1;
+          //   await comprobante.save();
+          // }
+          
+          if (comprobante) {
+            await this.comprobante.update(
+              {
+                where: { id: comproId },
+                data: {
+                  numInt: { increment: 1 },
+                },
+              }
+              
+            );
+          }
+          invNumero = comprobante.numInt + 1;
+
+        };
+        //////////  numera factura /////////////////
+
+        if (recAux > 0) {
+          invrecNum = recAux;
+          invrecDat =  invoiceAux.invDat;
+          }else{
+            invrecNum = recAux;
+            invrecDat =  invoiceAux.recDat;
+          };
+///***
+      const invoice = await this.order.update({
+      where: { id: id},
+      data: {
+          notes : invoiceAux.notes,
+          // codCom : invoiceAux.codCom,
+          dueDat : invoiceAux.dueDat,
+          invDat : invoiceAux.invDat,
+          invNum : invNumero,
+          recNum : recNumero,
+          recDat : invoiceAux.invDat,
+          // relaciones
+          comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
+            
+          },
+          include: { orderItems: true }, // incluye los items en la respuesta
+        });
+
+        // return { invoice };
+      const invoiceWithMongoId = {
+        ...invoice,
+        _id: invoice.id,
+      };
+
+      return { invoice: invoiceWithMongoId };            
+    } catch (error) {
+      this.handleExceptions( error );
+    }
+      
+        ///***
+//////////////inv
+
+}
 async createInv(createInvoiceDto: any) {
   const {invoiceAux, receiptAux} = createInvoiceDto;
   const { orderItems, shippingAddress } = invoiceAux;
@@ -38,7 +213,6 @@ async createInv(createInvoiceDto: any) {
     let invrecNum = 0;
     let invrecDat = "";
 
-""    // console.log("recibo")
 
     console.log(receiptAux.recDat)
     console.log(receiptAux.desVal)

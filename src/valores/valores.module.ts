@@ -5,5 +5,6 @@ import { ValoresController } from './valores.controller';
 @Module({
   controllers: [ValoresController],
   providers: [ValoresService],
+  exports: [ValoresService],
 })
 export class ValoresModule {}

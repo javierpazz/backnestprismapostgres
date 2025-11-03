@@ -10,8 +10,8 @@ export class ValoresController {
   constructor(private readonly valoresService: ValoresService) {}
 
   @Post('tes/admin/valores')
-  create(@Body() createValueeDto: CreateValoreDto, Valuee:Valuee) {
-    return this.valoresService.create(createValueeDto, Valuee);
+  create(@Body() createValueeDto: CreateValoreDto) {
+    return this.valoresService.create(createValueeDto);
   }
 
   @Get('tes/admin/valores')

@@ -95,7 +95,7 @@ model Comprobante {
   numInt     Int?
   
   codConId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
-  codCon      Configuration?  @relation(fields: [codConId], references: [id])
+  codCon      Configuration?  @relation(fields: [codConId], references: [id], onDelete: Restrict)
   order  Order[]   // 👈 Relación 
   
   createdAt  DateTime      @default(now())
@@ -187,7 +187,7 @@ model Product {
   orderItems  OrderItem[]   // 👈 Relación con OrderItem
 
   supplierId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
-  supplier      Supplier?   @relation(fields: [supplierId], references: [id])
+  supplier      Supplier?   @relation(fields: [supplierId], references: [id], onDelete: Restrict)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   @@unique([codigoPro, id_config])
@@ -199,7 +199,7 @@ model Review {
   name      String?
   comment   String?
   rating    Float?
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 }
 
 enum ProductType {
@@ -231,10 +231,10 @@ model OrderItem {
   observ      String?
   terminado   Boolean?
   productId   String
-  product     Product   @relation(fields: [productId], references: [id])
-  instrumento Instrumento? @relation(fields: [instrumentoId], references: [id])
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  instrumento Instrumento? @relation(fields: [instrumentoId], references: [id], onDelete: Restrict)
   instrumentoId String?
-  order Order? @relation(fields: [orderId], references: [id])
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Restrict)
   orderId String?
 }
 
@@ -254,23 +254,23 @@ model Order {
   totalBuy       Float?
 
   id_client      String?      // relación con Customer
-  customer     Customer?   @relation(fields: [id_client], references: [id])
+  customer     Customer?   @relation(fields: [id_client], references: [id], onDelete: Restrict)
   supplier      String?      // relación con Customer
-  supplier1     Supplier?   @relation(fields: [supplier], references: [id])
+  supplier1     Supplier?   @relation(fields: [supplier], references: [id], onDelete: Restrict)
   id_parte       String?      // relación con Parte
-  parte        Parte?   @relation(fields: [id_parte], references: [id])
+  parte        Parte?   @relation(fields: [id_parte], references: [id], onDelete: Restrict)
   id_instru      String?      // relación con Instrumento
-  instrumento  Instrumento?   @relation(fields: [id_instru], references: [id])
+  instrumento  Instrumento?   @relation(fields: [id_instru], references: [id], onDelete: Restrict)
 
   id_config       String?
-  configuration   Configuration?  @relation("Config1", fields: [id_config], references: [id])
+  configuration   Configuration?  @relation("Config1", fields: [id_config], references: [id], onDelete: Restrict)
 
   id_config2      String?
-  configuration2  Configuration?  @relation("Config2", fields: [id_config2], references: [id])
+  configuration2  Configuration?  @relation("Config2", fields: [id_config2], references: [id], onDelete: Restrict)
 
   codConNum      String?
   codCom         String?
-  comprobante  Comprobante?   @relation(fields: [codCom], references: [id])
+  comprobante  Comprobante?   @relation(fields: [codCom], references: [id], onDelete: Restrict)
 
   libNum         Int?
   folNum         Int?
@@ -284,7 +284,7 @@ model Order {
 
   isHaber        Boolean?
   user           String?
-  user1  User?   @relation(fields: [user], references: [id])
+  user1  User?   @relation(fields: [user], references: [id], onDelete: Restrict)
   id_delivery    String?
   id_address     String?
 
@@ -369,19 +369,19 @@ model Receipt {
 
   // Relaciones
   id_client    String? 
-  customer      Customer?       @relation(fields: [id_client], references: [id])
+  customer      Customer?       @relation(fields: [id_client], references: [id], onDelete: Restrict)
 
   id_config    String?
-  configuration      Configuration?  @relation(fields: [id_config], references: [id])
+  configuration      Configuration?  @relation(fields: [id_config], references: [id], onDelete: Restrict)
 
   id_encarg    String?
-  encargado      Encargado?      @relation(fields: [id_encarg], references: [id])
+  encargado      Encargado?      @relation(fields: [id_encarg], references: [id], onDelete: Restrict)
 
   user         String?
-  user1           User?           @relation(fields: [user], references: [id])
+  user1           User?           @relation(fields: [user], references: [id], onDelete: Restrict)
 
   supplier     String?
-  supplier1       Supplier?       @relation(fields: [supplier], references: [id])
+  supplier1       Supplier?       @relation(fields: [supplier], references: [id], onDelete: Restrict)
 
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -393,8 +393,8 @@ model ReceiptItem {
   numval      Float?
   amountval   Float
   receiptId   String
-  receipt     Receipt  @relation(fields: [receiptId], references: [id])
+  receipt     Receipt  @relation(fields: [receiptId], references: [id], onDelete: Restrict)
 
   valuee    String
-  valuee1      Valuee   @relation(fields: [valuee], references: [id])
+  valuee1      Valuee   @relation(fields: [valuee], references: [id], onDelete: Restrict)
 }

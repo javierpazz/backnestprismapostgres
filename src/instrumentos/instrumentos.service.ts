@@ -149,6 +149,11 @@ async remove(id: string) {
     });
     return { message: `Instrumento con id ${id} eliminado` };
   } catch (error) {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este Instrumento porque está siendo Utilizado.'
+      );
+    }
     if (error.code === 'P2025') {
       throw new BadRequestException(`Instrumento con id "${id}" no encontrado`);
     }

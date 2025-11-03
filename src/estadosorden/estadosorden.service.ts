@@ -98,7 +98,11 @@ async remove(id: string) {
     });
     return { message: `EstadosOrden con id ${id} eliminado` };
   } catch (error) {
-    if (error.code === 'P2025') {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este Estado porque está siendo Utilizado.'
+      );
+    }    if (error.code === 'P2025') {
       throw new BadRequestException(`EstadosOrden con id "${id}" no encontrado`);
     }
     throw error; // otros errores

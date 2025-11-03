@@ -21,9 +21,10 @@ import { ComprobanteModule } from './comprobante/comprobante.module';
 import { ProductoFacModule } from './producto-fac/producto-fac.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { ReceiptModule } from './receipt/receipt.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
-  imports: [ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule, ReceiptModule],
+  imports: [ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule, ReceiptModule, SeedModule],
   controllers: [],
   providers: [],
 })

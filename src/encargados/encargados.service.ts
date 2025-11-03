@@ -98,6 +98,11 @@ async remove(id: string) {
     });
     return { message: `Encargado con id ${id} eliminado` };
   } catch (error) {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este Encargado porque está siendo Utilizado.'
+      );
+    }
     if (error.code === 'P2025') {
       throw new BadRequestException(`Encargado con id "${id}" no encontrado`);
     }

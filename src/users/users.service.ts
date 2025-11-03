@@ -15,7 +15,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
 
 
-  async create(createUserDto: CreateUserDto, user:User) {
+  async create(createUserDto: CreateUserDto) {
     // createUserDto.nameCus = createUserDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createUserDto;
       const userInDB = await this.user.findUnique({
@@ -178,6 +178,11 @@ async remove(id: string) {
     });
     return { message: `User con id ${id} eliminado` };
   } catch (error) {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este Usuario porque está siendo Utilizado.'
+      );
+    }
     if (error.code === 'P2025') {
       throw new BadRequestException(`User con id "${id}" no encontrado`);
     }

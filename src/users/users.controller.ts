@@ -9,9 +9,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: any, user:User) {
+  create(@Body() createUserDto: any) {
     console.log(createUserDto)
-    return this.usersService.create(createUserDto, user);
+    return this.usersService.create(createUserDto);
   }
 
   @Get()

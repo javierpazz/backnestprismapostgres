@@ -119,6 +119,11 @@ async remove(id: string) {
     });
     return { message: `Product con id ${id} eliminado` };
   } catch (error) {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este Producto/Diligencia porque está siendo Utilizado.'
+      );
+    }
     if (error.code === 'P2025') {
       throw new BadRequestException(`Product con id "${id}" no encontrado`);
     }

@@ -15,7 +15,7 @@ export class ValoresService extends PrismaClient implements OnModuleInit {
 
 
 
-  async create(createValoreDto: CreateValoreDto, valuee:Valuee) {
+  async create(createValoreDto: CreateValoreDto) {
     // createValoreDto.nameCus = createValoreDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createValoreDto;
     try {
@@ -98,6 +98,11 @@ async remove(id: string) {
     });
     return { message: `Valuee con id ${id} eliminado` };
   } catch (error) {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este Valor porque está siendo Utilizado.'
+      );
+    }
     if (error.code === 'P2025') {
       throw new BadRequestException(`Valuee con id "${id}" no encontrado`);
     }

@@ -62,6 +62,10 @@ export class InvoiceController {
   //   return this.invoiceService.findOne(id);
   // }
 
+  @Put('invoices/:_id/geninvRem')
+  geninvRem(@Param('_id') id: string, @Body() updateInvoiceDto: any) {
+    return this.invoiceService.geninvRem(updateInvoiceDto, id as any);
+  }
   @Put('invoices/:_id/deleteremit')
   deleteremit(@Param('_id') id: string, @Body() updateInvoiceDto: any) {
     return this.invoiceService.nullremit(updateInvoiceDto, id as any);
@@ -83,6 +87,10 @@ export class InvoiceController {
 
   @Delete('invoices/:_id')
   remove(@Param('_id') id: string) {
+    return this.invoiceService.remove(id);
+  }
+  @Delete('orders/:_id')
+  removeOrd(@Param('_id') id: string) {
     return this.invoiceService.remove(id);
   }
 }

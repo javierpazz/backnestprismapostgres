@@ -104,10 +104,15 @@ async remove(id: string) {
     await this.configuration.delete({
       where: { id },
     });
-    return { message: `Registro con id ${id} eliminado` };
+    return { message: `P.Venta/Registro con id ${id} eliminado` };
   } catch (error) {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este P.Venta/Registro porque está siendo Utilizado.'
+      );
+    }
     if (error.code === 'P2025') {
-      throw new BadRequestException(`Registro con id "${id}" no encontrado`);
+      throw new BadRequestException(`P.Venta/Registro con id "${id}" no encontrado`);
     }
     throw error; // otros errores
   }

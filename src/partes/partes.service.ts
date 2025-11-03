@@ -98,6 +98,11 @@ async remove(id: string) {
     });
     return { message: `Parte con id ${id} eliminado` };
   } catch (error) {
+    if (error.code === 'P2003') {
+      throw new BadRequestException(
+        'No se puede eliminar este Parte porque está siendo Utilizado.'
+      );
+    }
     if (error.code === 'P2025') {
       throw new BadRequestException(`Parte con id "${id}" no encontrado`);
     }
