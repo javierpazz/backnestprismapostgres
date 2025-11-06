@@ -698,6 +698,141 @@ async createRem(createInvoiceDto: any) {
     }
 
 }
+async createOrd(createInvoiceDto: any) {
+  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+
+  const { orderItems, shippingAddress, ...orderData } = createInvoiceDto;
+
+  // Crear un arreglo con los productos que la persona quiere
+    const productsIds = orderItems.map( product => product._id );
+
+    // const dbProducts = await this.product.find({ _id: { $in: productsIds } });
+    const dbProducts = await this.product.findMany({
+      where: {
+        id: {
+          in: productsIds,
+        },
+      },
+    });
+
+    try {
+//////crea
+    const subTotal = orderItems.reduce( ( prev, current ) => {
+        const currentPrice = dbProducts.find( prod => prod.id === current._id )?.price;
+        if ( !currentPrice ) {
+            throw new Error('Verifique el carrito de nuevo, producto no existe');
+        }
+
+        return (currentPrice * current.quantity) + prev
+    }, 0 );
+
+    // const taxRate = 0.10 ;
+    const taxRate = orderItems.reduce( ( prev, current ) => (current.price * current.quantity * (current.porIva/100)) + prev, 0 );
+    // const backendTotal = subTotal * ( taxRate + 1 );
+    const backendTotal = subTotal + taxRate ;
+
+    if ( orderData.total !== backendTotal ) {
+        throw new Error('El total no cuadra con el monto');
+    }
+
+    // Todo bien hasta este punto
+    // const newOrder = new Order({ ...req.body,
+    //                              isPaid: false,
+    //                              user: req.uid,
+    //                              salbuy: "SALE",
+    //                              ordYes: "Y",
+    //                              staOrd: "NUEVA" });
+    // await newOrder.save();
+//////crea
+
+      const invoice = await this.order.create({
+      data: {
+////agrearemito
+      isPaid: false,
+      salbuy: "SALE",
+      ordYes: "Y",
+      staOrd: "NUEVA",
+////agrearemito
+      shippingAddress: orderData.shippingAddress,
+      paymentMethod: orderData.paymentMethod,
+      subTotal: orderData.subTotal,
+      shippingPrice: orderData.shippingPrice,
+      tax: orderData.tax,
+      total: orderData.total,
+      totalBuy: orderData.totalBuy,
+      // user: orderData.codUse,
+      // id_client: orderData.codCus,
+      // id_config: orderData.codCon,
+      // user: orderData.user,
+      // id_config2: orderData.codCon2,
+      movpvNum: orderData.movpvNum,
+      movpvDat: safeDate(orderData.movpvDat),
+      codConNum: orderData.codConNum,
+      // codCom: orderData.codCom,
+      // supplier: orderData.codSup,
+      //////////  numera remito /////////////////
+      remNum: orderData.remNum,
+      //////////  numera remito /////////////////
+      remDat: safeDate(orderData.remDat),
+      dueDat: safeDate(orderData.dueDat),
+      invNum: orderData.invNum,
+      invDat: safeDate(orderData.invDat),
+      recNum: orderData.recNum,
+      recDat: safeDate(orderData.recDat),
+      desVal: orderData.desVal,
+      notes: orderData.notes,
+/////////////
+
+
+
+            // relaciones
+            customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
+            comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
+            configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
+            supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
+            user1: orderData.uid ? { connect: { id: orderData.uid } } : undefined,
+
+
+            
+            // order items
+            orderItems: {
+              create: orderItems.map(item => ({
+                slug: item.slug,
+                title: item.title,
+                medPro: item.medPro,
+                quantity: item.quantity,
+                image: item.image,
+                price: item.price,
+                size: item.size,
+                porIva: item.porIva,
+                venDat: safeDate(item.venDat),
+                observ: item.observ,
+                terminado: item.terminado,
+                // productId: item.productId,
+                productId: item._id,
+                instrumentoId: item.instrumentoId,
+
+
+
+              }))
+            }
+          },
+          include: { orderItems: true }, // incluye los items en la respuesta
+        });
+
+        // return { invoice };
+      const invoiceWithMongoId = {
+        ...invoice,
+        _id: invoice.id,
+      };
+
+      return { invoice: invoiceWithMongoId };            
+
+    } catch (error) {
+      this.handleExceptions( error );
+    }
+
+}
 
 
 async createMov(createInvoiceDto: any) {

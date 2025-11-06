@@ -87,9 +87,10 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     let product: Product;
     if ( id ) {
       product = await this.product.findFirst({
-        where: { title : id },
+        where: { slug : id },
         include: {
           supplier: true,
+          reviews: true,
         },        
 
       });

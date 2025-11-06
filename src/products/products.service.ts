@@ -32,12 +32,11 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   }
 
-  async findAll(query: any) {
-  // isAuth,
-  // // isAdmin,
-    const {
-      configuracion,
-    } = query;
+  // async findAll(query: any) {
+  async findAll() {
+
+  const data = await this.configuration.findMany();
+  const configuracion = data[0].id;
 
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};

@@ -27,6 +27,10 @@ export class AuthController {
   loginUser(@Body() loginUserDto: LoginUserDto ) {
     return this.authService.loginadm( loginUserDto );
   }
+  @Post('login')
+  login(@Body() loginUserDto: LoginUserDto ) {
+    return this.authService.login( loginUserDto );
+  }
 
   // @Get('login/:email')
   // findOneByEmail(@Param('email') email: string) {

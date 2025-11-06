@@ -3,6 +3,8 @@ import { ProductoFacService } from './producto-fac.service';
 import { Product } from '@prisma/client';
 import { CreateProductoFacDto } from './dto/create-producto-fac.dto';
 import { UpdateProductoFacDto } from './dto/update-producto-fac.dto';
+import { Auth } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
 
 
 
@@ -12,6 +14,7 @@ export class ProductoFacController {
   constructor(private readonly productoFacService: ProductoFacService) {}
 
   @Post('tes/admin/productsfac')
+  @Auth( ValidRoles.admin )
   create(@Body() createProductoFacDto: CreateProductoFacDto, product:Product) {
     return this.productoFacService.create(createProductoFacDto, product);
   }
@@ -34,13 +37,15 @@ export class ProductoFacController {
   }
 
   @Put('products/downstock/:_id')
+  @Auth()
   downstock(@Param('_id') id: string,
   @Body() updateProductDto: any
-  ) {
-    return this.productoFacService.downstock(id, updateProductDto);
-  }
+) {
+  return this.productoFacService.downstock(id, updateProductDto);
+}
 
   @Put('products/upstock/:_id')
+  @Auth()
   upstock(@Param('_id') id: string,
   @Body() updateProductDto: any
   ) {
@@ -48,6 +53,7 @@ export class ProductoFacController {
   }
 
   @Put('tes/admin/productsfac')
+  @Auth( ValidRoles.admin )
   update(@Body() updateProductDto: UpdateProductoFacDto) {
   // update(@Body() updateProductDto: any) {
     console.log(updateProductDto)
@@ -55,6 +61,7 @@ export class ProductoFacController {
   }
 
   // @Delete('tes/admin/productsesc/:_id')
+  // @Auth( ValidRoles.admin )
   // remove(@Param('_id') id: string) {
   //   return this.productoFacService.remove(id);
   // }

@@ -58,13 +58,16 @@ export class AuthService extends PrismaClient implements OnModuleInit {
     });
 
     if ( !user ) 
-      throw new UnauthorizedException('Credentials are not valid (email)');
+      // throw new UnauthorizedException('Credentials are not valid (email)');
+      throw new UnauthorizedException('Datos Incorrectos');
       
     if ( !bcrypt.compareSync( password, user.password ) )
-      throw new UnauthorizedException('Credentials are not valid (password)');
+      // throw new UnauthorizedException('Credentials are not valid (password)');
+      throw new UnauthorizedException('Datos Incorrectos');
 
     if ( !user.isActive || user.role === "client" ) {
-      throw new UnauthorizedException('Credentials are not valid (Client)');
+      // throw new UnauthorizedException('Credentials are not valid (Client)');
+      throw new UnauthorizedException('Datos Incorrectos');
     }
 
     // // Regresar el usuario sin el password
@@ -87,6 +90,51 @@ export class AuthService extends PrismaClient implements OnModuleInit {
     };
   }
 
+  async login( loginUserDto: LoginUserDto ) {
+
+    const { password, email } = loginUserDto;
+    
+
+    const user = await this.user.findUnique({
+      where: { email },
+      // select: { email: true, password: true, id: true } //! OJO!
+    });
+
+    if ( !user ) 
+      // throw new UnauthorizedException('Credentials are not valid (email)');
+      throw new UnauthorizedException('Datos Incorrectos');
+      
+    if ( !bcrypt.compareSync( password, user.password ) )
+      // throw new UnauthorizedException('Credentials are not valid (password)');
+      throw new UnauthorizedException('Datos Incorrectos');
+
+    if ( !user.isActive || user.role !== "client" ) {
+      // throw new UnauthorizedException('Credentials are not valid (Client)');
+      throw new UnauthorizedException('Datos Incorrectos');
+    }
+
+    // // Regresar el usuario sin el password
+    // const { password: _, ...rest } = user;
+    // // console.log(user);
+    // return rest;
+    const {role, roles, name, id, isAdmin, isActive} = user;
+    
+    return {
+      // ...user,
+            user: {_id: id,
+                email,
+                roles,
+                role,
+                isAdmin,
+                isActive,
+                name
+             },
+      token: this.getJwtToken({ _id: user.id })
+    };
+  }
+
+
+  
   async checkAuthStatus( user: User ){
 
     const {role, roles, name, id, email, isAdmin, isActive} = user;

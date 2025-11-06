@@ -66,6 +66,22 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
     return customer;
   }
 
+  async findOneEmail(email: string) {
+    
+    let customer: Customer;
+    if ( email ) {
+      customer = await this.customer.findFirst({
+      where: { emailCus :email },
+      });
+    }
+
+    if ( !customer ) 
+      throw new NotFoundException(`Customer with id, name or no "${ email }" not found`);
+    
+    (customer as any)._id = customer.id;
+    return customer;
+  }
+
 async update(updateCustomerDto: UpdateCustomerDto) {
   const { _id, ...data } = updateCustomerDto;
 

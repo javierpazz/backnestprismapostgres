@@ -53,6 +53,15 @@ export class ConfigurationsService extends PrismaClient implements OnModuleInit 
   };
   }
 
+  async findAllV() {
+  const data = await this.configuration.findMany();
+  const configurations = data.map(item => ({
+    ...item,
+    _id: item.id.toString(), // agregamos _id
+  }));
+  return configurations;
+  }
+
 
   async findOne(id: string) {
     

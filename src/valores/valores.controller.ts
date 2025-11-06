@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Body, Param, Delete, Query, Put } from '@nestjs/common';
 import { ValoresService } from './valores.service';
-import { Valuee } from '@prisma/client';
 import { CreateValoreDto } from './dto/create-valore.dto';
 import { UpdateValoreDto } from './dto/update-valore.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+
+import { Auth } from '../auth/decorators';
+import { ValidRoles } from '../auth/interfaces';
 
 @Controller()
 export class ValoresController {
@@ -37,7 +39,8 @@ export class ValoresController {
   }
 
   @Delete('tes/admin/valores/:_id')
-  remove(@Param('_id') id: string) {
+  @Auth( ValidRoles.admin )
+    remove(@Param('_id') id: string) {
     return this.valoresService.remove(id);
   }
 }
