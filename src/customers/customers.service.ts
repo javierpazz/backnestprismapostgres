@@ -67,6 +67,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
   }
 
   async findOneEmail(email: string) {
+    console.log("email email")
     
     let customer: Customer;
     if ( email ) {

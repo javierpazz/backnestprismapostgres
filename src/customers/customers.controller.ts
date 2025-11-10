@@ -37,8 +37,10 @@ export class CustomersController {
   }
 
   @Get('customers/byemail/:email')
-  @Auth()
+  // @Auth()
+  
   findOneEmail(@Param('email') email: string) {
+    console.log("email")
     return this.customersService.findOneEmail(email);
   }
 

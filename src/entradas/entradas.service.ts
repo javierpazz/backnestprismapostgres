@@ -536,6 +536,7 @@ async findOne(id: string) {
       parte: true,          // id_parte
       user1: true,          // usuario
       orderItems: true,
+      shippingAddress: true,
     },
   });
 
@@ -596,6 +597,17 @@ async findOne(id: string) {
       ? { _id: invoice.user1.id,
       name: invoice.user1.name }
     : null,
+    shippingAddress: {
+          firstName: invoice.shippingAddress[0].firstName,
+          lastName: invoice.shippingAddress[0].lastName,
+          address: invoice.shippingAddress[0].address,
+          address2: invoice.shippingAddress[0].address2,
+          city: invoice.shippingAddress[0].city,
+          zip: invoice.shippingAddress[0].zip,
+          country: invoice.shippingAddress[0].country,
+          phone: invoice.shippingAddress[0].phone,
+    },
+
     orderItems: invoice.orderItems.map(item => ({
       _id: item.productId,
       slug: item.slug,

@@ -7,37 +7,44 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Auth } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/interfaces';
 
-@Controller('tes/admin/estadosorden')
+@Controller()
 export class EstadosordenController {
   constructor(private readonly estadosordenService: EstadosordenService) {}
 
-  @Post()
+  @Post('tes/admin/estadosorden')
   @Auth( ValidRoles.admin )
   create(@Body() createEstadosordenDto: CreateEstadosordenDto, stateOrd:StateOrd) {
     return this.estadosordenService.create(createEstadosordenDto, stateOrd);
   }
 
-  @Get()
+  @Get('tes/admin/estadosorden')
   @Auth()
   // findAllAdm( @Query() paginationDto: PaginationDto ) {
     findAll() {
       return this.estadosordenService.findAll();
     }
+
+  @Get('stateOrds')
+  @Auth()
+  // findAllAdm( @Query() paginationDto: PaginationDto ) {
+    findAllVie() {
+      return this.estadosordenService.findAll();
+    }
     
     
-  @Get(':_id')
+  @Get('tes/admin/estadosorden/:_id')
   @Auth()
   findOne(@Param('_id') id: string) {
     return this.estadosordenService.findOne(id);
   }
   
-  @Put()
+  @Put('tes/admin/estadosorden')
   @Auth( ValidRoles.admin )
   update(@Body() updateEstadosordenDto: UpdateEstadosordenDto) {
     return this.estadosordenService.update(updateEstadosordenDto);
   }
 
-  @Delete(':_id')
+  @Delete('tes/admin/estadosorden/:_id')
   @Auth( ValidRoles.admin )
   remove(@Param('_id') id: string) {
     return this.estadosordenService.remove(id);

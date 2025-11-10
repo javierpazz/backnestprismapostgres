@@ -57,6 +57,19 @@ export class InvoiceController {
   searchremB(@Query() query: any) {
     return this.invoiceService.searchremB(query);
   }
+
+  @Get('tes/admin/orders')
+  @Auth()
+  searchOrds(@Query() query: any) {
+    return this.invoiceService.searchOrds(query);
+  }
+
+  @Get('tes/orders/getordersbyus/:_id')
+  @Auth()
+  searchOrdUS(@Param('_id') id: string) {
+    return this.invoiceService.searchOrdUS(id);
+  }
+  
   
   @Get('invoices/searchmovS')
   @Auth()

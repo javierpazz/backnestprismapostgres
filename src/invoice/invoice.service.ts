@@ -753,7 +753,6 @@ async createOrd(createInvoiceDto: any) {
       ordYes: "Y",
       staOrd: "NUEVA",
 ////agrearemito
-      shippingAddress: orderData.shippingAddress,
       paymentMethod: orderData.paymentMethod,
       subTotal: orderData.subTotal,
       shippingPrice: orderData.shippingPrice,
@@ -786,11 +785,11 @@ async createOrd(createInvoiceDto: any) {
 
 
             // relaciones
-            customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
+            customer: orderData.id_client ? { connect: { id: orderData.id_client } } : undefined,
             comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
             configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
             supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
-            user1: orderData.uid ? { connect: { id: orderData.uid } } : undefined,
+            user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
 
 
             
@@ -811,10 +810,23 @@ async createOrd(createInvoiceDto: any) {
                 // productId: item.productId,
                 productId: item._id,
                 instrumentoId: item.instrumentoId,
-
-
-
               }))
+            },
+            shippingAddress: {
+              create:  {
+                firstName : shippingAddress.firstName,
+                lastName : shippingAddress.lastName,
+                address : shippingAddress.address,
+                address2 : shippingAddress.address2,
+                city : shippingAddress.city,
+                zip : shippingAddress.zip,
+                country : shippingAddress.country,
+                phone : shippingAddress.phone,
+                // postalCode : shippingAddress.postalCode || "",
+                // fullName : shippingAddress.fullName || "",
+                // cuit : shippingAddress.cuit || "",
+
+              }
             }
           },
           include: { orderItems: true }, // incluye los items en la respuesta
@@ -943,6 +955,8 @@ async createMov(createInvoiceDto: any) {
 
               }))
             }
+
+
           },
           include: { orderItems: true }, // incluye los items en la respuesta
         });
@@ -1356,6 +1370,204 @@ const obserFilter: Prisma.OrderWhereInput =
   }));
 
   return { invoices };}
+
+  async searchOrds(query: any) {
+  // isAuth,
+  // // isAdmin,
+///////query
+const {
+  order,
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  product,
+  obser,
+} = query;
+
+    // --- Fechas ---
+    const fechasFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { createdAt: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { createdAt: { gte: new Date(fech1) } }
+        : { createdAt: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+    // // --- Observaciones (LIKE en Postgres) ---
+    // const obserFilter =
+    //   obser && obser !== 'all'
+    //     ? {
+    //         OR: [
+    //           { notes: { contains: obser, mode: 'insensitive' } },
+    //           { orderItems: { some: { observ: { contains: obser, mode: 'insensitive' } } } },
+    //         ],
+    //       }
+    //     : {};
+
+const obserFilter: Prisma.OrderWhereInput =
+  obser && obser !== 'all'
+    ? {
+        OR: [
+          { notes: { contains: obser, mode: 'insensitive' } },
+          {
+            orderItems: {
+              some: { observ: { contains: obser, mode: 'insensitive' } },
+            },
+          },
+        ],
+      }
+    : {};
+
+
+
+    // --- Orden ---
+    // const sortOrder = order === 'newest' ? { createdAt: 'desc' } : { createdAt: 'asc' };
+    const existeIns =
+          { "id_instru":  null };
+
+    const sortOrder = order === 'newest'
+      ? { createdAt: 'desc' as const }
+      : { createdAt: 'asc' as const };
+
+
+///////query
+
+    const ordersWork = await this.order.findMany({
+      where: {
+        ...fechasFilter,
+        ...productFilter,
+        ...customerFilter,
+        ...configuracionFilter,
+        ...usuarioFilter,
+        ...obserFilter,
+        ...existeIns,
+        ordYes: 'Y'
+      },
+        orderBy: sortOrder,
+
+
+      include: {
+        customer: true,       // id_client
+        comprobante: true,       // id_client
+        configuration: true,  // id_config
+        user1: true,          // usuario si quieres incluirlo
+        orderItems: true,
+      },      })
+
+  const orders = ordersWork.map((order) => ({
+    _id: order.id,
+    ...order,
+    id_client: order.customer
+      ? { _id: order.customer.id, nameCus: order.customer.nameCus, emailCus: order.customer.emailCus }
+      : null,
+    codCom: order.comprobante
+      ? { _id: order.comprobante.id, nameCom: order.comprobante.nameCom }
+      : null,
+    id_config: order.configuration
+      ? { _id: order.configuration.id, name: order.configuration.name }
+      : null,
+    user: order.user
+      ? { _id: order.user1.id, name: order.user1.name, email: order.user1.email }
+      : null,
+
+    orderItems: order.orderItems.map((item) => ({
+      _id: item.productId,
+      slug: item.slug,
+      title: item.title,
+      quantity: item.quantity,
+      price: item.price,
+      porIva: item.porIva,
+      size: item.size,
+      observ: item.observ,
+      terminado: item.terminado,
+      productId: item.productId,
+
+    })),
+  }));
+
+  return orders;}
+
+  async searchOrdUS(id: string) {
+
+    // --- Fechas ---
+    const usuarioFilter = id && id !== 'all' ? { user: String(id) } : {};
+
+
+
+
+    const existeIns =
+          { "id_instru":  null };
+
+
+///////query
+
+    const ordersWork = await this.order.findMany({
+      where: {
+        ...usuarioFilter,
+        ...existeIns,
+        ordYes: 'Y'
+      },
+
+      include: {
+        customer: true,       // id_client
+        comprobante: true,       // id_client
+        configuration: true,  // id_config
+        user1: true,          // usuario si quieres incluirlo
+        orderItems: true,
+        shippingAddress: true,
+      },      })
+
+  const orders = ordersWork.map((order) => ({
+    _id: order.id,
+    ...order,
+    id_client: order.customer
+      ? { _id: order.customer.id, nameCus: order.customer.nameCus, emailCus: order.customer.emailCus }
+      : null,
+    codCom: order.comprobante
+      ? { _id: order.comprobante.id, nameCom: order.comprobante.nameCom }
+      : null,
+    id_config: order.configuration
+      ? { _id: order.configuration.id, name: order.configuration.name }
+      : null,
+    user: order.user
+      ? { _id: order.user1.id, name: order.user1.name, email: order.user1.email }
+      : null,
+
+    orderItems: order.orderItems.map((item) => ({
+      _id: item.productId,
+      slug: item.slug,
+      title: item.title,
+      quantity: item.quantity,
+      price: item.price,
+      porIva: item.porIva,
+      size: item.size,
+      observ: item.observ,
+      terminado: item.terminado,
+      productId: item.productId,
+    })),
+        shippingAddress: {
+          firstName: order.shippingAddress[0].firstName,
+          lastName: order.shippingAddress[0].lastName,
+          address: order.shippingAddress[0].address,
+          address2: order.shippingAddress[0].address2,
+          city: order.shippingAddress[0].city,
+          zip: order.shippingAddress[0].zip,
+          country: order.shippingAddress[0].country,
+          phone: order.shippingAddress[0].phone,
+    },
+  }));
+
+  return orders;}
 //////dili
 
   async searchmovS(query: any) {
