@@ -34,6 +34,13 @@ export class UsersController {
   update(@Body() updateUserDto: any) {
     return this.usersService.update(updateUserDto);
   }
+
+  @Put('perfil')
+  @Auth()
+  updatePerfil(@Body() updateUserDto: any) {
+    return this.usersService.updatePerfil(updateUserDto);
+  }
+
   @Put('role')
   @Auth( ValidRoles.admin )
   updateRole(@Body() updateUserDto: any) {

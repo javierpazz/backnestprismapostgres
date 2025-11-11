@@ -86,6 +86,56 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     return user;
   }
 
+async updatePerfil(updateUserDto: UpdateUserDto) {
+  const { _id, ...data } = updateUserDto;
+
+  try {
+
+////////
+  const user = await this.findOne(updateUserDto._id);
+        const validPassword = bcrypt.compareSync( updateUserDto.password, user.password );
+        if ( !validPassword || updateUserDto.puede === false ) {
+          throw new UnauthorizedException('Password incorrecto');
+        }
+        ///// verifico pasword
+        // user.name = updateUserDto.name;
+        // user.email = updateUserDto.email;
+        if (updateUserDto.passwordNue !== "") {
+        user.password = bcrypt.hashSync(updateUserDto.passwordNue, 10);
+        }
+////////
+
+
+
+    const updated = await this.user.update({
+      where: { id: _id }, // Prisma usa 'id'
+            data: {
+          name: updateUserDto.name,
+          email: updateUserDto.email,
+          password: user.password,
+          isAdmin: updateUserDto.isAdmin ?? false,
+          isActive: updateUserDto.isActive ?? true,
+          role: updateUserDto.role,
+        },
+
+    });
+
+    // Devolver _id para compatibilidad con frontend
+    return { _id: updated.id, ...updated };
+  } catch (error) {
+    // Unique constraint violation
+    if (error.code === 'P2002') {
+      throw new BadRequestException(
+        `Ya existe un User con valor duplicado para: ${error.meta?.target}`,
+      );
+    }
+    // User no encontrado
+    if (error.code === 'P2025') {
+      throw new NotFoundException(`User con id "${_id}" no encontrado`);
+    }
+    throw error;
+  }
+}
 async update(updateUserDto: UpdateUserDto) {
   const { _id, ...data } = updateUserDto;
 
