@@ -35,8 +35,10 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   // async findAll(query: any) {
   async findAll() {
 
-  const data = await this.configuration.findMany();
-  const configuracion = data[0].id;
+  const data = await this.configuration.findFirst({
+      where: { codCon : "0001" },
+  });
+  const configuracion = data.id;
 
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
@@ -45,9 +47,12 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       where: {
         ...configuracionFilter,
       },
-        orderBy: {
+      orderBy: {
           title: 'asc',
         },
+      include: {
+        ProductImage: true,
+      },          
       })
 
       // const kiki = products.map(c => ({
@@ -60,9 +65,10 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       // }));
       // console.log(kiki)
 
-      return products.map(({ id, ...rest }) => ({
+      return products.map(({ id, ProductImage, ...rest }) => ({
         _id: id,
         ...rest,
+      images: ProductImage.map( image => image.url )
       }));
 
   }

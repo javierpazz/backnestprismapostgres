@@ -15,6 +15,12 @@ export class ProductoFacController {
 
   @Post('tes/admin/productsfac')
   @Auth( ValidRoles.admin )
+  createFac(@Body() createProductoFacDto: CreateProductoFacDto, product:Product) {
+    return this.productoFacService.createFac(createProductoFacDto, product);
+  }
+
+  @Post('tes/admin/products')
+  @Auth( ValidRoles.admin )
   create(@Body() createProductoFacDto: CreateProductoFacDto, product:Product) {
     return this.productoFacService.create(createProductoFacDto, product);
   }
@@ -22,6 +28,10 @@ export class ProductoFacController {
   @Get('products/admin/tes')
   findAll(@Query() query: any) {
     return this.productoFacService.findAll(query);
+  }
+  @Get('products/categories')
+  findAllCat(@Query() query: any) {
+    return this.productoFacService.findAllCat(query);
   }
   @Get('/products/xpv')
   findAllvie(@Query() query: any) {
@@ -35,6 +45,13 @@ export class ProductoFacController {
 
     return this.productoFacService.findOne(id);
   }
+
+  @Put('products/downstock/:_id')
+  @Auth()
+  dispre(@Query() query: any)
+{
+  return this.productoFacService.dispre(query);
+}
 
   @Put('products/downstock/:_id')
   @Auth()
@@ -54,10 +71,17 @@ export class ProductoFacController {
 
   @Put('tes/admin/productsfac')
   @Auth( ValidRoles.admin )
-  update(@Body() updateProductDto: UpdateProductoFacDto) {
-  // update(@Body() updateProductDto: any) {
-    console.log(updateProductDto)
-    return this.productoFacService.update(updateProductDto);
+  updateFac(@Body() updateProductoFacDto: UpdateProductoFacDto) {
+  // update(@Body() updateProductoFacDto: any) {
+    console.log(updateProductoFacDto)
+    return this.productoFacService.updateFac(updateProductoFacDto);
+  }
+  @Put('tes/admin/products')
+  @Auth( ValidRoles.admin )
+  update(@Body() updateProductoFacDto: UpdateProductoFacDto) {
+  // update(@Body() updateProductoFacDto: any) {
+    console.log(updateProductoFacDto)
+    return this.productoFacService.update(updateProductoFacDto);
   }
 
   // @Delete('tes/admin/productsesc/:_id')

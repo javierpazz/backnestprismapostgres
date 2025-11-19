@@ -16,9 +16,47 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
 
 
   async create(createProductoFacDto: CreateProductoFacDto, product:Product) {
-    console.log("createProductoFacDto")
+    console.log("crea con imagen")
     console.log(createProductoFacDto)
-    console.log("createProductoFacDto")
+    console.log("crea con imagen")
+    // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
+  const { _id, supplier, createdAt, updatedAt, reviews, images, ...rest } = createProductoFacDto;
+  // if (rest.price) {
+  //   rest.price = parseFloat(rest.price as any);
+  // }
+  try {
+      const product = await 
+      this.product.create({
+        
+        data: {
+        ...rest,
+        supplier: supplier
+          ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
+
+        ProductImage: {
+            create: images.map(item => ({
+              url: item,
+            }))
+          }
+
+        },
+
+      });
+      return product;
+      
+    } catch (error) {
+      this.handleExceptions( error );
+    }
+
+
+  }
+
+  
+  async createFac(createProductoFacDto: CreateProductoFacDto, product:Product) {
+    console.log("crea sin imagen")
+    console.log(createProductoFacDto)
+    console.log("crea sin imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
   const { _id, supplier, createdAt, updatedAt, reviews, ...rest } = createProductoFacDto;
   // if (rest.price) {
@@ -43,6 +81,7 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
 
 
   }
+
 
   async findAll(query: any) {
   // isAuth,
@@ -83,27 +122,171 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
 
   }
 
+  async findAllCat(query: any) {
+    const {
+      configuracion,
+    } = query;
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
+
+
+    const categories = await this.product.groupBy({
+        by: ['category'],
+      where: {
+        ...configuracionFilter,
+      },
+      });
+
+    return categories.map((c) => c.category);
+
+}
+  async dispre(query: any) {
+
+      const {
+        porcen,
+        codProd2,
+        codProd1,
+        supplier,
+        category,
+        configuracion,
+      } = query;
+
+          // --- Otros filtros ---
+          const supplierFilter = supplier && supplier !== 'all' ? { supplierId: String(supplier) } : {};
+          const categoryFilter = category && category !== 'all' ? { category: category } : {};
+          const configuracionFilter =
+          configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+
+          // const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
+          const productsFilter =
+          !codProd1 && !codProd2 ? {}
+        : !codProd1 && codProd2 ? {
+                      codigoPro: {
+                        lte: codProd2,
+                      },
+                    }
+        : codProd1 && !codProd2 ? {
+                      codigoPro: {
+                        gte: codProd1,
+                      },
+                    }
+        :                   {
+                      codigoPro: {
+                        gte: codProd1,
+                        lte: codProd2,
+                      },
+                    };
+
+  try {
+          const products = await this.product.findMany({
+            where: {
+              ...productsFilter,
+              ...supplierFilter,
+              ...configuracionFilter,
+              ...categoryFilter,
+            },
+
+            })
+
+        await Promise.all(
+          products.map(async (product) => {
+            const newPrice = parseFloat(
+              (product.price / (1 + porcen / 100)).toFixed(2)
+            );
+
+            return this.product.update({
+              where: { id: product.id },
+              data: { price: newPrice },
+            });
+          })
+        );
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
+
+
+}
+
+
   async findOne(id: string) {
-    let product: Product;
+    let productT;
     if ( id ) {
-      product = await this.product.findFirst({
+      productT = await this.product.findFirst({
         where: { slug : id },
         include: {
           supplier: true,
+          ProductImage: true,
           reviews: true,
         },        
 
       });
     }
     
-    if ( !product ) 
+    if ( !productT ) 
       throw new NotFoundException(`Product with id, name or no "${ id }" not found`);
     
-    (product as any)._id = product.id;
-    return product;
-  }
+    (productT as any)._id = productT.id;
+    console.log(productT)
+    // return productT;
 
+    const { images = [], ProductImage, ...rest } = productT;
+    return {
+      ...rest,
+      images: ProductImage.map( image => image.url )
+    }
+
+
+  }
 async update(updateProductoFacDto: UpdateProductoFacDto) {
+  const { _id, supplier, reviews, images, ...rest } = updateProductoFacDto;
+
+  try {
+    const product = await this.product.update({
+      where: { id: _id },
+
+      data: {
+        ...rest,
+          ...(reviews && {
+      reviews: {
+        create: reviews.map(r => ({
+          name: r.name,
+          comment: r.comment,
+          rating: r.rating,
+        })),
+      },
+    }),
+
+        // 🔗 Supplier (si viene)
+        supplier: supplier
+          ? { connect: { id: supplier } }
+          : undefined,
+
+        // 🖼️ ProductImage (borrar todas y cargar nuevas)
+        ProductImage: images
+          ? {
+              deleteMany: {}, // elimina todas las imágenes anteriores
+
+              create: images.map(url => ({
+                url,
+              }))
+            }
+          : undefined,
+      },
+
+      include: {
+        ProductImage: true,
+      },
+    });
+
+    return product;
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
+}
+
+async updateFac(updateProductoFacDto: UpdateProductoFacDto) {
   const { _id, supplier, reviews, ...rest } = updateProductoFacDto;
 
   const data: any = {

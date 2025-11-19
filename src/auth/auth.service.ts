@@ -61,21 +61,57 @@ export class AuthService extends PrismaClient implements OnModuleInit {
       // throw new UnauthorizedException('Credentials are not valid (email)');
       throw new UnauthorizedException('Datos Incorrectos');
       
-    if ( !bcrypt.compareSync( password, user.password ) )
-      // throw new UnauthorizedException('Credentials are not valid (password)');
-      throw new UnauthorizedException('Datos Incorrectos');
+      
+      if ( !user.isActive || user.role === "client" ) {
+        // throw new UnauthorizedException('Credentials are not valid (Client)');
+        throw new UnauthorizedException('Datos Incorrectos');
+      }
+      
+      if ( !bcrypt.compareSync( password, user.password ) ){
+        // throw new UnauthorizedException('Credentials are not valid (password)');
+///// control logs
+      const log = user.numLogs + 1;
+      if(log > 3) {
+      await this.user.update({
+          where: { id: user.id },
+          data: {
+            numLogs: 0,
+            isActive: false
+          }
+        });
+      // res.status(401).send({ message: 'Hable con Administrador ' });
+      // return;        
+        throw new UnauthorizedException('Datos Incorrectos');
+      }        
+      // user.numLogs = log;    
+      // await user.save();
 
-    if ( !user.isActive || user.role === "client" ) {
-      // throw new UnauthorizedException('Credentials are not valid (Client)');
-      throw new UnauthorizedException('Datos Incorrectos');
-    }
+        await this.user.update({
+            where: { id: user.id },
+            data: {
+              numLogs: log
+            }
+          });
 
-    // // Regresar el usuario sin el password
+      throw new UnauthorizedException('Datos Incorrectos');
+      // return res.status(401).send({ message: 'Datos Invalidos' });
+///// control logs
+        throw new UnauthorizedException('Datos Incorrectos');
+        }
+
+        // // Regresar el usuario sin el password
     // const { password: _, ...rest } = user;
     // // console.log(user);
     // return rest;
     const {role, roles, name, id, isAdmin, isActive} = user;
-    
+
+///// control logs
+  await this.user.update({
+    where: { id: user.id },
+    data: { numLogs: 0 }
+  });
+///// control logs
+        
     return {
       // ...user,
             user: {_id: id,
@@ -104,21 +140,57 @@ export class AuthService extends PrismaClient implements OnModuleInit {
       // throw new UnauthorizedException('Credentials are not valid (email)');
       throw new UnauthorizedException('Datos Incorrectos');
       
-    if ( !bcrypt.compareSync( password, user.password ) )
-      // throw new UnauthorizedException('Credentials are not valid (password)');
-      throw new UnauthorizedException('Datos Incorrectos');
+      
+      if ( !user.isActive || user.role !== "client" ) {
+        // throw new UnauthorizedException('Credentials are not valid (Client)');
+        throw new UnauthorizedException('Datos Incorrectos');
+      }
+      
+      if ( !bcrypt.compareSync( password, user.password ) ) {
+        // throw new UnauthorizedException('Credentials are not valid (password)');
+///// control logs
+      const log = user.numLogs + 1;
+      if(log > 3) {
+      await this.user.update({
+          where: { id: user.id },
+          data: {
+            numLogs: 0,
+            isActive: false
+          }
+        });
+      // res.status(401).send({ message: 'Hable con Administrador ' });
+      // return;
+        throw new UnauthorizedException('Datos Incorrectos');
+      }
+      // user.numLogs = log;    
+      // await user.save();
 
-    if ( !user.isActive || user.role !== "client" ) {
-      // throw new UnauthorizedException('Credentials are not valid (Client)');
-      throw new UnauthorizedException('Datos Incorrectos');
-    }
+        await this.user.update({
+            where: { id: user.id },
+            data: {
+              numLogs: log
+            }
+          });
 
-    // // Regresar el usuario sin el password
+      throw new UnauthorizedException('Datos Incorrectos');
+      // return res.status(401).send({ message: 'Datos Invalidos' });
+///// control logs
+
+
+      }
+        // // Regresar el usuario sin el password
     // const { password: _, ...rest } = user;
     // // console.log(user);
     // return rest;
     const {role, roles, name, id, isAdmin, isActive} = user;
+
+///// control logs
+  await this.user.update({
+    where: { id: user.id },
+    data: { numLogs: 0 }
+  });///// control logs
     
+
     return {
       // ...user,
             user: {_id: id,

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "numLogs" INTEGER NOT NULL DEFAULT 0;

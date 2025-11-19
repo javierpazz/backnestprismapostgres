@@ -15,6 +15,7 @@ model User {
   email     String   @unique
   password  String
   name      String
+  numLogs   Int      @default(0)
   isAdmin   Boolean  @default(false)
   isActive  Boolean  @default(true)
   role      String   @default("user")
@@ -185,12 +186,23 @@ model Product {
   sizes       String[]
   reviews     Review[]
   orderItems  OrderItem[]   // 👈 Relación con OrderItem
+  ProductImage ProductImage[]
 
   supplierId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
   supplier      Supplier?   @relation(fields: [supplierId], references: [id], onDelete: Restrict)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   @@unique([codigoPro, id_config])
+}
+
+model ProductImage {
+  // id  Int    @id @default(autoincrement())
+  id        String  @id @default(uuid())
+
+  url String
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId String
 }
 
 model Review {
