@@ -11,6 +11,10 @@ import { ValidRoles } from 'src/auth/interfaces';
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
+  @Post('customers/signup')
+  createsignup(@Body() createCustomerDto: any, customer:Customer) {
+    return this.customersService.createsignup(createCustomerDto, customer);
+  }
   @Post('tes/admin/customers')
   @Auth()
   create(@Body() createCustomerDto: CreateCustomerDto, customer:Customer) {

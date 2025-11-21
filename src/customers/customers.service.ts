@@ -19,6 +19,29 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
 
 
 
+  async createsignup(createCustomerDto: any, customer:Customer) {
+    // createCustomerDto.nameCus = createCustomerDto.nameCus.toLocaleLowerCase();
+console.log(createCustomerDto)
+    const { _id, ...rest } = createCustomerDto;
+    try {
+      const customer = await 
+      this.customer.create(
+        {data: {
+          codCus: rest.nameCus,
+          nameCus: rest.nameCus,
+          emailCus: rest.emailCus,
+        }
+      }
+      );
+      return customer;
+      
+    } catch (error) {
+      this.handleExceptions( error );
+    }
+
+
+  }
+
   async create(createCustomerDto: CreateCustomerDto, customer:Customer) {
     // createCustomerDto.nameCus = createCustomerDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createCustomerDto;

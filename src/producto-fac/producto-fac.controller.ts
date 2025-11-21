@@ -46,7 +46,14 @@ export class ProductoFacController {
     return this.productoFacService.findOne(id);
   }
 
-  @Put('products/downstock/:_id')
+  @Put('products/aumpre')
+  @Auth()
+  aumpre(@Query() query: any)
+{
+  return this.productoFacService.aumpre(query);
+}
+
+  @Put('products/dispre')
   @Auth()
   dispre(@Query() query: any)
 {

@@ -6,6 +6,7 @@ import { PrismaClient, User } from '@prisma/client';
 // import { User } from './entities/user.entity';
 import { LoginUserDto, CreateUserDto } from './dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { CustomersService } from 'src/customers/customers.service';
 
 
 @Injectable()
@@ -16,7 +17,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
   constructor(
     private readonly jwtService: JwtService,
-    
+    // private readonly customersService: CustomersService,    
   ) {super()}
 
 
@@ -27,19 +28,42 @@ export class AuthService extends PrismaClient implements OnModuleInit {
           user = await this.user.create({
             data: {
               ...userData,
+              role: "client",
               password: bcrypt.hashSync( password, 10 )
                 },
           })
 
+      // Creo Customer a partir de usuario
+      // const receipt = await this.receipt.create({
+      //     data: {
+      //     },
+      //   });
+
 
       delete user.password;
 
-      return {
-        ...user,
-        _id: user.id.toString(), // agregamos _id
-        token: this.getJwtToken({ _id: user.id })
-      };
       // TODO: Retornar el JWT de acceso
+      // return {
+      //   ...user,
+      //   _id: user.id.toString(), // agregamos _id
+      //   token: this.getJwtToken({ _id: user.id })
+      // };
+
+    const {role, roles, name, id, email, isAdmin, isActive} = user;
+
+    return {
+      // ...user,
+            user: {_id: id,
+                email,
+                roles,
+                role,
+                isAdmin,
+                isActive,
+                name
+             },
+      token: this.getJwtToken({ _id: user.id })
+    };
+
 
     } catch (error) {
       this.handleDBErrors(error);

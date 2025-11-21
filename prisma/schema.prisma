@@ -18,7 +18,7 @@ model User {
   numLogs   Int      @default(0)
   isAdmin   Boolean  @default(false)
   isActive  Boolean  @default(true)
-  role      String   @default("user")
+  role      String   @default("client")
   roles     String[] @default(["user"])
   order  Order[]  
   receipt  Receipt[]   

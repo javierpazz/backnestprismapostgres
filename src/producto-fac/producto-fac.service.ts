@@ -140,6 +140,74 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     return categories.map((c) => c.category);
 
 }
+  async aumpre(query: any) {
+
+      const {
+        porcen,
+        codProd2,
+        codProd1,
+        supplier,
+        category,
+        configuracion,
+      } = query;
+
+          // --- Otros filtros ---
+          const supplierFilter = supplier && supplier !== 'all' ? { supplierId: String(supplier) } : {};
+          const categoryFilter = category && category !== 'all' ? { category: category } : {};
+          const configuracionFilter =
+          configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+
+          // const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
+          const productsFilter =
+          !codProd1 && !codProd2 ? {}
+        : !codProd1 && codProd2 ? {
+                      codigoPro: {
+                        lte: codProd2,
+                      },
+                    }
+        : codProd1 && !codProd2 ? {
+                      codigoPro: {
+                        gte: codProd1,
+                      },
+                    }
+        :                   {
+                      codigoPro: {
+                        gte: codProd1,
+                        lte: codProd2,
+                      },
+                    };
+
+  try {
+          const products = await this.product.findMany({
+            where: {
+              ...productsFilter,
+              ...supplierFilter,
+              ...configuracionFilter,
+              ...categoryFilter,
+            },
+
+            })
+
+        await Promise.all(
+          products.map(async (product) => {
+            const newPrice = parseFloat(
+              (product.price * (1 + porcen / 100)).toFixed(2)
+            );
+
+            return this.product.update({
+              where: { id: product.id },
+              data: { price: newPrice },
+            });
+          })
+        );
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
+
+
+}
+
   async dispre(query: any) {
 
       const {
@@ -191,7 +259,8 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
         await Promise.all(
           products.map(async (product) => {
             const newPrice = parseFloat(
-              (product.price / (1 + porcen / 100)).toFixed(2)
+              // (product.price / (1 + porcen / 100)).toFixed(2)
+              (product.price - (product.price * (porcen / 100))).toFixed(2)
             );
 
             return this.product.update({
