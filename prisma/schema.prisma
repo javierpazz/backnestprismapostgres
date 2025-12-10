@@ -172,13 +172,14 @@ model Product {
   id_config   String?
   // supplier    String?
   id_category String?
+  ecoActive   Boolean       @default(true)
   description String
-  price       Float?
-  priceBuy    Float?
-  inStock     Float?
-  minStock    Float?
-  porIva      Float?
-  rating      Float?
+  price       Float?        @default(0)
+  priceBuy    Float?        @default(0)
+  inStock     Float?        @default(0)
+  minStock    Float?        @default(0)
+  porIva      Float?        @default(0)
+  rating      Float?        @default(0)
   numReviews  Int?
   tags        String[]
   type        ProductType?

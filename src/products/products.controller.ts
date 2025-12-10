@@ -31,6 +31,22 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
+  @Get('products/eco')
+  findAllEco(@Query() paginationDto: PaginationDto) {
+    return this.productsService.findAllEco(paginationDto);
+  }
+
+  @Get('products/ecoreac25')
+  findAllEcoReac25(@Query() paginationDto: PaginationDto) {
+    return this.productsService.findAllEcoReac25(paginationDto);
+  }
+
+  @Put('tes/admin/products/ecomActive')
+  @Auth( ValidRoles.admin )
+  updateisActive(@Body() updateProductDto: UpdateProductDto) {
+    console.log(updateProductDto)
+    return this.productsService.updateecoActive(updateProductDto);
+  }
 
   @Put('tes/admin/productsesc')
   @Auth( ValidRoles.admin )

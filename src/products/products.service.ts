@@ -32,6 +32,180 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   }
 
+  async findAllEcoReac25(paginationDto: PaginationDto) {
+  const {
+    limit = 10,
+    offset = 0,
+    gender = '',
+    minPrice,
+    maxPrice,
+    sizes,
+    q: query,
+  } = paginationDto;
+
+  const data = await this.configuration.findFirst({
+      where: { codCon : "0001" },
+  });
+  const configuracion = data.id;
+
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
+
+
+  const sizesArray = sizes ? sizes.toUpperCase().split(',') : undefined;
+
+  // Prisma price filter builder
+  const priceFilter =
+    minPrice !== undefined && maxPrice !== undefined
+      ? { gte: minPrice, lte: maxPrice }
+      : minPrice !== undefined
+      ? { gte: minPrice }
+      : maxPrice !== undefined
+      ? { lte: maxPrice }
+      : undefined;
+
+  const where: any = {
+    ...configuracionFilter,
+    ecoActive : true,
+    gender: gender || undefined,
+    price: priceFilter,
+    sizes: sizesArray ? { hasEvery: sizesArray } : undefined,
+    title: query
+      ? {
+          contains: query,
+          mode: 'insensitive',
+        }
+      : undefined,
+  };
+  const [products, totalProducts] = await Promise.all([
+    this.product.findMany({
+      take: limit,
+      skip: offset,
+      where,
+      include: {
+        ProductImage: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    }),
+
+    this.product.count({ where }),
+  ]);
+
+
+  return {
+    count: totalProducts,
+    pages: Math.ceil(totalProducts / limit),
+    products: products.map((product) => ({
+        _id: product.id,
+      ...product,
+      images: product.ProductImage.map((img) => img.url),
+    })),
+  };
+  // return {
+  //   products: products.map((product) => ({
+  //       _id: product.id,
+  //     ...product,
+  //     images: product.ProductImage.map((img) => img.url),
+  //   })),
+  // };
+
+      // return products.map(({ id, ProductImage, ...rest }) => ({
+      //   _id: id,
+      //   ...rest,
+      // images: ProductImage.map( image => image.url )
+      // }));
+}
+
+  async findAllEco(paginationDto: PaginationDto) {
+  const {
+    limit = 10,
+    offset = 0,
+    gender = '',
+    minPrice,
+    maxPrice,
+    sizes,
+    q: query,
+  } = paginationDto;
+
+  const data = await this.configuration.findFirst({
+      where: { codCon : "0001" },
+  });
+  const configuracion = data.id;
+
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
+
+
+  const sizesArray = sizes ? sizes.toUpperCase().split(',') : undefined;
+
+  // Prisma price filter builder
+  const priceFilter =
+    minPrice !== undefined && maxPrice !== undefined
+      ? { gte: minPrice, lte: maxPrice }
+      : minPrice !== undefined
+      ? { gte: minPrice }
+      : maxPrice !== undefined
+      ? { lte: maxPrice }
+      : undefined;
+
+  const where: any = {
+    ...configuracionFilter,
+    ecoActive : true,
+    gender: gender || undefined,
+    price: priceFilter,
+    sizes: sizesArray ? { hasEvery: sizesArray } : undefined,
+    title: query
+      ? {
+          contains: query,
+          mode: 'insensitive',
+        }
+      : undefined,
+  };
+  const [products, totalProducts] = await Promise.all([
+    this.product.findMany({
+      // take: limit,
+      // skip: offset,
+      where,
+      include: {
+        ProductImage: true,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    }),
+
+    this.product.count({ where }),
+  ]);
+
+
+  // return {
+  //   count: totalProducts,
+  //   pages: Math.ceil(totalProducts / limit),
+  //   products: products.map((product) => ({
+  //       _id: product.id,
+  //     ...product,
+  //     images: product.ProductImage.map((img) => img.url),
+  //   })),
+  // };
+  // return {
+  //   products: products.map((product) => ({
+  //       _id: product.id,
+  //     ...product,
+  //     images: product.ProductImage.map((img) => img.url),
+  //   })),
+  // };
+
+      return products.map(({ id, ProductImage, ...rest }) => ({
+        _id: id,
+        ...rest,
+      images: ProductImage.map( image => image.url )
+      }));
+}
+
+
+
   // async findAll(query: any) {
   async findAll() {
 
@@ -73,6 +247,24 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   }
 
+
+  async updateecoActive(updateProductDto: UpdateProductDto) {
+    const { productId, ...data } = updateProductDto;
+    try {
+      const updated = await this.product.update({
+        where: { id: productId }, // Prisma usa 'id'
+              data: {
+            ecoActive: updateProductDto.ecoActive,
+          },
+      });
+  
+      // Devolver _id para compatibilidad con frontend
+      return { _id: updated.id, ...updated };
+    } catch (error) {
+      throw error;
+    }
+  }
+  
 
 async update(updateProductDto: UpdateProductDto) {
   const { _id, reviews, ...rest } = updateProductDto;

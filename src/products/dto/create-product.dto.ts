@@ -1,5 +1,5 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, IsEnum, ValidateNested, IsUUID } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, IsEnum, ValidateNested, IsUUID, IsBoolean } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export enum ProductType {
   SHIRTS = 'shirts',
@@ -35,6 +35,15 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   _id?: string;
+
+  @IsString()
+  @IsOptional()
+  productId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true) // convierte "true"/true → true, "false"/false → false
+  ecoActive?: boolean;
 
   @IsString()
   @IsNotEmpty()

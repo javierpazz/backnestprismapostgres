@@ -8,8 +8,30 @@ services:
     ports:
       - "5432:5432"
     environment:
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    container_name: teslodb
+    # container_name: stutzdb
+    container_name: ${DB_NAME}
     volumes:
       - ./postgres:/var/lib/postgresql/data
+
+  escr-app:
+    depends_on:
+      - db
+    # image: javierpazz/jpzecofacesc:1.0.10
+    image: escstutz
+    ports:
+      - 4000:4000
+    environment:
+      PORT: ${PORT}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      # MONGODB_URI: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_DB_NAME}:27017
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
+
+    restart: always
