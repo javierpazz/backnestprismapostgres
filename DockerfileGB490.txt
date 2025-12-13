@@ -1,0 +1,44 @@
+# ------------------------
+# 1️⃣ Dependencias + Prisma
+# ------------------------
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+RUN apk add --no-cache openssl
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# ------------------------
+# 2️⃣ Build Nest
+# ------------------------
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN yarn build
+
+# ------------------------
+# 3️⃣ Producción
+# ------------------------
+FROM node:20-alpine AS prod
+WORKDIR /app
+
+RUN apk add --no-cache openssl
+
+ENV NODE_ENV=production
+EXPOSE 4000
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY prisma ./prisma
+COPY public ./public
+COPY entrypoint.sh .
+
+RUN chmod +x entrypoint.sh
+
+CMD ["./entrypoint.sh"]

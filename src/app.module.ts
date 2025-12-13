@@ -1,4 +1,6 @@
+import { join } from 'path'; // en Node
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
 // import { ProductsModule } from './products/products.module';
 // import { ProductsnextModule } from './productsnext/productsnext.module';
 // import { AddressnextModule } from './addressnext/addressnext.module';
@@ -25,7 +27,13 @@ import { SeedModule } from './seed/seed.module';
 import { FilesModule } from './files/files.module';
 
 @Module({
-  imports: [ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule, ReceiptModule, SeedModule, FilesModule],
+  imports: [
+        
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname,'..','public'), 
+    }),
+
+    ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule, ReceiptModule, SeedModule, FilesModule],
   controllers: [],
   providers: [],
 })

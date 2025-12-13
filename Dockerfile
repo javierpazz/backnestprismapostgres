@@ -1,63 +1,40 @@
-# --- Etapa 1: Dependencias de desarrollo (para Prisma y build)
-FROM node:20-bullseye as dev-deps
+# ---------- BUILD ----------
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+# Dependencias necesarias para Prisma
+RUN apk add --no-cache openssl
 
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
 
-# Generamos el cliente de Prisma
+# Prisma
 RUN npx prisma generate
 
-
-# --- Etapa 2: Builder (compila Nest)
-FROM node:20-bullseye as builder
-WORKDIR /app
-
-COPY --from=dev-deps /app/node_modules ./node_modules
-COPY . .
-
+# Build Nest
 RUN yarn build
 
 
-# --- Etapa 3: Dependencias de producción
-FROM node:20-bullseye as prod-deps
+# ---------- PRODUCTION ----------
+FROM node:20-alpine AS prod
 WORKDIR /app
+
+# Solo lo mínimo necesario
+RUN apk add --no-cache openssl
+
+ENV NODE_ENV=production
 
 COPY package.json yarn.lock ./
+RUN yarn install --prod --frozen-lockfile && yarn cache clean
 
-RUN yarn install --prod --frozen-lockfile
-
-
-# --- Etapa 4: Imagen final
-FROM node:20-bullseye as prod
-WORKDIR /app
-EXPOSE 4000
-
-# Instalamos netcat para esperar la DB en las migraciones
-# RUN apk add --no-cache netcat-openbsd
-# RUN apk add --no-cache openssl1.1-compat netcat-openbsd
-# RUN apt-get update && apt-get install -y netcat-openbsd openssl && apt-get clean
-# Instalar netcat y OpenSSL en la imagen final
-RUN apt-get update && \
-    apt-get install -y netcat-openbsd openssl && \
-    apt-get clean
-
-
-# Variables de entorno
-ENV NODE_ENV=production
-ENV DATABASE_URL=${DATABASE_URL}
-ENV JWT_SECRET=${JWT_SECRET}
-
-# Copiamos sólo lo necesario
-COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-COPY prisma ./prisma
-
-# Ejecutar migraciones al iniciar (opcional)
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/public ./public
 COPY entrypoint.sh .
+
 RUN chmod +x entrypoint.sh
 
+EXPOSE 4000
 CMD ["./entrypoint.sh"]
