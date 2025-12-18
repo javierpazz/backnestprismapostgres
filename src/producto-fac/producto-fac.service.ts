@@ -20,7 +20,7 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     console.log(createProductoFacDto)
     console.log("crea con imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews, images, ...rest } = createProductoFacDto;
+  const { _id, supplier, createdAt, updatedAt, reviews, images, category, ...rest } = createProductoFacDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -32,6 +32,9 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
         ...rest,
         supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
+        categorys: category
+          ? { connect: { id: category } }
           : undefined,
 
         ProductImage: {
@@ -58,7 +61,7 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     console.log(createProductoFacDto)
     console.log("crea sin imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews, ...rest } = createProductoFacDto;
+  const { _id, supplier, createdAt, updatedAt, reviews, category, ...rest } = createProductoFacDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -70,6 +73,9 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
         ...rest,
         supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
+        categorys: category
+          ? { connect: { id: category } }
           : undefined,
       },
       });

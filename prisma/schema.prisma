@@ -8,11 +8,36 @@ datasource db {
 }
 
 
+model Country {
+  id   String @id
+  name String
+
+  UserAddress  UserAddress[]
+  OrderAddress OrderAddress[]
+}
+model UserAddress {
+  id         String  @id @default(uuid())
+  firstName  String
+  lastName   String
+  address    String
+  address2   String?
+  postalCode String
+  phone      String
+  city       String
+
+  // Relaciones
+  country   Country @relation(fields: [countryId], references: [id])
+  countryId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+}
 
 
 model User {
   id        String    @id @default(uuid())
   email     String   @unique
+  emailVerified DateTime?
   password  String
   name      String
   numLogs   Int      @default(0)
@@ -20,6 +45,7 @@ model User {
   isActive  Boolean  @default(true)
   role      String   @default("client")
   roles     String[] @default(["user"])
+  address UserAddress?
   order  Order[]  
   receipt  Receipt[]   
   createdAt DateTime @default(now())
@@ -153,6 +179,11 @@ model Instrumento {
   updatedAt   DateTime    @updatedAt
 }
 
+model Category {
+  id      String    @id @default(uuid())
+  name    String    @unique
+  Product Product[]
+}
 
 
 model Product {
@@ -172,6 +203,10 @@ model Product {
   id_config   String?
   // supplier    String?
   id_category String?
+
+  categorys   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
   ecoActive   Boolean       @default(true)
   description String
   price       Float?        @default(0)
@@ -239,7 +274,7 @@ model OrderItem {
   image       String?
   price       Float
   size        String?
-  porIva      Int
+  porIva      Float
   venDat      DateTime?
   observ      String?
   terminado   Boolean?
@@ -256,6 +291,7 @@ model Order {
   id             String       @id @default(uuid())
   orderItems     OrderItem[]  // relación 1:N con OrderItem
   shippingAddress ShippingAddress[]
+  orderAddress OrderAddress[]
   paymentMethod  String?
   paymentResult  PaymentResult?
 
@@ -265,7 +301,7 @@ model Order {
   tax            Float?
   total          Float?
   totalBuy       Float?
-
+  itemsInOrder Int
   id_client      String?      // relación con Customer
   customer     Customer?   @relation(fields: [id_client], references: [id], onDelete: Restrict)
   supplier      String?      // relación con Customer
@@ -333,6 +369,24 @@ model Order {
 
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+}
+
+model OrderAddress {
+  id         String  @id @default(uuid())
+  firstName  String
+  lastName   String
+  address    String
+  address2   String?
+  postalCode String
+  city       String
+  phone      String
+
+  // Relaciones
+  country   Country @relation(fields: [countryId], references: [id])
+  countryId String
+
+  Order   Order  @relation(fields: [orderId], references: [id])
+  orderId String @unique
 }
 
 model ShippingAddress {

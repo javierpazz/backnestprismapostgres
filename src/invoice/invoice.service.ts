@@ -497,6 +497,7 @@ async createInv(createInvoiceDto: any) {
             tax: invoiceAux.tax,
             total: invoiceAux.total,
             totalBuy: invoiceAux.totalBuy,
+            itemsInOrder:0,
             // user: invoiceAux.codUse,
             // id_client: invoiceAux.codCus,
             // id_config: invoiceAux.codCon,
@@ -624,6 +625,7 @@ async createRem(createInvoiceDto: any) {
       tax: orderData.tax,
       total: orderData.total,
       totalBuy: orderData.totalBuy,
+      itemsInOrder:0,
       // user: orderData.codUse,
       // id_client: orderData.codCus,
       // id_config: orderData.codCon,
@@ -759,6 +761,7 @@ async createOrd(createInvoiceDto: any) {
       tax: orderData.tax,
       total: orderData.total,
       totalBuy: orderData.totalBuy,
+      itemsInOrder: orderData.numberOfItems,
       // user: orderData.codUse,
       // id_client: orderData.codCus,
       // id_config: orderData.codCon,
@@ -766,7 +769,8 @@ async createOrd(createInvoiceDto: any) {
       // id_config2: orderData.codCon2,
       movpvNum: orderData.movpvNum,
       movpvDat: safeDate(orderData.movpvDat),
-      codConNum: orderData.codConNum,
+      // codConNum: orderData.codConNum,
+      codConNum: "0001",
       // codCom: orderData.codCom,
       // supplier: orderData.codSup,
       //////////  numera remito /////////////////
@@ -785,7 +789,7 @@ async createOrd(createInvoiceDto: any) {
 
 
             // relaciones
-            customer: orderData.id_client ? { connect: { id: orderData.id_client } } : undefined,
+            customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
             comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
             configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
             supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
@@ -812,15 +816,16 @@ async createOrd(createInvoiceDto: any) {
                 instrumentoId: item.instrumentoId,
               }))
             },
-            shippingAddress: {
+            orderAddress: {
               create:  {
                 firstName : shippingAddress.firstName,
                 lastName : shippingAddress.lastName,
                 address : shippingAddress.address,
                 address2 : shippingAddress.address2,
                 city : shippingAddress.city,
-                zip : shippingAddress.zip,
-                country : shippingAddress.country,
+                postalCode : shippingAddress.zip,
+                countryId : shippingAddress.country,
+                // countryId : "AR",
                 phone : shippingAddress.phone,
                 // postalCode : shippingAddress.postalCode || "",
                 // fullName : shippingAddress.fullName || "",
@@ -897,6 +902,7 @@ async createMov(createInvoiceDto: any) {
       tax: orderData.tax,
       total: orderData.total,
       totalBuy: orderData.totalBuy,
+            itemsInOrder:0,
       // user: orderData.codUse,
       // id_client: orderData.codCus,
       // id_config: orderData.codCon,
@@ -1524,7 +1530,7 @@ const obserFilter: Prisma.OrderWhereInput =
         configuration: true,  // id_config
         user1: true,          // usuario si quieres incluirlo
         orderItems: true,
-        shippingAddress: true,
+        orderAddress: true,
       },      })
 
   const orders = ordersWork.map((order) => ({
@@ -1556,14 +1562,14 @@ const obserFilter: Prisma.OrderWhereInput =
       productId: item.productId,
     })),
         shippingAddress: {
-          firstName: order.shippingAddress[0].firstName,
-          lastName: order.shippingAddress[0].lastName,
-          address: order.shippingAddress[0].address,
-          address2: order.shippingAddress[0].address2,
-          city: order.shippingAddress[0].city,
-          zip: order.shippingAddress[0].zip,
-          country: order.shippingAddress[0].country,
-          phone: order.shippingAddress[0].phone,
+          firstName: order.orderAddress[0].firstName,
+          lastName: order.orderAddress[0].lastName,
+          address: order.orderAddress[0].address,
+          address2: order.orderAddress[0].address2,
+          city: order.orderAddress[0].city,
+          zip: order.orderAddress[0].postalCode,
+          country: order.orderAddress[0].countryId,
+          phone: order.orderAddress[0].phone,
     },
   }));
 

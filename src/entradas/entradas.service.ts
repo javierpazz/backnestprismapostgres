@@ -75,6 +75,7 @@ async create(createEntradaDto: any) {
             tax: orderData.tax,
             total: orderData.total,
             totalBuy: orderData.totalBuy,
+            itemsInOrder:0,
             libNum: orderData.libNum,
             folNum: orderData.folNum,
             asiNum: orderData.asiNum,
@@ -536,7 +537,7 @@ async findOne(id: string) {
       parte: true,          // id_parte
       user1: true,          // usuario
       orderItems: true,
-      shippingAddress: true,
+      orderAddress: true,
     },
   });
 
@@ -597,16 +598,19 @@ async findOne(id: string) {
       ? { _id: invoice.user1.id,
       name: invoice.user1.name }
     : null,
-    // shippingAddress: {
-    //       firstName: invoice.shippingAddress[0].firstName,
-    //       lastName: invoice.shippingAddress[0].lastName,
-    //       address: invoice.shippingAddress[0].address,
-    //       address2: invoice.shippingAddress[0].address2,
-    //       city: invoice.shippingAddress[0].city,
-    //       zip: invoice.shippingAddress[0].zip,
-    //       country: invoice.shippingAddress[0].country,
-    //       phone: invoice.shippingAddress[0].phone,
-    // },
+
+    orderAddress: invoice.ordYes==="Y"
+
+    ?  {
+          firstName: invoice.orderAddress[0].firstName,
+          lastName: invoice.orderAddress[0].lastName,
+          address: invoice.orderAddress[0].address,
+          address2: invoice.orderAddress[0].address2,
+          city: invoice.orderAddress[0].city,
+          zip: invoice.orderAddress[0].postalCode,
+          country: invoice.orderAddress[0].countryId,
+          phone: invoice.orderAddress[0].phone,
+    }: null,
 
     orderItems: invoice.orderItems.map(item => ({
       _id: item.productId,
