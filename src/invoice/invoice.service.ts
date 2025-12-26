@@ -843,7 +843,7 @@ async createOrd(createInvoiceDto: any) {
         _id: invoice.id,
       };
 
-      return { invoice: invoiceWithMongoId };            
+      return  invoiceWithMongoId ;            
 
     } catch (error) {
       this.handleExceptions( error );

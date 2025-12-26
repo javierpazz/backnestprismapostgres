@@ -16,7 +16,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   async create(createProductDto: CreateProductDto, product:Product) {
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews,category, ...rest } = createProductDto;
+  const { _id, supplier, createdAt, updatedAt, reviews,categoryId, ...rest } = createProductDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -25,8 +25,8 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       // this.product.create({data:rest});
       this.product.create({data:{
           ...rest,
-              categorys: category
-          ? { connect: { id: category } }
+              categorys: categoryId
+          ? { connect: { id: categoryId } }
           : undefined,
       }
       });
@@ -176,7 +176,12 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       // skip: offset,
       where,
       include: {
-        ProductImage: true,
+        ProductImage: {
+          take: 2,
+          select: {
+            url: true,
+          },
+        },
       },
       orderBy: {
         id: 'asc',
@@ -207,8 +212,13 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       return products.map(({ id, ProductImage, ...rest }) => ({
         _id: id,
         ...rest,
-      images: ProductImage.map( image => image.url )
-      }));
+      // images: ProductImage.map( image => image.url )
+      images: ProductImage.map(
+         image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/${ image.url }`
+         )
+
+
+    }));
 }
 
 
@@ -249,7 +259,10 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       return products.map(({ id, ProductImage, ...rest }) => ({
         _id: id,
         ...rest,
-      images: ProductImage.map( image => image.url )
+      // images: ProductImage.map( image => image.url )
+      images: ProductImage.map(
+                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/${ image.url }`
+      )
       }));
 
   }

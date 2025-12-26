@@ -20,7 +20,7 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     console.log(createProductoFacDto)
     console.log("crea con imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews, images, category, ...rest } = createProductoFacDto;
+  const { _id, supplier, createdAt, updatedAt, reviews, images, categoryId, ...rest } = createProductoFacDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -33,8 +33,8 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
         supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
           : undefined,
-        categorys: category
-          ? { connect: { id: category } }
+        categorys: categoryId
+          ? { connect: { id: categoryId } }
           : undefined,
 
         ProductImage: {
@@ -61,7 +61,7 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     console.log(createProductoFacDto)
     console.log("crea sin imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews, category, ...rest } = createProductoFacDto;
+  const { _id, supplier, createdAt, updatedAt, reviews, categoryId, ...rest } = createProductoFacDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -74,8 +74,8 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
         supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
           : undefined,
-        categorys: category
-          ? { connect: { id: category } }
+        categorys: categoryId
+          ? { connect: { id: categoryId } }
           : undefined,
       },
       });
@@ -108,6 +108,7 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
         },
       include: {
         supplier: true,
+        ProductImage: true,
       },        
       })
 
@@ -119,11 +120,15 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
       //   _id: id,
       //   ...rest,
       // }));
-      // console.log(kiki)
+      console.log("kiki")
 
-      return products.map(({ id, ...rest }) => ({
+      return products.map(({ id, ProductImage, ...rest }) => ({
         _id: id,
         ...rest,
+              images: ProductImage.map(
+                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/${ image.url }`
+      )
+
       }));
 
   }
@@ -308,13 +313,18 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     const { images = [], ProductImage, ...rest } = productT;
     return {
       ...rest,
-      images: ProductImage.map( image => image.url )
+      // images: ProductImage.map( image => image.url )
+              images: ProductImage.map(
+                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/${ image.url }`
+      )
+
+
     }
 
 
   }
 async update(updateProductoFacDto: UpdateProductoFacDto) {
-  const { _id, supplier, reviews, images, ...rest } = updateProductoFacDto;
+  const { _id, supplier, reviews, images, categoryId, ...rest } = updateProductoFacDto;
 
   try {
     const product = await this.product.update({
@@ -335,6 +345,9 @@ async update(updateProductoFacDto: UpdateProductoFacDto) {
         // 🔗 Supplier (si viene)
         supplier: supplier
           ? { connect: { id: supplier } }
+          : undefined,
+        categorys: categoryId
+          ? { connect: { id: categoryId } }
           : undefined,
 
         // 🖼️ ProductImage (borrar todas y cargar nuevas)
@@ -362,13 +375,16 @@ async update(updateProductoFacDto: UpdateProductoFacDto) {
 }
 
 async updateFac(updateProductoFacDto: UpdateProductoFacDto) {
-  const { _id, supplier, reviews, ...rest } = updateProductoFacDto;
+  const { _id, supplier, reviews, categoryId, ...rest } = updateProductoFacDto;
 
   const data: any = {
     ...rest,
         supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
           : { disconnect: true },
+        categorys: categoryId
+          ? { connect: { id: categoryId } }
+          : undefined,
           ...(reviews && {
       reviews: {
         create: reviews.map(r => ({

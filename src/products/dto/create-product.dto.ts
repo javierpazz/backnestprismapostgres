@@ -172,4 +172,9 @@ export class CreateProductDto {
   @IsOptional()
   @IsUUID()
   supplier?: string;  
+
+  // 🔗 Relación con Configuration (UUID)
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;  
 }

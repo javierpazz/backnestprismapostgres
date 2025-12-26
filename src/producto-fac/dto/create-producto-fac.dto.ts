@@ -175,5 +175,10 @@ export class CreateProductoFacDto {
   @IsUUID()
   supplier?: string;  
 
+  // 🔗 Relación con Configuration (UUID)
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;  
+
 
 }

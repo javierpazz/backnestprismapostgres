@@ -204,8 +204,8 @@ model Product {
   // supplier    String?
   id_category String?
 
-  categorys   Category @relation(fields: [categoryId], references: [id])
-  categoryId String
+  categorys   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
 
   ecoActive   Boolean       @default(true)
   description String

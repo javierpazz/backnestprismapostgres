@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { OnModuleInit } from '@nestjs/common';
-import { PrismaClient, Order, Prisma, Configuration } from '@prisma/client';
+import { PrismaClient, Order, Prisma, Configuration, Product } from '@prisma/client';
 import { CreateEntradaDto } from './dto/create-entrada.dto';
 import { UpdateEntradaDto } from './dto/update-entrada.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
@@ -536,7 +536,16 @@ async findOne(id: string) {
       instrumento: true,    // id_instru
       parte: true,          // id_parte
       user1: true,          // usuario
-      orderItems: true,
+      // orderItems: true,
+    orderItems: {
+      include: {
+        product: {
+          include: {
+            ProductImage: true, // all image fields
+          },
+        },
+      },
+    },
       orderAddress: true,
     },
   });
@@ -616,6 +625,9 @@ async findOne(id: string) {
       _id: item.productId,
       slug: item.slug,
       title: item.title,
+      // image: item.product.ProductImage[0].url,
+      image: item.product.ProductImage[0].url.includes('http') ? item.product.ProductImage[0].url : `${ process.env.HOST_NAME}/${ item.product.ProductImage[0].url }`,
+
       medPro: item.medPro,
       quantity: item.quantity,
       price: item.price,
@@ -629,6 +641,8 @@ async findOne(id: string) {
   };
 
   console.log(formattedInvoice);
+  // console.log(invoice.orderItems);
+
   return formattedInvoice;
 }
 
