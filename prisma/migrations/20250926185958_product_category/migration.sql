@@ -64,7 +64,7 @@ CREATE TABLE "Order" (
 );
 
 -- CreateTable
-CREATE TABLE "ShippingAddress" (
+CREATE TABLE "orderAddress" (
     "id" TEXT NOT NULL,
     "fullName" TEXT,
     "firstName" TEXT,
@@ -94,7 +94,7 @@ CREATE TABLE "PaymentResult" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ShippingAddress_orderId_key" ON "ShippingAddress"("orderId");
+CREATE UNIQUE INDEX "ShippingAddress_orderId_key" ON "orderAddress"("orderId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PaymentResult_orderId_key" ON "PaymentResult"("orderId");
@@ -103,7 +103,7 @@ CREATE UNIQUE INDEX "PaymentResult_orderId_key" ON "PaymentResult"("orderId");
 ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ShippingAddress" ADD CONSTRAINT "ShippingAddress_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "orderAddress" ADD CONSTRAINT "ShippingAddress_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PaymentResult" ADD CONSTRAINT "PaymentResult_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

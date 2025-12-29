@@ -27,7 +27,7 @@ export class EntradasService extends PrismaClient implements OnModuleInit {
 
 
 async create(createEntradaDto: any) {
-  const { orderItems, shippingAddress, ...orderData } = createEntradaDto;
+  const { orderItems, orderAddress, ...orderData } = createEntradaDto;
 
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
     try {
@@ -425,7 +425,7 @@ const obserFilter: Prisma.OrderWhereInput =
     include: {
       order: {
         include: {
-          shippingAddress: true,
+          orderAddress: true,
           customer: true,
           parte: true,
           instrumento: true,
@@ -455,7 +455,7 @@ const invoices = orderItemsWithOrder.map(item => ({
     observ: item.observ,
     terminado: item.terminado,
   },
-  shippingAddress: item.order?.shippingAddress?.[0] ?? {
+  orderAddress: item.order?.orderAddress?.[0] ?? {
     firstName: '',
     lastName: '',
     address: '',

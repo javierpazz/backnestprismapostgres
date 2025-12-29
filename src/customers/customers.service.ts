@@ -21,13 +21,38 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
 
   async createsignup(createCustomerDto: any, customer:Customer) {
     // createCustomerDto.nameCus = createCustomerDto.nameCus.toLocaleLowerCase();
-console.log(createCustomerDto)
     const { _id, ...rest } = createCustomerDto;
     try {
+
+/////numera cliente
+      let cliNumero = 0;
+        const configuracion = await this.configuration.findUnique(
+          {
+            where: { id: rest.punto },
+          }
+        );
+        if (configuracion) {
+          configuracion.numIntCli += 1;
+          // await configuracion.save({ session });
+          await this.configuration.update(
+            {
+              where: { id: rest.punto },
+              data: {
+                numIntCli: { increment: 1 },
+              },
+            }
+          );
+          cliNumero = configuracion.numIntCli;
+        } else {
+          throw new Error('Configuración no encontrada');
+        }
+        console.log(cliNumero)
+/////numera cliente
+
       const customer = await 
       this.customer.create(
         {data: {
-          codCus: rest.nameCus,
+          codCus: String(cliNumero),
           nameCus: rest.nameCus,
           emailCus: rest.emailCus,
         }

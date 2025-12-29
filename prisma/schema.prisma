@@ -159,7 +159,7 @@ model Configuration {
   numIntOdp   Int      @default(0)
   numIntCaj   Int      @default(0)
   numIntMov   Int      @default(0)
-  numIntCli   Int      @default(0)
+  numIntCli   Int      @default(100000)
   orders1       Order[]     @relation("Config1")
   orders2       Order[]     @relation("Config2")
   receipt  Receipt[]   
@@ -231,13 +231,20 @@ model Product {
   @@unique([codigoPro, id_config])
 }
 
-model ProductImage {
-  // id  Int    @id @default(autoincrement())
-  id        String  @id @default(uuid())
+// model ProductImage {
+//   // id  Int    @id @default(autoincrement())
+//   id        String  @id @default(uuid())
 
+//   url String
+
+//   product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+//   productId String
+// }
+model ProductImage {
+  id  Int    @id @default(autoincrement())
   url String
 
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  product   Product @relation(fields: [productId], references: [id])
   productId String
 }
 
@@ -290,8 +297,8 @@ model OrderItem {
 model Order {
   id             String       @id @default(uuid())
   orderItems     OrderItem[]  // relación 1:N con OrderItem
-  shippingAddress ShippingAddress[]
   orderAddress OrderAddress[]
+  shippingAddress ShippingAddress[]
   paymentMethod  String?
   paymentResult  PaymentResult?
 

@@ -23,7 +23,7 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
 
 async geninvRem(createInvoiceDto: any, id:any) {
   const {invoiceAux, receiptAux} = createInvoiceDto;
-  const { orderItems, shippingAddress } = invoiceAux;
+  const { orderItems, orderAddress } = invoiceAux;
     console.log(invoiceAux)
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
@@ -198,7 +198,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
 }
 async createInv(createInvoiceDto: any) {
   const {invoiceAux, receiptAux} = createInvoiceDto;
-  const { orderItems, shippingAddress } = invoiceAux;
+  const { orderItems, orderAddress } = invoiceAux;
     console.log(invoiceAux)
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
@@ -490,7 +490,7 @@ async createInv(createInvoiceDto: any) {
 ///***
       const invoice = await this.order.create({
           data: {
-            // shippingAddress: invoiceAux.shippingAddress,
+            // orderAddress: invoiceAux.orderAddress,
             paymentMethod: invoiceAux.paymentMethod,
             subTotal: invoiceAux.subTotal,
             shippingPrice: invoiceAux.shippingPrice,
@@ -576,7 +576,7 @@ async createInv(createInvoiceDto: any) {
 }
 
 async createRem(createInvoiceDto: any) {
-  const { orderItems, shippingAddress, ...orderData } = createInvoiceDto;
+  const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
 
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
     try {
@@ -618,7 +618,7 @@ async createRem(createInvoiceDto: any) {
 
             const invoice = await this.order.create({
           data: {
-      shippingAddress: orderData.shippingAddress,
+      orderAddress: orderData.orderAddress,
       paymentMethod: orderData.paymentMethod,
       subTotal: orderData.subTotal,
       shippingPrice: orderData.shippingPrice,
@@ -703,7 +703,7 @@ async createRem(createInvoiceDto: any) {
 async createOrd(createInvoiceDto: any) {
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
-  const { orderItems, shippingAddress, ...orderData } = createInvoiceDto;
+  const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
 
   // Crear un arreglo con los productos que la persona quiere
     const productsIds = orderItems.map( product => product._id );
@@ -818,18 +818,18 @@ async createOrd(createInvoiceDto: any) {
             },
             orderAddress: {
               create:  {
-                firstName : shippingAddress.firstName,
-                lastName : shippingAddress.lastName,
-                address : shippingAddress.address,
-                address2 : shippingAddress.address2,
-                city : shippingAddress.city,
-                postalCode : shippingAddress.zip,
-                countryId : shippingAddress.country,
+                firstName : orderAddress.firstName,
+                lastName : orderAddress.lastName,
+                address : orderAddress.address,
+                address2 : orderAddress.address2,
+                city : orderAddress.city,
+                postalCode : orderAddress.zip,
+                countryId : orderAddress.country,
                 // countryId : "AR",
-                phone : shippingAddress.phone,
-                // postalCode : shippingAddress.postalCode || "",
-                // fullName : shippingAddress.fullName || "",
-                // cuit : shippingAddress.cuit || "",
+                phone : orderAddress.phone,
+                // postalCode : orderAddress.postalCode || "",
+                // fullName : orderAddress.fullName || "",
+                // cuit : orderAddress.cuit || "",
 
               }
             }
@@ -853,7 +853,7 @@ async createOrd(createInvoiceDto: any) {
 
 
 async createMov(createInvoiceDto: any) {
-  const { orderItems, shippingAddress, ...orderData } = createInvoiceDto;
+  const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
 
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
     try {
@@ -895,7 +895,7 @@ async createMov(createInvoiceDto: any) {
 
             const invoice = await this.order.create({
           data: {
-      shippingAddress: orderData.shippingAddress,
+      orderAddress: orderData.orderAddress,
       paymentMethod: orderData.paymentMethod,
       subTotal: orderData.subTotal,
       shippingPrice: orderData.shippingPrice,
@@ -1561,7 +1561,7 @@ const obserFilter: Prisma.OrderWhereInput =
       terminado: item.terminado,
       productId: item.productId,
     })),
-        shippingAddress: {
+        orderAddress: {
           firstName: order.orderAddress[0].firstName,
           lastName: order.orderAddress[0].lastName,
           address: order.orderAddress[0].address,
@@ -1956,7 +1956,7 @@ const orderItemsWithOrder = await this.orderItem.findMany({
   include: {
     order: {
       include: {
-        shippingAddress: true,
+        orderAddress: true,
         customer: true,
         parte: true,
         instrumento: true,
@@ -1984,7 +1984,7 @@ const invoices = orderItemsWithOrder.map(item => ({
     observ: item.observ,
     terminado: item.terminado,
   },
-  shippingAddress: item.order?.shippingAddress?.[0] ?? {
+  orderAddress: item.order?.orderAddress?.[0] ?? {
     firstName: '',
     lastName: '',
     address: '',
