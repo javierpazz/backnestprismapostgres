@@ -1,10 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// enum Role {
+//   admin
+//   user
+//   client
+// }
+
+// enum Size {
+//   XS
+//   S
+//   M
+//   L
+//   XL
+//   XXL
+//   XXXL
+// }
+
+model User {
+  id            String    @id @default(uuid())
+  email         String   @unique
+  emailVerified DateTime?
+  password      String
+  name          String
+  numLogs       Int      @default(0)
+  isAdmin       Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  // role      Role   @default(user)
+  role          String   @default("user")
+  roles         String[] @default(["user"])
+  resetToken    String
+  address       UserAddress?
+  order         Order[]
+  receipt       Receipt[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 
@@ -15,6 +55,7 @@ model Country {
   UserAddress  UserAddress[]
   OrderAddress OrderAddress[]
 }
+
 model UserAddress {
   id         String  @id @default(uuid())
   firstName  String
@@ -29,29 +70,12 @@ model UserAddress {
   country   Country @relation(fields: [countryId], references: [id])
   countryId String
 
+  // user String @unique
+  // user1   User   @relation(fields: [user], references: [id])
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique
 }
 
-
-model User {
-  id        String    @id @default(uuid())
-  email     String   @unique
-  emailVerified DateTime?
-  password  String
-  name      String
-  numLogs   Int      @default(0)
-  isAdmin   Boolean  @default(false)
-  isActive  Boolean  @default(true)
-  role      String   @default("client")
-  roles     String[] @default(["user"])
-  resetToken      String
-  address UserAddress?
-  order  Order[]  
-  receipt  Receipt[]   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
 
 model Customer {
   id        String    @id @default(uuid())
@@ -180,12 +204,12 @@ model Instrumento {
   updatedAt   DateTime    @updatedAt
 }
 
+
 model Category {
   id      String    @id @default(uuid())
   name    String    @unique
   Product Product[]
 }
-
 
 model Product {
   id          String   @id @default(uuid())
@@ -220,7 +244,9 @@ model Product {
   tags        String[]
   type        ProductType?
   gender      Gender?
-  sizes       String[]
+  // sizes       String[]
+  // sizes       Size[]   @default([])
+  sizes       String[]   @default([])
   reviews     Review[]
   orderItems  OrderItem[]   // 👈 Relación con OrderItem
   ProductImage ProductImage[]
@@ -241,6 +267,7 @@ model Product {
 //   product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 //   productId String
 // }
+
 model ProductImage {
   id  Int    @id @default(autoincrement())
   url String
@@ -281,6 +308,8 @@ model OrderItem {
   quantity    Int
   image       String?
   price       Float
+  // size        String?
+  // size     Size
   size        String?
   porIva      Float
   venDat      DateTime?
@@ -295,21 +324,40 @@ model OrderItem {
 }
 
 
+model OrderAddress {
+  id         String  @id @default(uuid())
+  firstName  String
+  lastName   String
+  address    String
+  address2   String?
+  postalCode String
+  city       String
+  phone      String
+
+  // Relaciones
+  country   Country @relation(fields: [countryId], references: [id])
+  countryId String
+
+  Order   Order  @relation(fields: [orderId], references: [id])
+  orderId String @unique
+}
+
 model Order {
   id             String       @id @default(uuid())
   orderItems     OrderItem[]  // relación 1:N con OrderItem
-  orderAddress OrderAddress[]
+  OrderAddress OrderAddress?
   shippingAddress ShippingAddress[]
   paymentMethod  String?
   paymentResult  PaymentResult?
 
   numberOfItems  Int?
+  itemsInOrder  Int?
   subTotal       Float?
   shippingPrice  Float?
   tax            Float?
   total          Float?
   totalBuy       Float?
-  itemsInOrder Int
+
   id_client      String?      // relación con Customer
   customer     Customer?   @relation(fields: [id_client], references: [id], onDelete: Restrict)
   supplier      String?      // relación con Customer
@@ -377,24 +425,6 @@ model Order {
 
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-}
-
-model OrderAddress {
-  id         String  @id @default(uuid())
-  firstName  String
-  lastName   String
-  address    String
-  address2   String?
-  postalCode String
-  city       String
-  phone      String
-
-  // Relaciones
-  country   Country @relation(fields: [countryId], references: [id])
-  countryId String
-
-  Order   Order  @relation(fields: [orderId], references: [id])
-  orderId String @unique
 }
 
 model ShippingAddress {
@@ -473,3 +503,4 @@ model ReceiptItem {
   valuee    String
   valuee1      Valuee   @relation(fields: [valuee], references: [id], onDelete: Restrict)
 }
+

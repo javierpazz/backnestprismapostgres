@@ -12,6 +12,10 @@ import { Transform, Type } from 'class-transformer';
 
 export class CreateUserDto {
 
+  // @IsString()
+  // @IsOptional()
+  // token?: string;
+
   @IsString()
   @IsOptional()
   _id?: string;

@@ -29,6 +29,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
             data: {
               ...userData,
               role: "client",
+              resetToken: "",
               password: bcrypt.hashSync( password, 10 )
                 },
           })

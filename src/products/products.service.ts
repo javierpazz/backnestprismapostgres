@@ -140,7 +140,9 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       where: { codCon : "0001" },
   });
   const configuracion = data.id;
-
+  console.log("configuracion")
+  console.log(configuracion)
+  console.log("configuracion")
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
 

@@ -1,11 +1,15 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
 import { PrismaClient, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
+import mg from 'mailgun-js';
+// import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtPayload } from 'src/auth/interfaces';
 
 @Injectable()
 export class UsersService extends PrismaClient implements OnModuleInit {
@@ -14,25 +18,166 @@ export class UsersService extends PrismaClient implements OnModuleInit {
   }
 
 
+  constructor(
+    private readonly jwtService: JwtService,
+    // private readonly customersService: CustomersService,    
+  ) {super()}
+
+
+  async forget(createUserDto: CreateUserDto) {
+
+const mailgun = () =>
+    mg({
+      apiKey: process.env.MAILGUN_API_KEY,
+      domain: process.env.MAILGUN_DOMIAN,
+    });
+    const baseUrl = () =>
+      process.env.BASE_URL
+        ? process.env.BASE_URL
+        : process.env.NODE_ENV !== 'production'
+        // ? 'http://localhost:3000'
+        ? 'http://localhost:5173'
+        : 'https://yourdomain.com';
+
+    const { _id, ...rest } = createUserDto;
+
+    try {
+      const userInDB = await this.user.findUnique({
+        where: { email : createUserDto.email },
+      });
+      if ( userInDB ) {
+        console.log("userInDB")
+        console.log(userInDB)
+        console.log("createUserDto")
+        console.log(createUserDto)
+      // const token = jwt.sign({ _id: userInDB._id }, process.env.JWT_SECRET, {
+      //   expiresIn: '3h',
+      // });
+      const token = this.getJwtToken({ _id: userInDB.id })
+
+      //////// modifica resetToken
+        const user = await this.findOne(userInDB.id);
+
+        const updated = await this.user.update({
+          where: { id: userInDB.id }, // Prisma usa 'id'
+          data: {
+            resetToken : token,
+          },
+          
+        });
+
+      //   // Devolver _id para compatibilidad con frontend
+      //   return { _id: updated.id, ...updated };
+      // //////// modifica resetToken
+
+
+
+      //reset link
+      console.log(`${baseUrl()}/reset-password/${token}/`);
+
+      //   mailgun()
+    //     .messages()
+    //     .send(
+    //       {
+    //         from: 'Amazona <me@mg.yourdomain.com>',
+    //         to: `${userInDB.name} <${userInDB.email}>`,
+    //         subject: `Reset Password`,
+    //         html: ` 
+    //          <p>Please Click the following link to reset your password:</p> 
+    //          <a href="${baseUrl()}/reset-password/${token}/"}>Reset Password</a>
+    //          `,
+    //       },
+    //       (error, body) => {
+    //         console.log(error);
+    //         console.log(body);
+    //       }
+    //     );
+    //   res.send({ message: 'Enviamos un link para actualizar su password' });
+    // } else {
+    //   res.status(404).send({ message: 'Usuario no encontrado' });
+    }else{
+            throw new BadRequestException(
+        `No existe un Usuario con esos datos`,
+      );
+
+    }
+
+    } catch (error) {
+      this.handleExceptions( error );
+    }
+
+
+  }
+
+/////////resetpasword
+  async reset(createUserDto: any) {
+
+    // jwt.verify(createUserDto.resetToken, process.env.JWT_SECRET, async (err, decode) => {
+      // if (err) {
+      //   res.status(401).send({ message: 'Invalid Token' });
+      // } else {
+        // const user = await User.findOne({ resetToken: req.body.token });
+        // if (user) {
+        //   if (req.body.password) {
+        //     user.password = bcrypt.hashSync(req.body.password, 8);
+        //     await user.save();
+        //     res.send({
+        //       message: 'Password reseted successfully',
+        //     });
+        //   }
+        // } else {
+        //   res.status(404).send({ message: 'User not found' });
+        // }
+      try {
+          const userInDB = await this.user.findFirst({
+            where: { resetToken : createUserDto.token},
+            // where: { email : createUserDto.email },
+          });
+            if ( userInDB ) {
+
+      //////// modifica password
+              const user = await this.findOne(userInDB.id);
+
+                const updated = await this.user.update({
+                  where: { id: userInDB.id }, // Prisma usa 'id'
+                  data: {
+                    password: bcrypt.hashSync(createUserDto.password, 10),
+                  },
+                });
+              } else {
+                      throw new BadRequestException(
+                  `No existe un Usuario con esos datos`,
+                );
+              }
+        } catch (error) {
+          this.handleExceptions( error );
+        }
+      
+    // });
+  }
+
+
+/////////resetpasword
 
   async create(createUserDto: CreateUserDto) {
     // createUserDto.nameCus = createUserDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createUserDto;
-      const userInDB = await this.user.findUnique({
-            where: { email : createUserDto.email },
-            });
-        if ( userInDB ) {
-          throw new BadRequestException(
-            `Ya existe un User con esos datos`,
-          );
-        }
-
-
-
+    const userInDB = await this.user.findUnique({
+      where: { email : createUserDto.email },
+    });
+    if ( userInDB ) {
+      throw new BadRequestException(
+        `Ya existe un User con esos datos`,
+      );
+    }
+    
+    
+    
     try {
       const user = await 
       this.user.create({
-      data: {
+        data: {
+          resetToken : "",
           name: createUserDto.name,
           email: createUserDto.email,
           // password: createUserDto.password,
@@ -247,6 +392,13 @@ async remove(id: string) {
     console.log(error);
     throw new InternalServerErrorException(`Can't create User - Check server logs`);
   }
+
+  private getJwtToken( payload: JwtPayload ) {
+
+      const token = this.jwtService.sign( payload );
+      return token;
+
+    }
 
 
 }
