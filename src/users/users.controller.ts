@@ -16,7 +16,7 @@ export class UsersController {
     return this.usersService.forget(createUserDto);
   }
   @Post('users/reset-password')
-  // @Auth()
+  @Auth()
   reset(@Body() createUserDto: any) {
     return this.usersService.reset(createUserDto);
   }

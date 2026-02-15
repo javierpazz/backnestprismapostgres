@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+// import mg from 'mailgun-js';
+import * as mg from 'mailgun-js';
 
 import { OnModuleInit } from '@nestjs/common';
 import { PrismaClient, Order, Prisma, Configuration } from '@prisma/client';
@@ -842,6 +844,40 @@ async createOrd(createInvoiceDto: any) {
         ...invoice,
         _id: invoice.id,
       };
+///////mail
+const mailgun = mg({
+  apiKey: process.env.MAILGUN_API_KEY,
+  domain: process.env.MAILGUN_DOMAIN,
+  // host: 'api.eu.mailgun.net', // 👈 IMPORTANTE si es región EU
+});
+
+    const baseUrl = () =>
+      process.env.BASE_URL
+        ? process.env.BASE_URL
+        : process.env.NODE_ENV !== 'production'
+        // ? 'http://localhost:3000'
+        ? 'http://localhost:5173'
+        : 'https://yourdomain.com';
+
+        await mailgun
+        .messages()
+        .send(
+          {
+            from: 'JPZ <javier_pazz@hotmail.com>',
+            // to: `${userInDB.name} <${userInDB.email}>`,
+            to: `JavierPZ <javier_pazz@hotmail.com>`,
+            // subject: `New order ${order._id}`,
+            // html: payOrderEmailTemplate(invoiceWithMongoId),          },
+            subject: `Orden Numero`,
+            html: ` 
+             <p>Probando orden`,
+            },
+          (error, body) => {
+            console.log(error);
+            console.log(body);
+          }
+        );
+///////mail
 
       return  invoiceWithMongoId ;            
 

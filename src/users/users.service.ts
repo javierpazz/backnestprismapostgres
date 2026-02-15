@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+// import mg from 'mailgun-js';
+import * as mg from 'mailgun-js';
 
 import { PrismaClient, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -7,7 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-import mg from 'mailgun-js';
+
 // import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtPayload } from 'src/auth/interfaces';
 
@@ -26,11 +28,18 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
   async forget(createUserDto: CreateUserDto) {
 
-const mailgun = () =>
-    mg({
-      apiKey: process.env.MAILGUN_API_KEY,
-      domain: process.env.MAILGUN_DOMIAN,
-    });
+// const mailgun = () =>
+//     mg({
+//       apiKey: process.env.MAILGUN_API_KEY,
+//       domain: process.env.MAILGUN_DOMIAN,
+//     });
+
+const mailgun = mg({
+  apiKey: process.env.MAILGUN_API_KEY,
+  domain: process.env.MAILGUN_DOMAIN,
+  // host: 'api.eu.mailgun.net', // 👈 IMPORTANTE si es región EU
+});
+
     const baseUrl = () =>
       process.env.BASE_URL
         ? process.env.BASE_URL
@@ -75,24 +84,25 @@ const mailgun = () =>
       //reset link
       console.log(`${baseUrl()}/reset-password/${token}/`);
 
-      //   mailgun()
-    //     .messages()
-    //     .send(
-    //       {
-    //         from: 'Amazona <me@mg.yourdomain.com>',
-    //         to: `${userInDB.name} <${userInDB.email}>`,
-    //         subject: `Reset Password`,
-    //         html: ` 
-    //          <p>Please Click the following link to reset your password:</p> 
-    //          <a href="${baseUrl()}/reset-password/${token}/"}>Reset Password</a>
-    //          `,
-    //       },
-    //       (error, body) => {
-    //         console.log(error);
-    //         console.log(body);
-    //       }
-    //     );
-    //   res.send({ message: 'Enviamos un link para actualizar su password' });
+
+        await mailgun
+        .messages()
+        .send(
+          {
+            from: 'JPZ <javier_pazz@hotmail.com>',
+            to: `${userInDB.name} <${userInDB.email}>`,
+            subject: `Reset Password`,
+            html: ` 
+             <p>Please Click the following link to reset your password:</p> 
+             <a href="${baseUrl()}/reset-password/${token}/"}>Reset Password</a>
+             `,
+          },
+          (error, body) => {
+            console.log(error);
+            console.log(body);
+          }
+        );
+      // res.send({ message: 'Enviamos un link para actualizar su password' });
     // } else {
     //   res.status(404).send({ message: 'Usuario no encontrado' });
     }else{
@@ -181,7 +191,7 @@ const mailgun = () =>
           name: createUserDto.name,
           email: createUserDto.email,
           // password: createUserDto.password,
-          password: bcrypt.hashSync(createUserDto.password, 10),
+          password: bcrypt.hashSync(createUserDto.passwordNue, 10),
           isAdmin: createUserDto.isAdmin ?? false,
           isActive: createUserDto.isActive ?? true,
           role: createUserDto.role,
@@ -239,7 +249,8 @@ async updatePerfil(updateUserDto: UpdateUserDto) {
 ////////
   const user = await this.findOne(updateUserDto._id);
         const validPassword = bcrypt.compareSync( updateUserDto.password, user.password );
-        if ( !validPassword || updateUserDto.puede === false ) {
+        // if ( !validPassword || updateUserDto.puede === false ) {
+        if ( !validPassword ) {
           throw new UnauthorizedException('Password incorrecto');
         }
         ///// verifico pasword

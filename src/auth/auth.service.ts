@@ -87,29 +87,46 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
     if ( !user ) 
       // throw new UnauthorizedException('Credentials are not valid (email)');
-      throw new UnauthorizedException('Datos Incorrectos');
+      // throw new UnauthorizedException('Datos Incorrectos');
+      throw new UnauthorizedException({
+    msg: 'Datos Invalidos',
+    code: 'INVALID_CREDENTIALS'
+  });
 
       
-      if ( !user.isActive || user.role === "client" ) {
-        // throw new UnauthorizedException('Credentials are not valid (Client)');
-        throw new UnauthorizedException('Datos Incorrectos');
-      }
+      // if ( !user.isActive || user.role === "client" ) {
+      //   // throw new UnauthorizedException('Credentials are not valid (Client)');
+      //   throw new UnauthorizedException('Datos Incorrectos');
+      // }
       
+      if ( !user.isActive ) {
+        // throw new UnauthorizedException('Credentials are not valid (Client)');
+        // throw new UnauthorizedException('Datos Incorrectos');
+        throw new UnauthorizedException({
+    msg: 'Usuario bloqueado - Hable con Administrador',
+    code: 'USER_BLOCKED'
+  });
+      }
+
       if ( !bcrypt.compareSync( password, user.password ) ){
         // throw new UnauthorizedException('Credentials are not valid (password)');
 ///// control logs
       const log = user.numLogs + 1;
-      if(log > 3) {
+      if(log > 5) {
       await this.user.update({
           where: { id: user.id },
           data: {
-            numLogs: 0,
+            // numLogs: 0,
             isActive: false
           }
         });
       // res.status(401).send({ message: 'Hable con Administrador ' });
       // return;        
-        throw new UnauthorizedException('Datos Incorrectos');
+        // throw new UnauthorizedException('Datos Incorrectos');
+        throw new UnauthorizedException({
+    msg: 'Datos Incorrectos - Hable con Administrador',
+    code: 'INVALID_CREDENTIALS'
+  });
       }        
       // user.numLogs = log;    
       // await user.save();
@@ -121,11 +138,22 @@ export class AuthService extends PrismaClient implements OnModuleInit {
             }
           });
 
-      throw new UnauthorizedException('Datos Incorrectos');
-      // return res.status(401).send({ message: 'Datos Invalidos' });
-///// control logs
-        throw new UnauthorizedException('Datos Incorrectos');
-        }
+      // throw new UnauthorizedException('Datos Incorrectos');
+      throw new UnauthorizedException({
+    msg: 'Datos Invalidos',
+    code: 'INVALID_CREDENTIALS'
+  });
+  
+}
+      if ( user.role === "client" ) {
+        // throw new UnauthorizedException('Credentials are not valid (Client)');
+        // throw new UnauthorizedException('Datos Incorrectos');
+        throw new UnauthorizedException({
+    msg: 'Usuario bloqueado - Este usuario es un CLiente',
+    code: 'USER_CLIENT'
+  });
+      }
+
 
         // // Regresar el usuario sin el password
     // const { password: _, ...rest } = user;
@@ -166,29 +194,41 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
     if ( !user ) 
       // throw new UnauthorizedException('Credentials are not valid (email)');
-      throw new UnauthorizedException('Datos Incorrectos');
+      // throw new UnauthorizedException('Datos Incorrectos');
+      throw new UnauthorizedException({
+    msg: 'Datos Invalidos',
+    code: 'INVALID_CREDENTIALS'
+  });
       
-      
-      if ( !user.isActive || user.role !== "client" ) {
+      if ( !user.isActive ) {
         // throw new UnauthorizedException('Credentials are not valid (Client)');
-        throw new UnauthorizedException('Datos Incorrectos');
+        // throw new UnauthorizedException('Datos Incorrectos');
+        throw new UnauthorizedException({
+    msg: 'Usuario bloqueado - Hable con Administrador',
+    code: 'USER_BLOCKED'
+  });
       }
+      
       
       if ( !bcrypt.compareSync( password, user.password ) ) {
         // throw new UnauthorizedException('Credentials are not valid (password)');
 ///// control logs
       const log = user.numLogs + 1;
-      if(log > 3) {
+      if(log > 5) {
       await this.user.update({
           where: { id: user.id },
           data: {
-            numLogs: 0,
+            // numLogs: 0,
             isActive: false
           }
         });
       // res.status(401).send({ message: 'Hable con Administrador ' });
       // return;
-        throw new UnauthorizedException('Datos Incorrectos');
+        // throw new UnauthorizedException('Datos Incorrectos');
+        throw new UnauthorizedException({
+    msg: 'Datos Incorrectos - Hable con Administrador',
+    code: 'INVALID_CREDENTIALS'
+  });
       }
       // user.numLogs = log;    
       // await user.save();
@@ -200,13 +240,24 @@ export class AuthService extends PrismaClient implements OnModuleInit {
             }
           });
 
-      throw new UnauthorizedException('Datos Incorrectos');
-      // return res.status(401).send({ message: 'Datos Invalidos' });
-///// control logs
+      // throw new UnauthorizedException('Datos Incorrectos');
+      throw new UnauthorizedException({
+    msg: 'Datos Invalidos',
+    code: 'INVALID_CREDENTIALS'
+  });
 
 
       }
-        // // Regresar el usuario sin el password
+      if ( user.role !== "client" ) {
+        // throw new UnauthorizedException('Credentials are not valid (Client)');
+        // throw new UnauthorizedException('Datos Incorrectos');
+        throw new UnauthorizedException({
+    msg: 'Usuario bloqueado - Este usuario es de la Empresa',
+    code: 'USER_ADMIN'
+  });
+      }
+
+    // // Regresar el usuario sin el password
     // const { password: _, ...rest } = user;
     // // console.log(user);
     // return rest;
