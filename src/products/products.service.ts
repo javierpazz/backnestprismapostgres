@@ -216,7 +216,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
         ...rest,
       // images: ProductImage.map( image => image.url )
       images: ProductImage.map(
-         image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/${ image.url }`
+         image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/PRODUCTS/${ image.url }`
          )
 
 
@@ -263,7 +263,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
         ...rest,
       // images: ProductImage.map( image => image.url )
       images: ProductImage.map(
-                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/${ image.url }`
+                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/PRODUCTS/${ image.url }`
       )
       }));
 

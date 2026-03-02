@@ -626,7 +626,7 @@ async findOne(id: string) {
       slug: item.slug,
       title: item.title,
       // image: item.product.ProductImage[0].url,
-      image: item.product.ProductImage[0].url.includes('http') ? item.product.ProductImage[0].url : `${ process.env.HOST_NAME}/${ item.product.ProductImage[0].url }`,
+      image: item.product.ProductImage[0].url.includes('http') ? item.product.ProductImage[0].url : `${ process.env.HOST_NAME}/PRODUCTS/${ item.product.ProductImage[0].url }`,
 
       medPro: item.medPro,
       quantity: item.quantity,
