@@ -170,6 +170,9 @@ const mailgun = mg({
 /////////resetpasword
 
   async create(createUserDto: CreateUserDto) {
+    console.log("createUserDto")
+    console.log(createUserDto)
+    console.log("createUserDto")
     // createUserDto.nameCus = createUserDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createUserDto;
     const userInDB = await this.user.findUnique({

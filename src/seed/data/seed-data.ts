@@ -1,4 +1,3 @@
-import * as bcrypt from 'bcrypt';
 
 // interface SeedProduct {
 //     codPro: string;
@@ -88,7 +87,9 @@ interface SeedUser {
     name     : string;
     email    : string;
     password: string;
+    passwordNue: string;
     role     : string;
+    resetToken: string;
     isAdmin    :boolean;
     isActive    :boolean;
     puede?       :boolean;
@@ -128,11 +129,13 @@ export const initialData: SeedData = {
       email: 'admin@example.com',
       // phone: '1',
       // password: bcrypt.hashSync('Aa123456', 10),
+      passwordNue: 'Aa123456',
       password: 'Aa123456',
       // image : "https://firebasestorage.googleapis.com/v0/b/delivery-udemy-mysql-b2eff.appspot.com/o/user_menu.png?alt=media&token=73763014-45af-465d-9831-7ef660ca5bb1",
       isAdmin: true,
       isActive: true,
       role: "admin",
+      resetToken: ''
       // roles: [{
       //   id : 1,
       //   name : "ADMIN",

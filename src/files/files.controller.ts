@@ -46,21 +46,16 @@ export class FilesController {
     }
     // const secureUrl = `${ file.filename }`;
     // const secureUrl = `${ this.configService.get('HOST_API') }/files/product/${ file.filename }`;
-    const message1 = `${ this.configService.get('HOST_API') }/files/product/${ file.filename }`;
+    const message = `${ this.configService.get('HOST_API') }/files/product/${ file.filename }`;
+    console.log(message);
+    return { message };
  
-    // 2) Subir a Cloudinary
-    const cloudinaryUpload = await this.filesService.uploadToCloudinary(file.path);
+    // // 2) Subir a Cloudinary
+    // const cloudinaryUpload = await this.filesService.uploadToCloudinary(file.path);
+    // const message = cloudinaryUpload.secure_url;
+      // console.log(message);
+      // return { message };
     
-
-    
-    // return {
-      //   localUrl,
-      //   cloudinaryUrl: cloudinaryUpload.secure_url,
-      //   public_id: cloudinaryUpload.public_id,
-      // };
-      const message = cloudinaryUpload.secure_url;
-      console.log(message);
-      return { message };
   }
 
 }
