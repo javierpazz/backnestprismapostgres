@@ -13,7 +13,31 @@ export class ProductoFacService extends PrismaClient implements OnModuleInit {
     await this.$connect();
   }
 
+async listByConfig(configId: string): Promise<any[]> {
+  const products = await this.product.findMany({
+    where: { id_config: configId },
+    include: {
+      supplier: true, // muy importante
+    },
+    orderBy: [
+      { category: 'asc' },
+      { codPro: 'asc' },
+    ],
+  });
 
+  return products.map(prod => ({
+    codigoPro: prod.codigoPro,
+    codPro: prod.codPro,
+    title: prod.title,
+    supplier: prod.supplier?.name || 'N/A', // ahora sí existe
+    category: prod.category,
+    price: prod.price?.toFixed(2),
+    priceBuy: prod.priceBuy?.toFixed(2),
+    inStock: prod.inStock?.toFixed(2),
+    minStock: prod.minStock?.toFixed(2),
+    porIva: prod.porIva,
+  }));
+}
 
   async create(createProductoFacDto: CreateProductoFacDto, product:Product) {
     console.log("crea con imagen")

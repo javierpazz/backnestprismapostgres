@@ -18,6 +18,235 @@ export class ReceiptService extends PrismaClient implements OnModuleInit {
     await this.$connect();
   }
 
+///////cajingegr
+async searchingegrSB(query: any) {
+
+  const { fech1, fech2, configuracion, usuario, encargado } = query;
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  let fechasFilter: any = {};
+
+  if (!f1 && f2) {
+    fechasFilter = {
+      OR: [
+        { recDat: { lte: f2 } },
+        { cajDat: { lte: f2 } },
+      ],
+    };
+  } else if (f1 && !f2) {
+    fechasFilter = {
+      OR: [
+        { recDat: { gte: f1 } },
+        { cajDat: { gte: f1 } },
+      ],
+    };
+  } else if (f1 && f2) {
+    fechasFilter = {
+      OR: [
+        { recDat: { gte: f1, lte: f2 } },
+        { cajDat: { gte: f1, lte: f2 } },
+      ],
+    };
+  }
+
+  const recibos = await this.receipt.findMany({
+    where: {
+      ...fechasFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(encargado && encargado !== 'all'
+        ? { id_encarg: encargado }
+        : {}),
+
+      cajNum: {
+        gt: 0,
+      },
+    },
+
+    orderBy: [
+      { id_encarg: 'asc' },
+      { createdAt: 'asc' },
+    ],
+
+    include: {
+      user1: { select: { name: true } },
+      encargado: { select: { name: true } },
+      configuration: { select: { name: true } },
+    },
+  });
+
+  const agrupadoPorEncargado: any = {};
+
+  for (const r of recibos) {
+
+    const encargadoId = r.id_encarg || 'sin_encargado';
+    const encargadoNombre = r.encargado?.name || 'Encargado sin nombre';
+
+    if (!agrupadoPorEncargado[encargadoId]) {
+      agrupadoPorEncargado[encargadoId] = {
+        encargado: encargadoNombre,
+        movimientos: [],
+        saldoTotal: 0,
+      };
+    }
+
+    const compDesVar =
+      r.salbuy === 'SALE' ? 'INGRESO CAJA' : 'RETIRO CAJA';
+
+    const movimiento = {
+      _uid: crypto.randomUUID(),
+      fecha: r.cajDat || r.recDat,
+      compDes: compDesVar,
+      nameCus: r.user1?.name || '',
+      nameCon: r.configuration?.name || '',
+      compNum: r.cajNum || r.recNum,
+      totalBuy: r.totalBuy || 0,
+      total: r.total || 0,
+      saldoMovimiento: (r.total || 0) - (r.totalBuy || 0),
+    };
+
+    const enc = agrupadoPorEncargado[encargadoId];
+
+    enc.saldoTotal += movimiento.saldoMovimiento;
+
+    movimiento['saldoAcumulado'] = enc.saldoTotal;
+
+    enc.movimientos.push(movimiento);
+  }
+
+  const resultado = Object.keys(agrupadoPorEncargado).map((id) => ({
+    encargado: id,
+    nombreCliente: agrupadoPorEncargado[id].encargado,
+    movimientos: agrupadoPorEncargado[id].movimientos,
+    saldoTotal: agrupadoPorEncargado[id].saldoTotal,
+  }));
+
+  return { resultado };
+
+}///////cajingegr
+///////cajsb
+async searchcajSB(query: any) {
+
+  const { fech1, fech2, configuracion, usuario, encargado } = query;
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  let fechasFilter: Prisma.ReceiptWhereInput = {};
+
+  if (f1 && f2) {
+    fechasFilter = {
+      OR: [
+        { recDat: { gte: f1, lte: f2 } },
+        { cajDat: { gte: f1, lte: f2 } },
+      ],
+    };
+  }
+
+  const recibos = await this.receipt.findMany({
+
+    where: {
+      ...fechasFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: String(configuracion) }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: String(usuario) }
+        : {}),
+
+      ...(encargado && encargado !== 'all'
+        ? { id_encarg: String(encargado) }
+        : {}),
+    },
+
+    orderBy: [
+      { user: 'asc' },
+      { createdAt: 'asc' }
+    ],
+
+    include: {
+      user1: { select: { id: true, name: true } },
+      supplier1: { select: { name: true } },
+      customer: { select: { nameCus: true } },
+      encargado: { select: { name: true } },
+    }
+
+  });
+
+  const agrupadoPorUser: any = {};
+
+  for (const r of recibos) {
+
+    const userId = r.user1?.id || 'sin_usuario';
+    const userNombre = r.user1?.name || 'Usuario sin nombre';
+
+    if (!agrupadoPorUser[userId]) {
+      agrupadoPorUser[userId] = {
+        _uid: crypto.randomUUID(),
+        user: userNombre,
+        movimientos: [],
+        saldoTotal: 0,
+      };
+    }
+
+    let compDesVar = r.recNum ? "Recibo/O.Pago" : "Ing./Ret. Caja";
+
+    let descrip = '';
+
+    if (r.supplier1) {
+      descrip = r.supplier1.name;
+    } else if (r.customer) {
+      descrip = r.customer.nameCus;
+    } else if (r.encargado) {
+      descrip = r.encargado.name;
+    }
+
+    const movimiento = {
+      _uid: crypto.randomUUID(),
+      fecha: r.cajDat || r.recDat,
+      compDes: compDesVar,
+      descripcion: descrip,
+      compNum: r.cajNum || r.recNum,
+      totalBuy: r.totalBuy || 0,
+      total: r.total || 0,
+      saldoMovimiento: (r.total || 0) - (r.totalBuy || 0),
+    };
+
+    const user = agrupadoPorUser[userId];
+
+    user.saldoTotal += movimiento.saldoMovimiento;
+
+    movimiento['saldoAcumulado'] = user.saldoTotal;
+
+    user.movimientos.push(movimiento);
+  }
+
+  const resultado = Object.keys(agrupadoPorUser).map(userId => ({
+    _uid: agrupadoPorUser[userId]._uid,
+    user: userId,
+    nombreCliente: agrupadoPorUser[userId].user,
+    movimientos: agrupadoPorUser[userId].movimientos,
+    saldoTotal: agrupadoPorUser[userId].saldoTotal,
+  }));
+
+  return { resultado };
+
+}///////cajsb
+
+
+
+
   async create(createReceiptDto: any) {
 
 

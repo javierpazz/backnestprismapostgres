@@ -13,6 +13,22 @@ import { ValidRoles } from 'src/auth/interfaces';
 export class ProductoFacController {
   constructor(private readonly productoFacService: ProductoFacService) {}
 
+
+@Get('products/list')
+  @Auth()  // si quieres que esté autenticado como en isAuth
+  async list(@Query('configuracion') configuracion: string) {
+    if (!configuracion) return [];
+
+    try {
+      const products = await this.productoFacService.listByConfig(configuracion);
+      return products;
+    } catch (error) {
+      console.error(error);
+      return { message: 'Server error' };
+    }
+  }
+
+  
   @Post('tes/admin/productsfac')
   @Auth( ValidRoles.admin )
   createFac(@Body() createProductoFacDto: CreateProductoFacDto, product:Product) {

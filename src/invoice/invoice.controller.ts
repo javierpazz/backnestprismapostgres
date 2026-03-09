@@ -10,7 +10,40 @@ import { ValidRoles } from 'src/auth/interfaces';
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
   
+  // @Get('invoices/proiye')
+  // async proiye(@Query() query: any) {
+  //   return this.invoiceService.proiye(query);
+  // }
+
+  @Get('invoices/prosup')
+  async prosup(@Query() query: any) {
+    return this.invoiceService.prosup(query);
+  }
   
+  @Get('invoices/procus')
+  async procus(@Query() query: any) {
+    return this.invoiceService.procus(query);
+  }
+
+  @Get('invoices/suppro')
+  async suppro(@Query() query: any) {
+    return this.invoiceService.suppro(query);
+  }  
+
+  @Get('invoices/cuspro')
+  cuspro(@Query() query: any) {
+    return this.invoiceService.cuspro(query);
+  }
+
+  @Get('invoices/ctasup')
+  ctasup(@Query() query: any) {
+    return this.invoiceService.ctasup(query);
+  }  
+  
+  @Get('invoices/ctacus')
+  ctacus(@Query() query: any) {
+    return this.invoiceService.ctacus(query);
+  }  
   
   @Post('invoices')
   @Auth()

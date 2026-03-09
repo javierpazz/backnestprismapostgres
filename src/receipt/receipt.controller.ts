@@ -11,7 +11,16 @@ import { ValidRoles } from 'src/auth/interfaces';
 export class ReceiptController {
   constructor(private readonly receiptService: ReceiptService) {}
 
+  @Get('receipts/searchingegrSB')
+  searchingegrSB(@Query() query: any) {
+    console.log("pasando")
+    return this.receiptService.searchingegrSB(query);
+  }
 
+  @Get('receipts/searchcajSB')
+  searchcajSB(@Query() query: any) {
+    return this.receiptService.searchcajSB(query);
+  }
   @Post('receipts')
   @Auth()
   create(@Body() createReceiptDto: any) {

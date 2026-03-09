@@ -22,6 +22,904 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
   }
+  
+  ///// proiye
+  ///// proiye
+  ///// prosup
+async prosup(query: any) {
+
+  type ProSupMovimiento = {
+    supplier?: any
+    title?: string
+    quantity?: number
+    amount?: number
+  }
+
+  const { fech1, fech2, configuracion, usuario, supplier } = query;
+
+  const factura = 'BUY';
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  const fechasFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { invDat: { lte: f2 } }
+      : f1 && !f2
+      ? { invDat: { gte: f1 } }
+      : { invDat: { gte: f1, lte: f2 } };
+
+  const orders = await this.order.findMany({
+
+    where: {
+
+      ...fechasFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(supplier && supplier !== 'all'
+        ? { supplier: supplier }
+        : {}),
+
+      salbuy: factura,
+
+    },
+
+    include: {
+      supplier1: true,
+      orderItems: true,
+    },
+
+  });
+
+  const movimientos: ProSupMovimiento[] = [];
+
+  // equivalente a $unwind
+  for (const order of orders) {
+
+    for (const item of order.orderItems) {
+
+      movimientos.push({
+        supplier: order.supplier1,
+        title: item.title,
+        quantity: item.quantity,
+        amount: item.quantity * item.price,
+      });
+
+    }
+
+  }
+
+  const agrupadoPorProducto: any = {};
+
+  for (const r of movimientos) {
+
+    const productTitle = r.title || 'Producto sin nombre';
+
+    if (!agrupadoPorProducto[productTitle]) {
+
+      agrupadoPorProducto[productTitle] = {
+        suppliers: {},
+        productTotalQuantity: 0,
+        productTotalAmount: 0,
+      };
+
+    }
+
+    const supplierId = r.supplier?.id || 'sin_supplier';
+
+    const supplierName =
+      r.supplier?.name ||
+      'Proveedor desconocido';
+
+    if (!agrupadoPorProducto[productTitle].suppliers[supplierId]) {
+
+      agrupadoPorProducto[productTitle].suppliers[supplierId] = {
+        supplierId,
+        supplierName,
+        totalQuantity: 0,
+        totalAmount: 0,
+      };
+
+    }
+
+    const sup = agrupadoPorProducto[productTitle].suppliers[supplierId];
+
+    sup.totalQuantity += r.quantity || 0;
+    sup.totalAmount += r.amount || 0;
+
+    agrupadoPorProducto[productTitle].productTotalQuantity += r.quantity || 0;
+    agrupadoPorProducto[productTitle].productTotalAmount += r.amount || 0;
+
+  }
+
+  const resultado = Object.keys(agrupadoPorProducto).map((productTitle) => ({
+
+    _id: productTitle,
+    suppliers: Object.values(agrupadoPorProducto[productTitle].suppliers),
+    productTotalQuantity: agrupadoPorProducto[productTitle].productTotalQuantity,
+    productTotalAmount: agrupadoPorProducto[productTitle].productTotalAmount,
+
+  }));
+
+  return {
+    resultado
+  };
+
+}
+  ///// prosup
+
+  ///// procus
+async procus(query: any) {
+
+  type ProCusMovimiento = {
+    client?: any
+    title?: string
+    quantity?: number
+    amount?: number
+  }
+
+  const { fech1, fech2, configuracion, usuario, customer } = query;
+
+  const factura = 'SALE';
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  const fechasFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { invDat: { lte: f2 } }
+      : f1 && !f2
+      ? { invDat: { gte: f1 } }
+      : { invDat: { gte: f1, lte: f2 } };
+
+  const orders = await this.order.findMany({
+
+    where: {
+
+      ...fechasFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(customer && customer !== 'all'
+        ? { id_client: customer }
+        : {}),
+
+      salbuy: factura,
+
+    },
+
+    include: {
+      customer: true,
+      orderItems: true,
+    },
+
+  });
+
+  const movimientos: ProCusMovimiento[] = [];
+
+  // equivalente a $unwind
+  for (const order of orders) {
+
+    for (const item of order.orderItems) {
+
+      movimientos.push({
+        client: order.customer,
+        title: item.title,
+        quantity: item.quantity,
+        amount: item.quantity * item.price,
+      });
+
+    }
+
+  }
+
+  const agrupadoPorProducto: any = {};
+
+  for (const r of movimientos) {
+
+    const productTitle = r.title || 'Producto sin nombre';
+
+    if (!agrupadoPorProducto[productTitle]) {
+
+      agrupadoPorProducto[productTitle] = {
+        clients: {},
+        productTotalQuantity: 0,
+        productTotalAmount: 0,
+      };
+
+    }
+
+    const clientId = r.client?.id || 'sin_cliente';
+
+    const clientName =
+      r.client?.nameCus ||
+      r.client?.name ||
+      'Cliente desconocido';
+
+    if (!agrupadoPorProducto[productTitle].clients[clientId]) {
+
+      agrupadoPorProducto[productTitle].clients[clientId] = {
+        clientId,
+        clientName,
+        totalQuantity: 0,
+        totalAmount: 0,
+      };
+
+    }
+
+    const cli = agrupadoPorProducto[productTitle].clients[clientId];
+
+    cli.totalQuantity += r.quantity || 0;
+    cli.totalAmount += r.amount || 0;
+
+    agrupadoPorProducto[productTitle].productTotalQuantity += r.quantity || 0;
+    agrupadoPorProducto[productTitle].productTotalAmount += r.amount || 0;
+
+  }
+
+  const resultado = Object.keys(agrupadoPorProducto).map((productTitle) => ({
+
+    _id: productTitle,
+    clients: Object.values(agrupadoPorProducto[productTitle].clients),
+    productTotalQuantity: agrupadoPorProducto[productTitle].productTotalQuantity,
+    productTotalAmount: agrupadoPorProducto[productTitle].productTotalAmount,
+
+  }));
+
+  return {
+    resultado
+  };
+
+}
+  ///// procus
+
+  ///// suppro
+  async suppro(query: any) {
+
+  type SupProMovimiento = {
+    supplier?: any
+    title?: string
+    quantity?: number
+    amount?: number
+  }
+
+  const { fech1, fech2, configuracion, usuario, supplier } = query;
+
+  const factura = 'BUY';
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  const fechasFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { invDat: { lte: f2 } }
+      : f1 && !f2
+      ? { invDat: { gte: f1 } }
+      : { invDat: { gte: f1, lte: f2 } };
+
+  const orders = await this.order.findMany({
+
+    where: {
+
+      ...fechasFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(supplier && supplier !== 'all'
+        ? { supplierId: supplier }
+        : {}),
+
+      salbuy: factura,
+    },
+
+    include: {
+      supplier1: true,
+      orderItems: true,
+    },
+
+  });
+
+  const movimientos: SupProMovimiento[] = [];
+
+  // equivalente a $unwind
+  for (const order of orders) {
+
+    for (const item of order.orderItems) {
+
+      movimientos.push({
+        supplier: order.supplier1,
+        title: item.title,
+        quantity: item.quantity,
+        amount: item.quantity * item.price,
+      });
+
+    }
+
+  }
+
+  const agrupadoPorSupplier: any = {};
+
+  // equivalente a $group
+  for (const r of movimientos) {
+
+    const supplierId = r.supplier?.id || 'sin_supplier';
+    const codSup = r.supplier?.codSup;
+    const supplierNombre = r.supplier?.name || 'Supplier sin nombre';
+
+    if (!agrupadoPorSupplier[supplierId]) {
+
+      agrupadoPorSupplier[supplierId] = {
+        codSup,
+        supplier: supplierNombre,
+        products: {},
+        totalAmountSupplier: 0,
+      };
+
+    }
+
+    if (!agrupadoPorSupplier[supplierId].products[r.title]) {
+
+      agrupadoPorSupplier[supplierId].products[r.title] = {
+        title: r.title,
+        totalQuantity: 0,
+        totalAmount: 0,
+      };
+
+    }
+
+    const prod = agrupadoPorSupplier[supplierId].products[r.title];
+
+    prod.totalQuantity += r.quantity || 0;
+    prod.totalAmount += r.amount || 0;
+
+    agrupadoPorSupplier[supplierId].totalAmountSupplier += r.amount || 0;
+
+  }
+
+  const resultado = Object.keys(agrupadoPorSupplier).map((id) => ({
+
+    supplierId: id,
+    suppliercodSup: agrupadoPorSupplier[id].codSup,
+    supplierName: agrupadoPorSupplier[id].supplier,
+    totalAmountSupplier: agrupadoPorSupplier[id].totalAmountSupplier,
+    products: Object.values(agrupadoPorSupplier[id].products),
+
+  }));
+
+  return {
+    resultado
+  };
+}
+  ///// suppro
+
+
+  ///// cuspro
+async cuspro(query: any) {
+
+  type CusProMovimiento = {
+    customer?: any
+    title?: string
+    quantity?: number
+    amount?: number
+  }
+
+  const { fech1, fech2, configuracion, usuario, customer } = query;
+
+  const factura = 'SALE';
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  const fechasFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { invDat: { lte: f2 } }
+      : f1 && !f2
+      ? { invDat: { gte: f1 } }
+      : { invDat: { gte: f1, lte: f2 } };
+
+  const orders = await this.order.findMany({
+    where: {
+      ...fechasFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(customer && customer !== 'all'
+        ? { id_client: customer }
+        : {}),
+
+      salbuy: factura,
+    },
+
+    include: {
+      customer: true,
+      orderItems: true,
+    },
+  });
+
+  const movimientos: CusProMovimiento[] = [];
+
+  // equivalente a $unwind
+  for (const order of orders) {
+
+    for (const item of order.orderItems) {
+
+      movimientos.push({
+        customer: order.customer,
+        title: item.title,
+        quantity: item.quantity,
+        amount: item.quantity * item.price,
+      });
+
+    }
+
+  }
+
+  const agrupadoPorCustomer: any = {};
+
+  // equivalente a $group
+  for (const r of movimientos) {
+
+    const customerId = r.customer?.id || 'sin_cliente';
+    const codCust = r.customer?.codCus;
+    const customerNombre = r.customer?.nameCus || 'Cliente sin nombre';
+
+    if (!agrupadoPorCustomer[customerId]) {
+
+      agrupadoPorCustomer[customerId] = {
+        codCust,
+        customer: customerNombre,
+        products: {},
+        totalAmountClient: 0,
+      };
+
+    }
+
+    if (!agrupadoPorCustomer[customerId].products[r.title]) {
+
+      agrupadoPorCustomer[customerId].products[r.title] = {
+        title: r.title,
+        totalQuantity: 0,
+        totalAmount: 0,
+      };
+
+    }
+
+    const prod = agrupadoPorCustomer[customerId].products[r.title];
+
+    prod.totalQuantity += r.quantity || 0;
+    prod.totalAmount += r.amount || 0;
+
+    agrupadoPorCustomer[customerId].totalAmountClient += r.amount || 0;
+  }
+
+
+const resultado = Object.keys(agrupadoPorCustomer).map((id) => ({
+
+  clientId: id,
+  clientcodCus: agrupadoPorCustomer[id].codCust,
+  clientNameCus: agrupadoPorCustomer[id].customer,
+  totalAmountClient: agrupadoPorCustomer[id].totalAmountClient,
+  products: Object.values(agrupadoPorCustomer[id].products),
+
+}));
+
+  return {
+    resultado
+  };
+}  ///// cuspro
+
+
+  ///// ctasup
+async ctasup(query: any) {
+
+  type CtaSupMovimiento = {
+    docDat?: Date | null
+    haber?: number | null
+    debe?: number | null
+    recNum?: number | null
+    invNum?: number | null
+    supplier?: any
+    configuration?: any
+    user?: any
+    comprobante?: any
+  }
+
+  const { fech1, fech2, configuracion, usuario, supplier } = query;
+  const factura = 'BUY';
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  const fechasInvFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { invDat: { lte: f2 } }
+      : f1 && !f2
+      ? { invDat: { gte: f1 } }
+      : { invDat: { gte: f1, lte: f2 } };
+
+  const fechasRecFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { recDat: { lte: f2 } }
+      : f1 && !f2
+      ? { recDat: { gte: f1 } }
+      : { recDat: { gte: f1, lte: f2 } };
+
+  const recibos = await this.receipt.findMany({
+    where: {
+      ...fechasRecFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(supplier && supplier !== 'all'
+        ? { supplier: supplier }
+        : {}),
+
+      salbuy: factura,
+    },
+
+    include: {
+      supplier1: true,
+      configuration: true,
+      user1: true,
+    },
+  });
+
+  const facturas = await this.order.findMany({
+    where: {
+      ...fechasInvFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(supplier && supplier !== 'all'
+        ? { supplier: supplier }
+        : {}),
+
+      salbuy: factura,
+    },
+
+    include: {
+      supplier1: true,
+      configuration: true,
+      user1: true,
+      comprobante: true,
+    },
+  });
+
+  // recibos → haber
+  const movimientosRec: CtaSupMovimiento[] = (recibos as any).map((r: any) => ({
+    docDat: r.recDat,
+    haber: r.totalBuy,
+    debe: 0,
+    recNum: r.recNum,
+    supplier: r.supplier1,
+    configuration: r.configuration,
+    user: r.user1,
+  }));
+
+  // facturas proveedor
+  const movimientosInv: CtaSupMovimiento[] = (facturas as any).map((o: any) => ({
+    docDat: o.invDat,
+    haber: o.isHaber ? o.totalBuy : 0,
+    debe: !o.isHaber ? o.totalBuy : 0,
+    invNum: o.invNum,
+    supplier: o.supplier1,
+    configuration: o.configuration,
+    user: o.user1,
+    comprobante: o.comprobante,
+  }));
+
+  const ctacte: CtaSupMovimiento[] = [
+    ...movimientosRec,
+    ...movimientosInv,
+  ];
+
+  // ordenar por proveedor y fecha
+  ctacte.sort((a, b) => {
+
+    const sa = a.supplier?.id || '';
+    const sb = b.supplier?.id || '';
+
+    if (sa < sb) return -1;
+    if (sa > sb) return 1;
+
+    const da = new Date(a.docDat || 0).getTime();
+    const db = new Date(b.docDat || 0).getTime();
+
+    return da - db;
+  });
+
+  const agrupadoPorSupplier: any = {};
+
+  for (const r of ctacte) {
+
+    const supplierId = r.supplier?.id || 'sin_supplier';
+    const codSupp = r.supplier?.codSup;
+    const supplierNombre = r.supplier?.name || 'Proveedor sin nombre';
+
+    if (!agrupadoPorSupplier[supplierId]) {
+      agrupadoPorSupplier[supplierId] = {
+        codSupp,
+        supplier: supplierNombre,
+        movimientos: [],
+        saldoTotal: 0,
+      };
+    }
+
+    const descrip = r.comprobante?.nameCom || 'ORDEN DE PAGO';
+
+    const movimiento = {
+      _uid: crypto.randomUUID(),
+      fecha: r.docDat,
+      compDes: descrip,
+      nameUse: r.user?.name,
+      nameCon: r.configuration?.name,
+      compNum: r.invNum || r.recNum,
+      totalBuy: r.debe || 0,
+      total: r.haber || 0,
+      saldoMovimiento: (r.haber || 0) - (r.debe || 0),
+    };
+
+    const sup = agrupadoPorSupplier[supplierId];
+
+    sup.saldoTotal += movimiento.saldoMovimiento;
+
+    movimiento['saldoAcumulado'] = sup.saldoTotal;
+
+    sup.movimientos.push(movimiento);
+  }
+
+  const resultado = Object.keys(agrupadoPorSupplier).map((id) => ({
+    supplier: id,
+    codSupp: agrupadoPorSupplier[id].codSupp,
+    nombreSupplier: agrupadoPorSupplier[id].supplier,
+    movimientos: agrupadoPorSupplier[id].movimientos,
+    saldoTotal: agrupadoPorSupplier[id].saldoTotal,
+  }));
+
+  return {
+    resultado,
+    ctacte,
+  };
+}  
+  ///// ctasup
+  ///// ctacte
+async ctacus(query: any) {
+
+  type CtaCteMovimiento = {
+    docDat?: Date | null
+    haber?: number | null
+    debe?: number | null
+    recNum?: number | null
+    invNum?: number | null
+    customer?: any
+    configuration?: any
+    user?: any
+    comprobante?: any
+  }
+
+  const { fech1, fech2, configuracion, usuario, customer } = query;
+  const factura = 'SALE';
+
+  const f1 = fech1 ? new Date(fech1) : null;
+  const f2 = fech2 ? new Date(fech2) : null;
+
+  const fechasInvFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { invDat: { lte: f2 } }
+      : f1 && !f2
+      ? { invDat: { gte: f1 } }
+      : { invDat: { gte: f1, lte: f2 } };
+
+  const fechasRecFilter =
+    !f1 && !f2
+      ? {}
+      : !f1 && f2
+      ? { recDat: { lte: f2 } }
+      : f1 && !f2
+      ? { recDat: { gte: f1 } }
+      : { recDat: { gte: f1, lte: f2 } };
+
+  const recibos = await this.receipt.findMany({
+    where: {
+      ...fechasRecFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(customer && customer !== 'all'
+        ? { id_client: customer }
+        : {}),
+
+      salbuy: factura,
+    },
+
+    include: {
+      customer: true,
+      configuration: true,
+      user1: true,
+    },
+  });
+
+  const facturas = await this.order.findMany({
+    where: {
+      ...fechasInvFilter,
+
+      ...(configuracion && configuracion !== 'all'
+        ? { id_config: configuracion }
+        : {}),
+
+      ...(usuario && usuario !== 'all'
+        ? { user: usuario }
+        : {}),
+
+      ...(customer && customer !== 'all'
+        ? { id_client: customer }
+        : {}),
+
+      salbuy: factura,
+    },
+
+    include: {
+      customer: true,
+      configuration: true,
+      user1: true,
+      comprobante: true,
+    },
+  });
+
+  // Convertir recibos
+  // const movimientosRec: CtaCteMovimiento[] = recibos.map((r) => ({
+  const movimientosRec: CtaCteMovimiento[] = (recibos as any).map((r: any) => ({
+    docDat: r.recDat,
+    haber: r.total,
+    recNum: r.recNum,
+    customer: r.customer,
+    configuration: r.configuration,
+    user: r.user1,
+  }));
+
+  // Convertir facturas
+  // const movimientosInv: CtaCteMovimiento[] = facturas.map((o) => ({
+  const movimientosInv: CtaCteMovimiento[] = (facturas as any).map((o: any) => ({
+    docDat: o.invDat,
+    debe: o.total,
+    invNum: o.invNum,
+    customer: o.customer,
+    configuration: o.configuration,
+    user: o.user1,
+    comprobante: o.comprobante,
+  }));
+
+  const ctacte: CtaCteMovimiento[] = [
+    ...movimientosRec,
+    ...movimientosInv
+  ];
+
+  // ordenar por cliente y fecha
+  ctacte.sort((a, b) => {
+
+    const ca = a.customer?.id || '';
+    const cb = b.customer?.id || '';
+
+    if (ca < cb) return -1;
+    if (ca > cb) return 1;
+
+    const da = new Date(a.docDat || 0).getTime();
+    const db = new Date(b.docDat || 0).getTime();
+
+    return da - db;
+  });
+
+  const agrupadoPorCustomer: any = {};
+
+  for (const r of ctacte) {
+
+    const customerId = r.customer?.id || 'sin_cliente';
+    const codCust = r.customer?.codCus;
+    const customerNombre = r.customer?.nameCus || 'Cliente sin nombre';
+
+    if (!agrupadoPorCustomer[customerId]) {
+      agrupadoPorCustomer[customerId] = {
+        codCust,
+        customer: customerNombre,
+        movimientos: [],
+        saldoTotal: 0,
+      };
+    }
+
+    const descrip = r.comprobante?.nameCom || 'RECIBO';
+
+    const movimiento = {
+      _uid: crypto.randomUUID(),
+      fecha: r.docDat,
+      compDes: descrip,
+      nameUse: r.user?.name,
+      nameCon: r.configuration?.name,
+      compNum: r.invNum || r.recNum,
+      totalBuy: r.debe || 0,
+      total: r.haber || 0,
+      saldoMovimiento: (r.haber || 0) - (r.debe || 0),
+    };
+
+    const cust = agrupadoPorCustomer[customerId];
+
+    cust.saldoTotal += movimiento.saldoMovimiento;
+
+    movimiento['saldoAcumulado'] = cust.saldoTotal;
+
+    cust.movimientos.push(movimiento);
+  }
+
+  const resultado = Object.keys(agrupadoPorCustomer).map((id) => ({
+    customer: id,
+    codCust: agrupadoPorCustomer[id].codCust,
+    nombreCliente: agrupadoPorCustomer[id].customer,
+    movimientos: agrupadoPorCustomer[id].movimientos,
+    saldoTotal: agrupadoPorCustomer[id].saldoTotal,
+  }));
+
+  return {
+    resultado,
+    ctacte
+  };
+}///// ctacte
+
 
 async geninvRem(createInvoiceDto: any, id:any) {
   const {invoiceAux, receiptAux} = createInvoiceDto;
