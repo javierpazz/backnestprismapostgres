@@ -23,6 +23,169 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
     await this.$connect();
   }
   
+//////dash1
+
+  async dashboard1(query: any) {
+///categorias    
+      const categories = await this.product.groupBy({
+        by: ['category'],
+        _count: {
+          category: true,
+        },
+      });
+
+      const productCategories = categories.map((item) => ({
+        _id: item.category,
+        count: item._count.category,
+      }));
+///categorias    
+///daily      
+    type DailyOrder = {
+      _id: string;
+      orders: number;
+      sales: number;
+      buys: number;
+    };
+    const { fechasFilter, configuracionFilter, customerFilter, usuarioFilter } = query;
+
+    const invoices = await this.order.findMany({
+      where: {
+        invNum: { gt: 0 },
+        ...fechasFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+      },
+      select: {
+        invDat: true,
+        total: true,
+        totalBuy: true,
+      },
+    });
+
+    const dailyMap: Record<string, DailyOrder> = {};
+
+    for (const inv of invoices) {
+
+      const date = inv.invDat.toISOString().split('T')[0];
+
+      if (!dailyMap[date]) {
+        dailyMap[date] = {
+          _id: date,
+          orders: 0,
+          sales: 0,
+          buys: 0,
+        };
+      }
+
+      dailyMap[date].orders += 1;
+      dailyMap[date].sales += inv.total || 0;
+      dailyMap[date].buys += inv.totalBuy || 0;
+    }
+
+    const dailyOrders = Object.values(dailyMap).sort((a, b) =>
+      a._id.localeCompare(b._id)
+    );
+
+///daily      
+
+///dailymoney
+type DailyMoney = {
+  _id: string;
+  inputs: number;
+  outputs: number;
+};
+  const receipts = await this.receipt.findMany({
+    where: {
+      recNum: { gt: 0 },
+    },
+    select: {
+      recDat: true,
+      total: true,
+      totalBuy: true,
+    },
+  });
+
+  const dailyMapMoney: Record<string, DailyMoney> = {};
+
+  for (const rec of receipts) {
+
+    const date = rec.recDat.toISOString().split('T')[0];
+
+    if (!dailyMapMoney[date]) {
+      dailyMapMoney[date] = {
+        _id: date,
+        inputs: 0,
+        outputs: 0,
+      };
+    }
+
+    dailyMapMoney[date].inputs += rec.total || 0;
+    dailyMapMoney[date].outputs += rec.totalBuy || 0;
+  }
+
+  const dailyMoney = Object.values(dailyMapMoney).sort((a, b) =>
+    a._id.localeCompare(b._id)
+  );
+
+
+///dailymoney      
+
+      return {
+          productCategories,
+          dailyOrders,
+          dailyMoney
+      };
+
+
+
+  }
+//////dash1
+
+//////dash
+
+  async dashboard(query: any) {
+  // isAuth,
+  // // isAdmin,
+    // const numberOfOrders = await Order.count();
+    // const paidOrders = await Order.find({ isPaid: true }).count();
+    // const numberOfClients = await User.find({ role: 'client' }).count();
+    // const numberOfProducts = await Product.count();
+    // const productsWithNoInventory = await Product.find({ inStock: 0 }).count();
+    // const lowInventory = await Product.find({ inStock: { $lte: 10 } }).count();
+    
+    const numberOfOrders = await this.order.count();
+
+    const paidOrders = await this.order.count({
+      where: { isPaid: true },
+    });
+
+    const numberOfClients = await this.user.count({
+      where: { role: 'client' },
+    });
+
+    const numberOfProducts = await this.product.count();
+
+    const productsWithNoInventory = await this.product.count({
+      where: { inStock: 0 },
+    });
+
+    const lowInventory = await this.product.count({
+      where: { inStock: { lte: 10 } },
+    });
+
+    return {
+      numberOfOrders,
+      paidOrders,
+      numberOfClients,
+      numberOfProducts,
+      productsWithNoInventory,
+      lowInventory,
+      notPaidOrders: numberOfOrders - paidOrders
+    };
+  }
+//////dash
+
   ///// proiye
   ///// proiye
   ///// prosup
