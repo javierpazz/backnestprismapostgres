@@ -26,7 +26,51 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
 //////dash1
 
   async dashboard1(query: any) {
-///categorias    
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
+
+
+
+    ///categorias    
       const categories = await this.product.groupBy({
         by: ['category'],
         _count: {
@@ -46,15 +90,17 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
       sales: number;
       buys: number;
     };
-    const { fechasFilter, configuracionFilter, customerFilter, usuarioFilter } = query;
+    // const { fechasFilter, configuracionFilter, customerFilter, usuarioFilter } = query;
 
     const invoices = await this.order.findMany({
       where: {
         invNum: { gt: 0 },
-        ...fechasFilter,
+        ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
         ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
       },
       select: {
         invDat: true,
@@ -96,9 +142,20 @@ type DailyMoney = {
   outputs: number;
 };
   const receipts = await this.receipt.findMany({
-    where: {
-      recNum: { gt: 0 },
-    },
+    // where: {
+    //   recNum: { gt: 0 },
+    // },
+      where: {
+        recNum: { gt: 0 },
+        ...fechasRecFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
+      },
+
+
     select: {
       recDat: true,
       total: true,
@@ -130,11 +187,205 @@ type DailyMoney = {
 
 
 ///dailymoney      
+///orders
+const ordersData = await this.order.aggregate({
+  where: {
+    invNum: { gt: 0 },
+    salbuy: 'SALE',
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: ordersData._count._all,
+    totalSales: ordersData._sum.total || 0,
+  },
+];
+///orders
+///ctacte
+type CtacteDaily = {
+  _id: string;
+  salesS: number;
+  inputsS: number;
+  salesB: number;
+  inputsB: number;
+};
+
+
+  const receipts1 = await this.receipt.findMany({
+    where: {
+      recNum: { gt: 0 },
+        ...fechasRecFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
+    },
+    select: {
+      recDat: true,
+      total: true,
+      totalBuy: true,
+    },
+  });
+
+  const invoices1 = await this.order.findMany({
+    where: {
+      invNum: { gt: 0 },
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
+    },
+    select: {
+      invDat: true,
+      total: true,
+      totalBuy: true,
+    },
+  });
+
+  const map: Record<string, CtacteDaily> = {};
+
+  // receipts (inputs)
+  for (const rec of receipts1) {
+    const date = rec.recDat.toISOString().split('T')[0];
+
+    if (!map[date]) {
+      map[date] = {
+        _id: date,
+        salesS: 0,
+        inputsS: 0,
+        salesB: 0,
+        inputsB: 0,
+      };
+    }
+
+    map[date].inputsS += rec.total || 0;
+    map[date].inputsB += rec.totalBuy || 0;
+  }
+
+  // invoices (sales)
+  for (const inv of invoices1) {
+    const date = inv.invDat.toISOString().split('T')[0];
+
+    if (!map[date]) {
+      map[date] = {
+        _id: date,
+        salesS: 0,
+        inputsS: 0,
+        salesB: 0,
+        inputsB: 0,
+      };
+    }
+
+    map[date].salesS += inv.total || 0;
+    map[date].salesB += inv.totalBuy || 0;
+  }
+
+  const ctacte = Object.values(map).sort((a, b) =>
+    a._id.localeCompare(b._id)
+  );
+///ctacte
+///proIO
+type ProductIO = {
+  _id: string;
+  salio: number;
+  entro: number;
+};
+
+
+  const invoices2 = await this.order.findMany({
+    where: {
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
+    },
+    select: {
+      salbuy: true,
+      orderItems: {
+        select: {
+          title: true,
+          quantity: true,
+        },
+      },
+    },
+  });
+
+  const map2: Record<string, ProductIO> = {};
+
+  for (const inv of invoices2) {
+
+    for (const item of inv.orderItems) {
+
+      const title = item.title;
+
+      if (!map2[title]) {
+        map2[title] = {
+          _id: title,
+          salio: 0,
+          entro: 0,
+        };
+      }
+
+      if (inv.salbuy === 'SALE') {
+        map2[title].salio += item.quantity;
+      }
+
+      if (inv.salbuy === 'BUY') {
+        map2[title].entro += item.quantity;
+      }
+    }
+  }
+
+  const producIO = Object.values(map2).sort((a, b) =>
+    a._id.localeCompare(b._id)
+  );
+
+///proIO
+
+const Users = await this.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+
 
       return {
           productCategories,
           dailyOrders,
-          dailyMoney
+          dailyMoney,
+          orders,
+          users,
+          customers,
+          ctacte,
+          producIO
       };
 
 
@@ -187,6 +438,126 @@ type DailyMoney = {
 //////dash
 
   ///// proiye
+async proiye(query: any) {
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
+  const invoices = await this.order.findMany({
+    where: {
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
+    },
+    include: {
+      orderItems: true,
+      configuration: true,
+    },
+  });
+
+  const map: Record<string, any> = {};
+
+  for (const inv of invoices) {
+
+    const configId = inv.id_config;
+
+    if (!map[configId]) {
+      map[configId] = {
+        configId,
+        clientNameCus: inv.configuration?.name,
+        clientcodCus: inv.configuration?.codCon,
+        totalAmountClient: 0,
+        totalAmountClientBuy: 0,
+        products: [],
+      };
+    }
+
+    for (const item of inv.orderItems) {
+
+      const amount = item.quantity * item.price;
+
+      let product = map[configId].products.find(
+        (p) => p.title === item.title
+      );
+
+      if (!product) {
+        product = {
+          title: item.title,
+          totalQuantity: 0,
+          totalAmount: 0,
+          totalIngreso: 0,
+          totalEgreso: 0,
+          totalMontoIngreso: 0,
+          totalMontoEgreso: 0,
+          saldo: 0,
+        };
+
+        map[configId].products.push(product);
+      }
+
+      product.totalQuantity += item.quantity;
+      product.totalAmount += amount;
+
+      if (inv.isHaber) {
+        product.totalIngreso += item.quantity;
+        product.totalMontoIngreso += amount;
+        map[configId].totalAmountClient += amount;
+      } else {
+        product.totalEgreso += item.quantity;
+        product.totalMontoEgreso += amount;
+        map[configId].totalAmountClientBuy += amount;
+      }
+
+      product.saldo =
+        product.totalMontoIngreso - product.totalMontoEgreso;
+    }
+  }
+
+  const resultado = Object.values(map).sort((a: any, b: any) =>
+    a.clientNameCus.localeCompare(b.clientNameCus)
+  );
+
+  return { resultado };
+} 
   ///// proiye
   ///// prosup
 async prosup(query: any) {
@@ -198,7 +569,45 @@ async prosup(query: any) {
     amount?: number
   }
 
-  const { fech1, fech2, configuracion, usuario, supplier } = query;
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
 
   const factura = 'BUY';
 
@@ -215,26 +624,18 @@ async prosup(query: any) {
       : { invDat: { gte: f1, lte: f2 } };
 
   const orders = await this.order.findMany({
-
+   
     where: {
-
-      ...fechasFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(supplier && supplier !== 'all'
-        ? { supplier: supplier }
-        : {}),
-
       salbuy: factura,
-
+      ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
+
+
 
     include: {
       supplier1: true,
@@ -330,43 +731,65 @@ async procus(query: any) {
     amount?: number
   }
 
-  const { fech1, fech2, configuracion, usuario, customer } = query;
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
 
   const factura = 'SALE';
 
   const f1 = fech1 ? new Date(fech1) : null;
   const f2 = fech2 ? new Date(fech2) : null;
 
-  const fechasFilter =
-    !f1 && !f2
-      ? {}
-      : !f1 && f2
-      ? { invDat: { lte: f2 } }
-      : f1 && !f2
-      ? { invDat: { gte: f1 } }
-      : { invDat: { gte: f1, lte: f2 } };
 
   const orders = await this.order.findMany({
 
     where: {
-
-      ...fechasFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(customer && customer !== 'all'
-        ? { id_client: customer }
-        : {}),
-
       salbuy: factura,
-
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
+
+
 
     include: {
       customer: true,
@@ -463,42 +886,64 @@ async procus(query: any) {
     amount?: number
   }
 
-  const { fech1, fech2, configuracion, usuario, supplier } = query;
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
 
   const factura = 'BUY';
 
   const f1 = fech1 ? new Date(fech1) : null;
   const f2 = fech2 ? new Date(fech2) : null;
 
-  const fechasFilter =
-    !f1 && !f2
-      ? {}
-      : !f1 && f2
-      ? { invDat: { lte: f2 } }
-      : f1 && !f2
-      ? { invDat: { gte: f1 } }
-      : { invDat: { gte: f1, lte: f2 } };
 
   const orders = await this.order.findMany({
 
     where: {
-
-      ...fechasFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(supplier && supplier !== 'all'
-        ? { supplierId: supplier }
-        : {}),
-
       salbuy: factura,
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
+
 
     include: {
       supplier1: true,
@@ -591,39 +1036,61 @@ async cuspro(query: any) {
     amount?: number
   }
 
-  const { fech1, fech2, configuracion, usuario, customer } = query;
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
 
   const factura = 'SALE';
 
   const f1 = fech1 ? new Date(fech1) : null;
   const f2 = fech2 ? new Date(fech2) : null;
 
-  const fechasFilter =
-    !f1 && !f2
-      ? {}
-      : !f1 && f2
-      ? { invDat: { lte: f2 } }
-      : f1 && !f2
-      ? { invDat: { gte: f1 } }
-      : { invDat: { gte: f1, lte: f2 } };
 
   const orders = await this.order.findMany({
     where: {
-      ...fechasFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(customer && customer !== 'all'
-        ? { id_client: customer }
-        : {}),
-
       salbuy: factura,
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
 
     include: {
@@ -720,48 +1187,66 @@ async ctasup(query: any) {
     comprobante?: any
   }
 
-  const { fech1, fech2, configuracion, usuario, supplier } = query;
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
+
+
   const factura = 'BUY';
 
   const f1 = fech1 ? new Date(fech1) : null;
   const f2 = fech2 ? new Date(fech2) : null;
 
-  const fechasInvFilter =
-    !f1 && !f2
-      ? {}
-      : !f1 && f2
-      ? { invDat: { lte: f2 } }
-      : f1 && !f2
-      ? { invDat: { gte: f1 } }
-      : { invDat: { gte: f1, lte: f2 } };
-
-  const fechasRecFilter =
-    !f1 && !f2
-      ? {}
-      : !f1 && f2
-      ? { recDat: { lte: f2 } }
-      : f1 && !f2
-      ? { recDat: { gte: f1 } }
-      : { recDat: { gte: f1, lte: f2 } };
 
   const recibos = await this.receipt.findMany({
-    where: {
-      ...fechasRecFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(supplier && supplier !== 'all'
-        ? { supplier: supplier }
-        : {}),
-
-      salbuy: factura,
+      
+      where: {
+        salbuy: factura,
+        ...fechasRecFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
+
+///filtroparaborrar
 
     include: {
       supplier1: true,
@@ -771,23 +1256,17 @@ async ctasup(query: any) {
   });
 
   const facturas = await this.order.findMany({
+    
     where: {
-      ...fechasInvFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(supplier && supplier !== 'all'
-        ? { supplier: supplier }
-        : {}),
-
       salbuy: factura,
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
+
 
     include: {
       supplier1: true,
@@ -909,48 +1388,61 @@ async ctacus(query: any) {
     comprobante?: any
   }
 
-  const { fech1, fech2, configuracion, usuario, customer } = query;
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { invDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { invDat: { gte: new Date(fech1) } }
+        : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    // --- Fechas ---
+    const fechasRecFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { recDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { recDat: { gte: new Date(fech1) } }
+        : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
   const factura = 'SALE';
 
   const f1 = fech1 ? new Date(fech1) : null;
   const f2 = fech2 ? new Date(fech2) : null;
 
-  const fechasInvFilter =
-    !f1 && !f2
-      ? {}
-      : !f1 && f2
-      ? { invDat: { lte: f2 } }
-      : f1 && !f2
-      ? { invDat: { gte: f1 } }
-      : { invDat: { gte: f1, lte: f2 } };
-
-  const fechasRecFilter =
-    !f1 && !f2
-      ? {}
-      : !f1 && f2
-      ? { recDat: { lte: f2 } }
-      : f1 && !f2
-      ? { recDat: { gte: f1 } }
-      : { recDat: { gte: f1, lte: f2 } };
-
   const recibos = await this.receipt.findMany({
     where: {
-      ...fechasRecFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(customer && customer !== 'all'
-        ? { id_client: customer }
-        : {}),
-
-      salbuy: factura,
+        salbuy: factura,
+        ...fechasRecFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
+
 
     include: {
       customer: true,
@@ -960,23 +1452,20 @@ async ctacus(query: any) {
   });
 
   const facturas = await this.order.findMany({
+    
+    ///filtroparaborrar
     where: {
-      ...fechasInvFilter,
-
-      ...(configuracion && configuracion !== 'all'
-        ? { id_config: configuracion }
-        : {}),
-
-      ...(usuario && usuario !== 'all'
-        ? { user: usuario }
-        : {}),
-
-      ...(customer && customer !== 'all'
-        ? { id_client: customer }
-        : {}),
-
       salbuy: factura,
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
     },
+
+///filtroparaborrar
+
 
     include: {
       customer: true,
@@ -1584,6 +2073,11 @@ async createInv(createInvoiceDto: any) {
             desVal: invoiceAux.desVal,
             notes: invoiceAux.notes,
             salbuy: invoiceAux.salbuy,
+//arreglaishaber          // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
+          // isHaber: (invoiceAux.salbuy === "SALE") ? invoiceAux.isHaber : !invoiceAux.isHaber,
+            isHaber: invoiceAux.isHaber,
+          // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
+
 /////////////
 
 

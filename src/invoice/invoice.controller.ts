@@ -11,47 +11,62 @@ export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
   
   @Get('orders/summary')
-  async dashboard1(@Query() query: any) {
-    console.log("dashboard1")
+  // async dashboard1(@Query() query: any) {
+  @Auth()
+  dashboard1(@Query() query: any) {
     return this.invoiceService.dashboard1(query);
   }
   
   @Get('tes/admin')
-  async dashboard(@Query() query: any) {
+  @Auth()
+  // async dashboard(@Query() query: any) {
+  dashboard(@Query() query: any) {
+    console.log("dashboard")
     return this.invoiceService.dashboard(query);
   }
 
-  // @Get('invoices/proiye')
+  @Get('invoices/proiye')
   // async proiye(@Query() query: any) {
-  //   return this.invoiceService.proiye(query);
-  // }
+  @Auth()
+  proiye(@Query() query: any) {
+    return this.invoiceService.proiye(query);
+  }
 
   @Get('invoices/prosup')
-  async prosup(@Query() query: any) {
-    return this.invoiceService.prosup(query);
+  // async prosup(@Query() query: any) {
+  @Auth()
+  prosup(@Query() query: any) {
+  return this.invoiceService.prosup(query);
   }
   
   @Get('invoices/procus')
-  async procus(@Query() query: any) {
+  // async procus(@Query() query: any) {
+  @Auth()
+  procus(@Query() query: any) {
     return this.invoiceService.procus(query);
   }
 
   @Get('invoices/suppro')
-  async suppro(@Query() query: any) {
+  // async suppro(@Query() query: any) {
+  @Auth()
+  suppro(@Query() query: any) {
     return this.invoiceService.suppro(query);
   }  
 
   @Get('invoices/cuspro')
+  @Auth()
   cuspro(@Query() query: any) {
     return this.invoiceService.cuspro(query);
   }
 
   @Get('invoices/ctasup')
+  @Auth()
   ctasup(@Query() query: any) {
     return this.invoiceService.ctasup(query);
   }  
   
   @Get('invoices/ctacus')
+  @Auth()
   ctacus(@Query() query: any) {
     return this.invoiceService.ctacus(query);
   }  
