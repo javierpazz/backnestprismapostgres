@@ -222,18 +222,29 @@ const obserFilter: Prisma.OrderWhereInput =
           { "id_instru": { not : null} };
 
           // --- Registro ---
-    const registroFilter =
-      registro === 'TOD'
-        ? {}
-        : registro === 'REGI'
-        ? { libNum: { gt: 0 } }
-        : registro === 'NREGI'
-        ? { libNum: 0 }
-        : registro === 'PROT'
-        ? { asiNum: { gt: 0 } }
-        : registro === 'NPROT'
-        ? { asiNum: 0 }
-        : {};
+  const registroFilter =
+    registro === 'TOD'
+      ? {}
+      : registro === 'REGI'
+      ? { libNum: { gt: 0 } }
+      : registro === 'NREGI'
+      ? {
+          OR: [
+            { libNum: { lt: 1 } },
+            { libNum: null }
+          ]
+        }
+      : registro === 'PROT'
+      ? { asiNum: { gt: 0 } }
+      : registro === 'NPROT'
+      ?{
+        OR: [
+          { asiNum: { lt: 1 } },
+          { asiNum: null }
+        ]
+      }
+      : {};
+
 
     // --- Orden ---
     // const sortOrder = order === 'newest' ? { createdAt: 'desc' } : { createdAt: 'asc' };
@@ -250,7 +261,7 @@ const obserFilter: Prisma.OrderWhereInput =
         ...fechasFilter,
         ...parteFilter,
         ...instruFilter,
-        ...productFilter,
+        // ...productFilter,
         ...customerFilter,
         ...configuracionFilter,
         ...usuarioFilter,
@@ -324,7 +335,7 @@ const obserFilter: Prisma.OrderWhereInput =
     registro,
     obser,
   } = query;
-
+console.log(query)
   // --- Fechas ---
   const fechasFilter =
     !fech1 && !fech2
@@ -367,23 +378,40 @@ const obserFilter: Prisma.OrderWhereInput =
     estado === 'TOD'
       ? {}
       : estado === 'EST'
-      ? { order: { terminado: false } }
+      ? { terminado: false }
       : estado === 'ET'
-      ? { order: { terminado: true } }
+      ? { terminado: true } 
       : {};
-
+  // const estadoFilter =
+  //   estado === 'TOD'
+  //     ? {}
+  //     : estado === 'EST'
+  //     ? { order: {terminado: false } }
+  //     : estado === 'ET'
+  //     ? { order: {terminado: true } }
+  //     : {};
   // --- Registro ---
   const registroFilter =
     registro === 'TOD'
       ? {}
       : registro === 'REGI'
-      ? { order: { libNum: { gt: 0 } } }
+      ? { libNum: { gt: 0 } }
       : registro === 'NREGI'
-      ? { order: { libNum: 0 } }
+      ? {
+          OR: [
+            { libNum: { lt: 1 } },
+            { libNum: null }
+          ]
+        }
       : registro === 'PROT'
-      ? { order: { asiNum: { gt: 0 } } }
+      ? { asiNum: { gt: 0 } }
       : registro === 'NPROT'
-      ? { order: { asiNum: 0 } }
+      ?{
+        OR: [
+          { asiNum: { lt: 1 } },
+          { asiNum: null }
+        ]
+      }
       : {};
 
   // --- Instrumentos existentes ---
@@ -406,10 +434,10 @@ const obserFilter: Prisma.OrderWhereInput =
       ...productFilter,
       ...obserFilter,
       ...estadoFilter,
-      ...registroFilter,
       order: {
         is: {
           // id_instru: { not: null }, // ✅ el filtro se mantiene
+          ...registroFilter,
           ...existeIns,
           ...fechasFilter,
           ...parteFilter,

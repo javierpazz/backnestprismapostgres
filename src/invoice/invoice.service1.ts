@@ -3,7 +3,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import * as mg from 'mailgun-js';
 
 import { OnModuleInit } from '@nestjs/common';
-import { PrismaClient, Order, Prisma, Configuration, Parte } from '@prisma/client';
+import { PrismaClient, Order, Prisma, Configuration } from '@prisma/client';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
@@ -23,418 +23,7 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
     await this.$connect();
   }
   
-
-//////dash1esc
-
-  async dashboard1Esc(query: any) {
-
-
-///filtroparaborrar
-const {
-  fech1,
-  fech2,
-  configuracion,
-  usuario,
-  customer,
-  supplier,
-  parte,
-  encargado,
-  comprobante,
-} = query;
-
-    // --- Fechas ---
-    const fechasInvFilter =
-      !fech1 && !fech2
-        ? {}
-        : !fech1 && fech2
-        ? { remDat: { lte: new Date(fech2) } }
-        : fech1 && !fech2
-        ? { remDat: { gte: new Date(fech1) } }
-        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
-
-    // --- Otros filtros ---
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-    const configuracionFilter =
-      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
-
-///filtroparaborrar
-
-
-
-
-    ///dilval
-      const resultdilVal = await this.orderItem.groupBy({
-        by: ['terminado'],
-        where: {
-          order: {
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-
-          },
-        },
-        _sum: {
-          price: true,
-        },
-      });    
-      const dilVal = resultdilVal.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        total: r._sum.price || 0,
-      }));
-    ///dilval
-    ///dilter
-          const resultdil = await this.orderItem.groupBy({
-        by: ['terminado'],
-        where: {
-          order: {
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-
-          },
-        },
-        _count: {
-          id: true,
-        },
-      });
-
-      const dilter = resultdil.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        count: r._count.id,
-      }));
-
-
-    ///dilter
-
-    ///intterVal
-/// intterVal
-      const resultinsVal = await this.order.groupBy({
-        by: ['terminado'],
-        where: {
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-        },
-        _sum: {
-          total: true,
-        },
-      });
-      const insterVal = resultinsVal.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        total: r._sum.total || 0,
-      }));
-/// intterVal
-    ///intterVal
-
-
-
-    ///intter
-      const resultTer = await this.order.groupBy({
-        by: ['terminado'],
-        where: {
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-
-        },
-        _count: {
-          id: true,
-        },
-      });    
-      const inster = resultTer.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        count: r._count.id,
-      }));
-
-
-
-    ///intter
-
-    ///intpubpriVal
-
-            const ordersPubPriVal = await this.order.findMany({
-              where: {
-                id_instru: {not: null},
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...comprobanteFilter,
-                ...parteFilter,
-              },
-              include: {
-                instrumento: {
-                  select: {
-                    publico: true
-                  }
-                }
-              }
-            });
-
-            const resultVal = {
-              publico: 0,
-              privado: 0
-            };
-
-            for (const order of ordersPubPriVal) {
-
-              if (order.instrumento?.publico) {
-                resultVal.publico += order.total || 0;
-              } else {
-                resultVal.privado += order.total || 0;
-              }
-
-            }
-
-            const PubPriVal = [
-              { type: 'Publico', total: resultVal.publico },
-              { type: 'Privado', total: resultVal.privado }
-                ]
-          
-    ///intpubpriVal
-    ///entpubpri
-
-            const ordersPubPri = await this.order.findMany({
-              where: {
-                id_instru: {not: null},
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...comprobanteFilter,
-                ...parteFilter,
-              },
-              include: {
-                instrumento: {
-                  select: {
-                    publico: true
-                  }
-                }
-              }
-            });
-
-            const result = {
-              publico: 0,
-              privado: 0
-            };
-
-            // for (const order of ordersPubPri) {
-
-            //   if (order.instrumento?.publico) {
-            //     result.publico += order.total || 0;
-            //   } else {
-            //     result.privado += order.total || 0;
-            //   }
-
-            // }
-
-              ordersPubPri.forEach(o => {
-                if (o.instrumento?.publico) {
-                  result.publico++;
-                } else {
-                  result.privado++;
-                }
-              });
-            const PubPri = [
-              { type: 'Publico', total: result.publico },
-              { type: 'Privado', total: result.privado }
-                ]
-          
-    ///entpubpri
-    ///clientestop10
-    const topCustomers = await this.order.groupBy({
-          by: ['id_client'],
-          where: {
-            id_instru: {not: null},
-            id_client: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const customersTop = await this.customer.findMany({
-          where: {
-            id: { in: topCustomers.map(c => c.id_client!) },
-          },
-          select: {
-            id: true,
-            nameCus: true
-          }
-        });
-
-        const mapCustomers = Object.fromEntries(
-          customersTop.map(c => [c.id, c.nameCus])
-        );
-
-        const top10Clients = topCustomers.map(c => ({
-          customerId: c.id_client,
-          customer: mapCustomers[c.id_client!],
-          totalSales: c._sum.total || 0
-        }));
-
-        ///clientestop10
-    ///partetop10
-        const topPartes = await this.order.groupBy({
-          by: ['id_parte'],
-          where: {
-            id_instru: {not: null},
-            id_parte: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...parteFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const partesTop = await this.parte.findMany({
-          where: {
-            id: { in: topPartes.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapPartes = Object.fromEntries(
-          partesTop.map(c => [c.id, c.name])
-        );
-
-        const top10Partes = topPartes.map(c => ({
-          parteId: c.id_parte,
-          parte: mapPartes[c.id_parte!],
-          totalSales: c._sum.total || 0
-        }));
-
-        ///partetop10
-
-    ///categorias    
-      const categories = await this.product.groupBy({
-        by: ['category'],
-        _count: {
-          category: true,
-        },
-      });
-
-      const productCategories = categories.map((item) => ({
-        _id: item.category,
-        count: item._count.category,
-      }));
-///categorias    
-
-///orders
-const ordersData = await this.order.aggregate({
-  where: {
-            id_instru: {not: null},
-        ...fechasInvFilter,
-        ...configuracionFilter,
-        ...customerFilter,
-        ...usuarioFilter,
-        ...comprobanteFilter,
-        ...parteFilter,
-  },
-  _count: {
-    _all: true,
-  },
-  _sum: {
-    total: true,
-  },
-});
-
-const orders = [
-  {
-    _id: null,
-    numOrders: ordersData._count._all,
-    totalSales: ordersData._sum.total || 0,
-  },
-];
-///orders
-
-const Users = await this.user.count();
-const users = [
-  {
-    _id: null,
-    numUsers: Users
-  }
-  ]
-const Customers = await this.customer.count();
-const customers = [
-  {
-    _id: null,
-    numCustomers: Customers
-  }
-  ]
-
-
-      return {
-          productCategories,
-          orders,
-          users,
-          customers,
-          top10Clients,
-          top10Partes,
-          PubPri,
-          PubPriVal,
-          inster,
-          dilter,
-          dilVal,
-          insterVal
-
-      };
-
-
-
-  }
-//////dash1Esc
-
-
-  //////dash1
+//////dash1
 
   async dashboard1(query: any) {
 
@@ -448,7 +37,6 @@ const {
   customer,
   supplier,
   parte,
-  encargado,
   comprobante,
 } = query;
 
@@ -472,7 +60,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
     const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
@@ -487,93 +74,33 @@ const {
 
 
     ///dilval
-      const resultdilVal = await this.orderItem.groupBy({
+      const resultdilval = await this.orderItem.groupBy({
         by: ['terminado'],
-        where: {
-          order: {
-            salbuy: 'SALE',
-            invNum: { gt: 0 },
-            // id_client: customer,
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-
-          },
-        },
-        _sum: {
-          price: true,
+        _count: {
+          id: true,
         },
       });    
-      const dilVal = resultdilVal.map(r => ({
+      const dilter = resultdilval.map(r => ({
         _id: r.terminado ? 'terminado' : 'pendiente',
-        total: r._sum.price || 0,
+        count: r._count.id,
       }));
+
     ///dilval
     ///dilter
-          const resultdil = await this.orderItem.groupBy({
+          const resultdilTer = await this.orderItem.groupBy({
         by: ['terminado'],
         where: {
           order: {
+            id_client: customer,   // id del cliente
             salbuy: 'SALE',
             invNum: { gt: 0 },
-            // id_client: customer,   // id del cliente
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-
           },
         },
         _count: {
           id: true,
         },
       });
-
-      const dilter = resultdil.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        count: r._count.id,
-      }));
-
-
     ///dilter
-
-    ///intterVal
-/// intterVal
-      const resultinsVal = await this.order.groupBy({
-        by: ['terminado'],
-        where: {
-          invNum: { gt: 0 },
-          salbuy: 'SALE',
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-        },
-        _sum: {
-          total: true,
-        },
-      });
-      const insterVal = resultinsVal.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        total: r._sum.total || 0,
-      }));
-/// intterVal
-    ///intterVal
-
-
 
     ///intter
       const resultTer = await this.order.groupBy({
@@ -581,15 +108,6 @@ const {
         where: {
           invNum: { gt: 0 },
           salbuy: 'SALE',
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-
         },
         _count: {
           id: true,
@@ -609,15 +127,7 @@ const {
             const ordersPubPriVal = await this.order.findMany({
               where: {
                 salbuy: 'SALE',
-                invNum: { gt: 0 },
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...comprobanteFilter,
-                ...supplierFilter,
-                ...encargadoFilter,
-                ...parteFilter,
+                invNum: { gt: 0 }
               },
               include: {
                 instrumento: {
@@ -654,15 +164,7 @@ const {
             const ordersPubPri = await this.order.findMany({
               where: {
                 salbuy: 'SALE',
-                invNum: { gt: 0 },
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...comprobanteFilter,
-                ...supplierFilter,
-                ...encargadoFilter,
-                ...parteFilter,
+                invNum: { gt: 0 }
               },
               include: {
                 instrumento: {
@@ -714,8 +216,6 @@ const {
             ...usuarioFilter,
             ...comprobanteFilter,
             ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
 
           },
           _sum: {
@@ -764,8 +264,6 @@ const {
             ...usuarioFilter,
             ...comprobanteFilter,
             ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
 
           },
           _sum: {
@@ -832,8 +330,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
       },
       select: {
         invDat: true,
@@ -886,8 +382,6 @@ type DailyMoney = {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
       },
 
 
@@ -933,8 +427,6 @@ const ordersData = await this.order.aggregate({
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
   },
   _count: {
     _all: true,
@@ -971,8 +463,6 @@ type CtacteDaily = {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
     select: {
       recDat: true,
@@ -990,8 +480,6 @@ type CtacteDaily = {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
     select: {
       invDat: true,
@@ -1058,8 +546,6 @@ type ProductIO = {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
     select: {
       salbuy: true,
@@ -1134,10 +620,8 @@ const customers = [
           PubPri,
           PubPriVal,
           inster,
-          dilter,
-          dilVal,
-          insterVal
-
+          resultdilTer,
+          dilter
       };
 
 
@@ -1201,8 +685,6 @@ const {
   customer,
   supplier,
   comprobante,
-  parte,
-  encargado,
 } = query;
 
     // --- Fechas ---
@@ -1225,8 +707,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -1243,8 +723,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
     include: {
       orderItems: true,
@@ -1336,8 +814,6 @@ const {
   customer,
   supplier,
   comprobante,
-  encargado,
-  parte,
 } = query;
 
     // --- Fechas ---
@@ -1360,8 +836,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -1395,8 +869,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
 
@@ -1504,8 +976,6 @@ const {
   customer,
   supplier,
   comprobante,
-  encargado,
-  parte,
 } = query;
 
     // --- Fechas ---
@@ -1528,8 +998,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -1555,8 +1023,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
 
@@ -1665,8 +1131,6 @@ const {
   customer,
   supplier,
   comprobante,
-  encargado,
-  parte,
 } = query;
 
     // --- Fechas ---
@@ -1689,8 +1153,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -1716,8 +1178,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
 
@@ -1821,8 +1281,6 @@ const {
   customer,
   supplier,
   comprobante,
-  encargado,
-  parte,
 } = query;
 
     // --- Fechas ---
@@ -1845,8 +1303,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -1871,8 +1327,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
     include: {
@@ -1978,8 +1432,6 @@ const {
   customer,
   supplier,
   comprobante,
-  encargado,
-  parte,
 } = query;
 
     // --- Fechas ---
@@ -2002,8 +1454,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -2030,8 +1480,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
 ///filtroparaborrar
@@ -2053,8 +1501,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
 
@@ -2187,8 +1633,6 @@ const {
   customer,
   supplier,
   comprobante,
-  encargado,
-  parte,
 } = query;
 
     // --- Fechas ---
@@ -2211,8 +1655,6 @@ const {
         : { recDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encarg: String(encargado) } : {};
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -2235,8 +1677,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
 
@@ -2258,8 +1698,6 @@ const {
         ...usuarioFilter,
         ...comprobanteFilter,
         ...supplierFilter,
-        ...encargadoFilter,
-        ...parteFilter,
     },
 
 ///filtroparaborrar

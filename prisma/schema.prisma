@@ -174,6 +174,7 @@ model Instrumento {
   id          String      @id @default(uuid())
   codIns      String
   name        String
+  publico     Boolean       @default(true)
   orderItems OrderItem[]
   order  Order[]   // 👈 Relación con OrderItem
   createdAt   DateTime    @default(now())
