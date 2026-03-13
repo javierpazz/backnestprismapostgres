@@ -375,7 +375,6 @@ async update(updateProductoFacDto: UpdateProductoFacDto) {
         codCon: id_config
           ? { connect: { id: id_config } } // 🔗 Prisma busca el UUID del Configuration
           : undefined,
-
     
         // 🔗 Supplier (si viene)
         supplier: supplier
@@ -410,11 +409,15 @@ async update(updateProductoFacDto: UpdateProductoFacDto) {
 }
 
 async updateFac(updateProductoFacDto: UpdateProductoFacDto) {
-  const { _id, supplier, reviews, categoryId, ...rest } = updateProductoFacDto;
+  const { _id, supplier, reviews, categoryId, id_config, ...rest } = updateProductoFacDto;
 
   const data: any = {
     ...rest,
-        supplier: supplier
+        codCon: id_config
+          ? { connect: { id: id_config } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
+    
+          supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
           : { disconnect: true },
         categorys: categoryId

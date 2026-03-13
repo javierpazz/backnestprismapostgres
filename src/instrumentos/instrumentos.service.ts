@@ -47,11 +47,11 @@ export class InstrumentosService extends PrismaClient implements OnModuleInit {
       //   ...c,
       // }));
   return instrumentos.map((ins) => ({
-    _id: ins.id,
     ...ins,
+    _id: ins.id,
     orderItems: ins.orderItems.map((oi) => ({
-      _id: oi.productId,      // 👈 duplicamos el id
       ...oi,
+      _id: oi.productId,      // 👈 duplicamos el id
     })),
   }));
   }

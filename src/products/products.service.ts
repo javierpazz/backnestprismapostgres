@@ -269,8 +269,8 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       // console.log(kiki)
 
       return products.map(({ id, ProductImage, ...rest }) => ({
-        _id: id,
         ...rest,
+        _id: id,
       // images: ProductImage.map( image => image.url )
       images: ProductImage.map(
                  image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/PRODUCTS/${ image.url }`
