@@ -126,7 +126,7 @@ async create(createEntradaDto: any) {
                 terminado: item.terminado,
                 // productId: item.productId,
                 productId: item._id,
-                instrumentoId: item.instrumentoId,
+                // instrumentoId: item.instrumentoId,
 
 
 
@@ -468,7 +468,8 @@ console.log(query)
 
 // Mapeamos cada OrderItem a un objeto tipo invoice
 const invoices = orderItemsWithOrder.map(item => ({
-  _id: item.id, // ID del item
+  // _id: item.id, // ID del item
+_id: item.order?.id,
   orderItems: {
     _id: item.id,
     slug: item.slug,

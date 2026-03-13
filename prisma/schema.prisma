@@ -182,13 +182,41 @@ model Instrumento {
   codIns      String
   name        String
   publico     Boolean       @default(true)
-  orderItems OrderItem[]
+  paramItems ParamItem[]
   order  Order[]   // 👈 Relación con OrderItem
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
     @@index([publico])
 }
+
+model ParamItem {
+  id          String   @id @default(uuid())
+  slug        String?
+  title       String
+  medPro      String
+  quantity    Int
+  image       String?
+  price       Float
+  size        String?
+  porIva      Float
+  venDat      DateTime?
+  observ      String?
+  terminado   Boolean?
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  instrumento Instrumento? @relation(fields: [instrumentoId], references: [id], onDelete: Restrict)
+  instrumentoId String?
+  // order Order? @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  // orderId String?
+
+  // @@index([orderId])
+  @@index([productId])
+  @@index([instrumentoId])
+  @@index([terminado])
+
+}
+
 
 model Category {
   id      String    @id @default(uuid())
@@ -219,8 +247,8 @@ model Product {
   // supplier    String?
   id_category String?
 
-  categoryId String?
   categorys   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
 
   ecoActive   Boolean       @default(true)
   description String
@@ -237,6 +265,7 @@ model Product {
   sizes       String[]
   reviews     Review[]
   orderItems  OrderItem[]   // 👈 Relación con OrderItem
+  paramItems  ParamItem[]   // 👈 Relación con OrderItem
   ProductImage ProductImage[]
   
   supplierId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
@@ -307,14 +336,13 @@ model OrderItem {
   terminado   Boolean?
   productId   String
   product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
-  instrumento Instrumento? @relation(fields: [instrumentoId], references: [id], onDelete: Restrict)
-  instrumentoId String?
+  // instrumento Instrumento? @relation(fields: [instrumentoId], references: [id], onDelete: Restrict)
+  // instrumentoId String?
   order Order? @relation(fields: [orderId], references: [id], onDelete: Restrict)
   orderId String?
 
   @@index([orderId])
   @@index([productId])
-  @@index([instrumentoId])
   @@index([terminado])
 
 }

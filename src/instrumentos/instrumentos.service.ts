@@ -39,7 +39,7 @@ export class InstrumentosService extends PrismaClient implements OnModuleInit {
           name: 'asc',
         },
         include: {
-          orderItems: true,
+          paramItems: true,
         },        
       })
       // return instrumentos.map(c => ({
@@ -49,7 +49,7 @@ export class InstrumentosService extends PrismaClient implements OnModuleInit {
   return instrumentos.map((ins) => ({
     ...ins,
     _id: ins.id,
-    orderItems: ins.orderItems.map((oi) => ({
+    paramItems: ins.paramItems.map((oi) => ({
       ...oi,
       _id: oi.productId,      // 👈 duplicamos el id
     })),
@@ -109,9 +109,9 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
             ({
           where: { id: _id }, // Prisma usa 'id'
         data: {
-          orderItems: {
+          paramItems: {
             deleteMany: {instrumentoId: _id}, // borra todos los actuales
-            create: createParamsDto.body.orderItems?.map((oi) => ({
+            create: createParamsDto.body.paramItems?.map((oi) => ({
               title: oi.title,
               medPro: oi.medPro,
               quantity: oi.quantity,
@@ -127,7 +127,7 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
           },
         },
         // include: {
-        //   orderItems: { include: { product: true } },
+        //   paramItems: { include: { product: true } },
         // },
        })
       );
@@ -141,7 +141,7 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
 
 async remove(id: string) {
   try {
-    await this.orderItem.deleteMany({
+    await this.paramItem.deleteMany({
       where: { instrumentoId: id },
     });
     await this.instrumento.delete({
