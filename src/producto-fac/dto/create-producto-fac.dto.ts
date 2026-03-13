@@ -180,5 +180,10 @@ export class CreateProductoFacDto {
   @IsUUID()
   categoryId?: string;  
 
+  // 🔗 Relación con Configuration (UUID)
+  @IsOptional()
+  @IsUUID()
+  codCon?: string;  
+
 
 }

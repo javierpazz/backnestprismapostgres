@@ -171,7 +171,6 @@ model Configuration {
   orders2       Order[]     @relation("Config2")
   receipt  Receipt[]   
   comprobantes Comprobante[]
-  products Product[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -211,16 +210,12 @@ model Product {
   image3      String?
   brand       String?
   category    String?
-  // id_config   String?
-  id_config    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
-  codCon      Configuration?  @relation(fields: [id_config], references: [id], onDelete: Restrict)
-
-
+  id_config   String?
   // supplier    String?
   id_category String?
 
-  categoryId String?
   categorys   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
 
   ecoActive   Boolean       @default(true)
   description String
@@ -239,6 +234,9 @@ model Product {
   orderItems  OrderItem[]   // 👈 Relación con OrderItem
   ProductImage ProductImage[]
   
+  codCom         String?
+  comprobante  Comprobante?   @relation(fields: [codCom], references: [id], onDelete: Restrict)
+
   supplierId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
   supplier      Supplier?   @relation(fields: [supplierId], references: [id], onDelete: Restrict)
   createdAt   DateTime    @default(now())

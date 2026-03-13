@@ -16,7 +16,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
 
   async create(createProductDto: CreateProductDto, product:Product) {
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews,categoryId, ...rest } = createProductDto;
+  const { _id, supplier, createdAt, updatedAt, reviews,categoryId, id_config, ...rest } = createProductDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -25,7 +25,17 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       // this.product.create({data:rest});
       this.product.create({data:{
           ...rest,
-              categorys: categoryId
+
+        // 🔗 Supplier (si viene)
+          supplier: supplier
+          ? { connect: { id: supplier } }
+          : undefined,
+          
+          codCon: id_config
+          ? { connect: { id: id_config } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
+
+          categorys: categoryId
           ? { connect: { id: categoryId } }
           : undefined,
       }

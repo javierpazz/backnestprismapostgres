@@ -44,7 +44,7 @@ async listByConfig(configId: string): Promise<any[]> {
     console.log(createProductoFacDto)
     console.log("crea con imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews, images, categoryId, ...rest } = createProductoFacDto;
+  const { _id, supplier, createdAt, updatedAt, reviews, images, categoryId, id_config, ...rest } = createProductoFacDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -54,6 +54,9 @@ async listByConfig(configId: string): Promise<any[]> {
         
         data: {
         ...rest,
+        codCon: id_config
+          ? { connect: { id: id_config } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
         supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
           : undefined,
@@ -85,7 +88,7 @@ async listByConfig(configId: string): Promise<any[]> {
     console.log(createProductoFacDto)
     console.log("crea sin imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
-  const { _id, supplier, createdAt, updatedAt, reviews, categoryId, ...rest } = createProductoFacDto;
+  const { _id, supplier, createdAt, updatedAt, reviews, categoryId, id_config, ...rest } = createProductoFacDto;
   // if (rest.price) {
   //   rest.price = parseFloat(rest.price as any);
   // }
@@ -95,6 +98,9 @@ async listByConfig(configId: string): Promise<any[]> {
         
         data: {
         ...rest,
+        codCon: id_config
+          ? { connect: { id: id_config } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
         supplier: supplier
           ? { connect: { id: supplier } } // 🔗 Prisma busca el UUID del Configuration
           : undefined,
@@ -348,7 +354,7 @@ async listByConfig(configId: string): Promise<any[]> {
 
   }
 async update(updateProductoFacDto: UpdateProductoFacDto) {
-  const { _id, supplier, reviews, images, categoryId, ...rest } = updateProductoFacDto;
+  const { _id, supplier, reviews, images, categoryId, id_config, ...rest } = updateProductoFacDto;
 
   try {
     const product = await this.product.update({
@@ -366,6 +372,11 @@ async update(updateProductoFacDto: UpdateProductoFacDto) {
       },
     }),
 
+        codCon: id_config
+          ? { connect: { id: id_config } } // 🔗 Prisma busca el UUID del Configuration
+          : undefined,
+
+    
         // 🔗 Supplier (si viene)
         supplier: supplier
           ? { connect: { id: supplier } }
