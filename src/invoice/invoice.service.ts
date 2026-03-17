@@ -750,55 +750,8 @@ const {
         }));
 
         ///clientestop10
-    ///partetop10
-        const topPartes = await this.order.groupBy({
-          by: ['id_parte'],
-          where: {
-            salbuy: 'SALE',
-            invNum: { gt: 0 },
-            id_parte: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...parteFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
 
-          },
-          _sum: {
-            total: true
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const partesTop = await this.parte.findMany({
-          where: {
-            id: { in: topPartes.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapPartes = Object.fromEntries(
-          partesTop.map(c => [c.id, c.name])
-        );
-
-        const top10Partes = topPartes.map(c => ({
-          parteId: c.id_parte,
-          parte: mapPartes[c.id_parte!],
-          totalSales: c._sum.total || 0
-        }));
-
+        ///partetop10
         ///partetop10
 
     ///categorias    
@@ -1130,7 +1083,7 @@ const customers = [
           ctacte,
           producIO,
           top10Clients,
-          top10Partes,
+          // top10Partes,
           PubPri,
           PubPriVal,
           inster,
@@ -1237,6 +1190,7 @@ const {
 ///filtroparaborrar
   const invoices = await this.order.findMany({
     where: {
+        invNum: {gt : 0},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1388,7 +1342,7 @@ const {
   const orders = await this.order.findMany({
    
     where: {
-      salbuy: factura,
+      salbuy: factura, invNum: {gt : 0},
       ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1548,7 +1502,7 @@ const {
   const orders = await this.order.findMany({
 
     where: {
-      salbuy: factura,
+      salbuy: factura, invNum: {gt : 0},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1709,7 +1663,7 @@ const {
   const orders = await this.order.findMany({
 
     where: {
-      salbuy: factura,
+      salbuy: factura, invNum: {gt : 0},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1864,7 +1818,7 @@ const {
 
   const orders = await this.order.findMany({
     where: {
-      salbuy: factura,
+      salbuy: factura, invNum: {gt : 0},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -2046,7 +2000,7 @@ const {
   const facturas = await this.order.findMany({
     
     where: {
-      salbuy: factura,
+      salbuy: factura, invNum: {gt : 0},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -2251,7 +2205,7 @@ const {
     
     ///filtroparaborrar
     where: {
-      salbuy: factura,
+      salbuy: factura, invNum: {gt : 0},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -3722,7 +3676,7 @@ const obserFilter: Prisma.OrderWhereInput =
         ...configuracionFilter,
         ...usuarioFilter,
         ...obserFilter,
-        ...existeIns,
+        // ...existeIns,
         salbuy: 'SALE', remNum: {gt : 0}
       },
         orderBy: sortOrder,
