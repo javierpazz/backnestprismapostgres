@@ -335,7 +335,6 @@ const obserFilter: Prisma.OrderWhereInput =
     registro,
     obser,
   } = query;
-console.log(query)
   // --- Fechas ---
   const fechasFilter =
     !fech1 && !fech2
@@ -669,7 +668,6 @@ async findOne(id: string) {
     })),
   };
 
-  console.log(formattedInvoice);
   // console.log(invoice.orderItems);
 
   return formattedInvoice;

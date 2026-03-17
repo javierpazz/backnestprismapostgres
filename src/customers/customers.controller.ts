@@ -44,7 +44,6 @@ export class CustomersController {
   // @Auth()
   
   findOneEmail(@Param('email') email: string) {
-    console.log("email")
     return this.customersService.findOneEmail(email);
   }
 

@@ -59,7 +59,6 @@ export class UsersController {
   @Put('tes/admin/users/isActive')
   @Auth( ValidRoles.admin )
   updateisActive(@Body() updateUserDto: UpdateUserDto) {
-    console.log(updateUserDto)
     return this.usersService.updateisActive(updateUserDto);
   }
 

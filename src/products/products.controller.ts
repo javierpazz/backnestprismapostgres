@@ -44,7 +44,6 @@ export class ProductsController {
   @Put('tes/admin/products/ecomActive')
   @Auth( ValidRoles.admin )
   updateisActive(@Body() updateProductDto: UpdateProductDto) {
-    console.log(updateProductDto)
     return this.productsService.updateecoActive(updateProductDto);
   }
 

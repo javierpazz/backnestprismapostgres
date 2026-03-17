@@ -47,7 +47,6 @@ export class FilesController {
     // const secureUrl = `${ file.filename }`;
     // const secureUrl = `${ this.configService.get('HOST_API') }/files/product/${ file.filename }`;
     const message = `${ this.configService.get('HOST_API') }/files/product/${ file.filename }`;
-    console.log(message);
     return { message };
  
     // // 2) Subir a Cloudinary

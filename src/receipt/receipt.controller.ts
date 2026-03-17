@@ -13,7 +13,6 @@ export class ReceiptController {
 
   @Get('receipts/searchingegrSB')
   searchingegrSB(@Query() query: any) {
-    console.log("pasando")
     return this.receiptService.searchingegrSB(query);
   }
 

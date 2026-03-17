@@ -81,9 +81,6 @@ export class AuthService extends PrismaClient implements OnModuleInit {
       where: { email },
       // select: { email: true, password: true, id: true } //! OJO!
     });
-      console.log("user")
-      console.log(user)
-      console.log("user")
 
     if ( !user ) 
       // throw new UnauthorizedException('Credentials are not valid (email)');

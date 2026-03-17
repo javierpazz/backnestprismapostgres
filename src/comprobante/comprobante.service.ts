@@ -100,9 +100,6 @@ export class ComprobanteService extends PrismaClient implements OnModuleInit {
 
 async update(updateComprobanteDto: UpdateComprobanteDto) {
 
-      console.log("updateComprobanteDto")
-console.log(updateComprobanteDto)
-console.log("updateComprobanteDto")
 
   const { _id, codCon, ...rest } = updateComprobanteDto;
 

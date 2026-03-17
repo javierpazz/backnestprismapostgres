@@ -55,10 +55,6 @@ const mailgun = mg({
         where: { email : createUserDto.email },
       });
       if ( userInDB ) {
-        console.log("userInDB")
-        console.log(userInDB)
-        console.log("createUserDto")
-        console.log(createUserDto)
       // const token = jwt.sign({ _id: userInDB._id }, process.env.JWT_SECRET, {
       //   expiresIn: '3h',
       // });
@@ -82,7 +78,6 @@ const mailgun = mg({
 
 
       //reset link
-      console.log(`${baseUrl()}/reset-password/${token}/`);
 
 
         await mailgun
@@ -170,9 +165,6 @@ const mailgun = mg({
 /////////resetpasword
 
   async create(createUserDto: CreateUserDto) {
-    console.log("createUserDto")
-    console.log(createUserDto)
-    console.log("createUserDto")
     // createUserDto.nameCus = createUserDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createUserDto;
     const userInDB = await this.user.findUnique({

@@ -96,14 +96,12 @@ export class ProductoFacController {
   @Auth( ValidRoles.admin )
   updateFac(@Body() updateProductoFacDto: UpdateProductoFacDto) {
   // update(@Body() updateProductoFacDto: any) {
-    console.log(updateProductoFacDto)
     return this.productoFacService.updateFac(updateProductoFacDto);
   }
   @Put('tes/admin/products')
   @Auth( ValidRoles.admin )
   update(@Body() updateProductoFacDto: UpdateProductoFacDto) {
   // update(@Body() updateProductoFacDto: any) {
-    console.log(updateProductoFacDto)
     return this.productoFacService.update(updateProductoFacDto);
   }
 

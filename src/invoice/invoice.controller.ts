@@ -27,7 +27,6 @@ export class InvoiceController {
   @Auth()
   // async dashboard(@Query() query: any) {
   dashboard(@Query() query: any) {
-    console.log("dashboard")
     return this.invoiceService.dashboard(query);
   }
 

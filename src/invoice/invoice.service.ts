@@ -2328,7 +2328,6 @@ const {
 async geninvRem(createInvoiceDto: any, id:any) {
   const {invoiceAux, receiptAux} = createInvoiceDto;
   const { orderItems, orderAddress } = invoiceAux;
-    console.log(invoiceAux)
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
 
@@ -2343,10 +2342,6 @@ async geninvRem(createInvoiceDto: any, id:any) {
     let invrecDat = "";
 
 
-    console.log(receiptAux.recDat)
-    console.log(receiptAux.desVal)
-    console.log(receiptAux.receiptItems)
-    console.log("recibo")
     if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
       //////////  numera RECIBO /////////////////
       
@@ -2421,7 +2416,6 @@ async geninvRem(createInvoiceDto: any, id:any) {
           },
           include: { receiptItems: true }, // incluye los items en la respuesta
         });
-    console.log(recAux);
   }else{
     recAux = 0;  
     // recDat = null;
@@ -2506,7 +2500,6 @@ async geninvRem(createInvoiceDto: any, id:any) {
 async createInv(createInvoiceDto: any) {
   const {invoiceAux, receiptAux} = createInvoiceDto;
   const { orderItems, orderAddress } = invoiceAux;
-    console.log(invoiceAux)
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
 
@@ -2521,10 +2514,6 @@ async createInv(createInvoiceDto: any) {
     let invrecDat = "";
 
 
-    console.log(receiptAux.recDat)
-    console.log(receiptAux.desVal)
-    console.log(receiptAux.receiptItems)
-    console.log("recibo")
     if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
       //////////  numera RECIBO /////////////////
       
@@ -2599,7 +2588,6 @@ async createInv(createInvoiceDto: any) {
           },
           include: { receiptItems: true }, // incluye los items en la respuesta
         });
-    console.log(recAux);
   }else{
     recAux = 0;  
     // recDat = null;

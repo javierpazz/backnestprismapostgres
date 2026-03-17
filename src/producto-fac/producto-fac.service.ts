@@ -40,9 +40,6 @@ async listByConfig(configId: string): Promise<any[]> {
 }
 
   async create(createProductoFacDto: CreateProductoFacDto, product:Product) {
-    console.log("crea con imagen")
-    console.log(createProductoFacDto)
-    console.log("crea con imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
   const { _id, supplier, createdAt, updatedAt, reviews, images, categoryId, id_config, ...rest } = createProductoFacDto;
   // if (rest.price) {
@@ -84,9 +81,6 @@ async listByConfig(configId: string): Promise<any[]> {
 
   
   async createFac(createProductoFacDto: CreateProductoFacDto, product:Product) {
-    console.log("crea sin imagen")
-    console.log(createProductoFacDto)
-    console.log("crea sin imagen")
     // createProductDto.nameCus = createProductDto.nameCus.toLocaleLowerCase();
   const { _id, supplier, createdAt, updatedAt, reviews, categoryId, id_config, ...rest } = createProductoFacDto;
   // if (rest.price) {
@@ -150,7 +144,6 @@ async listByConfig(configId: string): Promise<any[]> {
       //   _id: id,
       //   ...rest,
       // }));
-      console.log("kiki")
 
       return products.map(({ id, ProductImage, ...rest }) => ({
         _id: id,
@@ -337,7 +330,6 @@ async listByConfig(configId: string): Promise<any[]> {
       throw new NotFoundException(`Product with id, name or no "${ id }" not found`);
     
     (productT as any)._id = productT.id;
-    console.log(productT)
     // return productT;
 
     const { images = [], ProductImage, ...rest } = productT;

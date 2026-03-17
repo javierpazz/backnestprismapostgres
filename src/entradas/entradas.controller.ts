@@ -12,7 +12,6 @@ export class EntradasController {
   @Post('invoices/remEsc')
   @Auth()
   create(@Body() createEntradaDto: any) {
-    console.log(createEntradaDto)
     return this.entradasService.create(createEntradaDto);
   }
 
