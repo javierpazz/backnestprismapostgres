@@ -2399,7 +2399,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
       if (receiptAux.recNum > 0)
         {recNumero = receiptAux.recNum }
         else {
-          const configId = receiptAux.codCon;
+          const configId = receiptAux.codCon._id;
           const configuracion = await this.configuration.findUnique(
           {
             where: { id: configId },
@@ -2447,7 +2447,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
 
             // relaciones
             customer: receiptAux.codCus ? { connect: { id: receiptAux.codCus } } : undefined,
-            configuration: receiptAux.codCon ? { connect: { id: receiptAux.codCon } } : undefined,
+            configuration: receiptAux.codCon._id ? { connect: { id: receiptAux.codCon._id } } : undefined,
             supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
             user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
 
@@ -2519,11 +2519,14 @@ async geninvRem(createInvoiceDto: any, id:any) {
       data: {
           notes : invoiceAux.notes,
           // codCom : invoiceAux.codCom,
-          dueDat : invoiceAux.dueDat,
-          invDat : invoiceAux.invDat,
+          // dueDat : invoiceAux.dueDat,
+          // invDat : invoiceAux.invDat,
           invNum : invNumero,
           recNum : recNumero,
-          recDat : invoiceAux.invDat,
+          // recDat : invoiceAux.invDat,
+          dueDat: safeDate(invoiceAux.dueDat),
+          invDat: safeDate(invoiceAux.invDat),
+          recDat: safeDate(invoiceAux.invDat),
           // relaciones
           comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
             
@@ -2592,7 +2595,7 @@ async createInv(createInvoiceDto: any) {
 
             );
           }
-          recNumero = configuracion.numIntRec;
+          recNumero = configuracion.numIntRec + 1;
         };
         //////////  numera RECIBO /////////////////
   
@@ -2872,8 +2875,8 @@ async createInv(createInvoiceDto: any) {
             notes: invoiceAux.notes,
             salbuy: invoiceAux.salbuy,
 //arreglaishaber          // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
-          // isHaber: (invoiceAux.salbuy === "SALE") ? invoiceAux.isHaber : !invoiceAux.isHaber,
-            isHaber: invoiceAux.isHaber,
+          isHaber: (invoiceAux.salbuy === "SALE") ? invoiceAux.isHaber : !invoiceAux.isHaber,
+            // isHaber: invoiceAux.isHaber,
           // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
 
 /////////////
@@ -3458,7 +3461,7 @@ const obserFilter: Prisma.OrderWhereInput =
         ...configuracionFilter,
         ...usuarioFilter,
         ...obserFilter,
-        ...existeIns,
+        // ...existeIns,
         salbuy: 'SALE', invNum: {gt : 0}
       },
         orderBy: sortOrder,
