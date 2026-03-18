@@ -2339,11 +2339,12 @@ async geninvRem(createInvoiceDto: any, id:any) {
     let invNumero = 0;
     let remNumero = 0;
     let invrecNum = 0;
-    let invrecDat = "";
+    let invrecDat = null;
 
 
     if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
       //////////  numera RECIBO /////////////////
+      invrecDat = invoiceAux.invDat;
       
       if (receiptAux.recNum > 0)
         {recNumero = receiptAux.recNum }
@@ -2395,7 +2396,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
 
 
             // relaciones
-            customer: receiptAux.codCus ? { connect: { id: receiptAux.codCus } } : undefined,
+            customer: receiptAux.codCus._id ? { connect: { id: receiptAux.codCus._id } } : undefined,
             configuration: receiptAux.codCon._id ? { connect: { id: receiptAux.codCon._id } } : undefined,
             supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
             user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
@@ -2456,16 +2457,17 @@ async geninvRem(createInvoiceDto: any, id:any) {
 
         if (recAux > 0) {
           invrecNum = recAux;
-          invrecDat =  invoiceAux.invDat;
+          // invrecDat =  invoiceAux.invDat;
           }else{
             invrecNum = recAux;
-            invrecDat =  invoiceAux.recDat;
+            // invrecDat =  invoiceAux.recDat;
           };
 ///***
       const invoice = await this.order.update({
       where: { id: id},
       data: {
           notes : invoiceAux.notes,
+          isHaber: invoiceAux.isHaber,
           // codCom : invoiceAux.codCom,
           // dueDat : invoiceAux.dueDat,
           // invDat : invoiceAux.invDat,
@@ -2474,7 +2476,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
           // recDat : invoiceAux.invDat,
           dueDat: safeDate(invoiceAux.dueDat),
           invDat: safeDate(invoiceAux.invDat),
-          recDat: safeDate(invoiceAux.invDat),
+          recDat: safeDate(invrecDat),
           // relaciones
           comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
             
@@ -2511,11 +2513,12 @@ async createInv(createInvoiceDto: any) {
     let invNumero = 0;
     let remNumero = 0;
     let invrecNum = 0;
-    let invrecDat = "";
+    let invrecDat = null;
 
 
     if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
       //////////  numera RECIBO /////////////////
+      invrecDat = invoiceAux.invDat;
       
       if (receiptAux.recNum > 0)
         {recNumero = receiptAux.recNum }
@@ -2777,10 +2780,10 @@ async createInv(createInvoiceDto: any) {
         
         if (recAux > 0) {
           invrecNum = recAux;
-          invrecDat =  invoiceAux.invDat;
+          // invrecDat =  invoiceAux.invDat;
           }else{
             invrecNum = recAux;
-            invrecDat =  invoiceAux.recDat;
+            // invrecDat =  invoiceAux.recDat;
           };
 ///***
       const invoice = await this.order.create({
@@ -2811,8 +2814,9 @@ async createInv(createInvoiceDto: any) {
             dueDat: safeDate(invoiceAux.dueDat),
             // invNum: invoiceAux.invNum,
             invDat: safeDate(invoiceAux.invDat),
-            recNum: invoiceAux.recNum,
-            recDat: safeDate(invoiceAux.recDat),
+            // recNum: invoiceAux.recNum,
+            recNum: recNumero,
+            recDat: safeDate(invrecDat),
             desVal: invoiceAux.desVal,
             notes: invoiceAux.notes,
             salbuy: invoiceAux.salbuy,
@@ -3664,7 +3668,7 @@ const obserFilter: Prisma.OrderWhereInput =
         ...configuracionFilter,
         ...usuarioFilter,
         ...obserFilter,
-        // ...existeIns,
+        ...existeIns,
         salbuy: 'SALE', remNum: {gt : 0}
       },
         orderBy: sortOrder,
@@ -4489,6 +4493,7 @@ async nullremit(updateInvoiceDto: any, id: string) {
       where: { id: id},
       data: {
             remNum: null,
+            remDat: null,
             },
     });
 
@@ -4508,12 +4513,13 @@ async updateS(updateInvoiceDto: any, id: string) {
   //   ...rest,
   // };
 
+  console.log(updateInvoiceDto)
   try {
     const updated = await this.order.updateMany({
       where: { recNum: updateInvoiceDto.recNum, id_client: updateInvoiceDto.customer },
       data: {
             recNum: 0,
-            recDat: '',
+            recDat: null,
             desVal: '',
             },
     });
@@ -4537,7 +4543,7 @@ async updateB(updateInvoiceDto: any, id: string) {
       where: { recNum: updateInvoiceDto.recNum, supplier: updateInvoiceDto.supplier },
       data: {
             recNum: 0,
-            recDat: '',
+            recDat: null,
             desVal: '',
             },
     });
