@@ -14,13 +14,13 @@ export class InvoiceController {
   // async dashboard1(@Query() query: any) {
   @Auth()
   dashboard1Esc(@Query() query: any) {
-    return this.invoiceService.dashboard1Esc(query);
+    return this.invoiceService.dashboardEsc(query);
   }
   @Get('orders/summary')
   // async dashboard1(@Query() query: any) {
   @Auth()
   dashboard1(@Query() query: any) {
-    return this.invoiceService.dashboard1(query);
+    return this.invoiceService.dashboard(query);
   }
   
   @Get('tes/admin')

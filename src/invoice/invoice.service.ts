@@ -26,7 +26,7 @@ export class InvoiceService extends PrismaClient implements OnModuleInit {
 
 //////dash1esc
 
-  async dashboard1Esc(query: any) {
+  async dashboardEsc(query: any) {
 
 
 ///filtroparaborrar
@@ -436,7 +436,7 @@ const customers = [
 
   //////dash1
 
-  async dashboard1(query: any) {
+  async dashboard(query: any) {
 
 
 ///filtroparaborrar
@@ -485,223 +485,450 @@ const {
 
 
 
-
-    ///dilval
-      const resultdilVal = await this.orderItem.groupBy({
-        by: ['terminado'],
-        where: {
-          order: {
-            salbuy: 'SALE',
-            invNum: { gt: 0 },
-            // id_client: customer,
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-
-          },
-        },
-        _sum: {
-          price: true,
-        },
-      });    
-      const dilVal = resultdilVal.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        total: r._sum.price || 0,
-      }));
-    ///dilval
-    ///dilter
-          const resultdil = await this.orderItem.groupBy({
-        by: ['terminado'],
-        where: {
-          order: {
-            salbuy: 'SALE',
-            invNum: { gt: 0 },
-            // id_client: customer,   // id del cliente
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-
-          },
-        },
-        _count: {
-          id: true,
-        },
-      });
-
-      const dilter = resultdil.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        count: r._count.id,
-      }));
-
-
-    ///dilter
-
-    ///intterVal
-/// intterVal
-      const resultinsVal = await this.order.groupBy({
-        by: ['terminado'],
-        where: {
-          invNum: { gt: 0 },
-          salbuy: 'SALE',
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-        },
-        _sum: {
-          total: true,
-        },
-      });
-      const insterVal = resultinsVal.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        total: r._sum.total || 0,
-      }));
-/// intterVal
-    ///intterVal
-
-
-
-    ///intter
-      const resultTer = await this.order.groupBy({
-        by: ['terminado'],
-        where: {
-          invNum: { gt: 0 },
-          salbuy: 'SALE',
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...supplierFilter,
-            ...encargadoFilter,
-            ...parteFilter,
-
-        },
-        _count: {
-          id: true,
-        },
-      });    
-      const inster = resultTer.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        count: r._count.id,
-      }));
-
-
-
-    ///intter
-
-    ///intpubpriVal
-
-            const ordersPubPriVal = await this.order.findMany({
-              where: {
-                salbuy: 'SALE',
-                invNum: { gt: 0 },
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...comprobanteFilter,
-                ...supplierFilter,
-                ...encargadoFilter,
-                ...parteFilter,
-              },
-              include: {
-                instrumento: {
-                  select: {
-                    publico: true
-                  }
-                }
-              }
-            });
-
-            const resultVal = {
-              publico: 0,
-              privado: 0
-            };
-
-            for (const order of ordersPubPriVal) {
-
-              if (order.instrumento?.publico) {
-                resultVal.publico += order.total || 0;
-              } else {
-                resultVal.privado += order.total || 0;
-              }
-
+    ///Productos10Buy
+            const itemsProBuy = await this.orderItem.findMany({
+          where: {
+            order: {
+              salbuy: 'BUY',
+              invNum: { gt: 0 },
+              ...fechasInvFilter,
+                  ...configuracionFilter,
+                  ...customerFilter,
+                  ...usuarioFilter,
+                  ...comprobanteFilter,
+                  ...supplierFilter,
+                  ...encargadoFilter,
+                  ...parteFilter,
             }
+          },
+          include: {
+            product: {
+              select: {
+                title: true,
+                category: true
+              }
+            }
+          }
+        });
 
-            const PubPriVal = [
-              { type: 'Publico', total: resultVal.publico },
-              { type: 'Privado', total: resultVal.privado }
-                ]
+        const productosMapBuy = new Map<string, any>();
+
+        itemsProBuy.forEach(item => {
+          const total = (item.price || 0) * (item.quantity || 0);
+
+          if (!productosMapBuy.has(item.productId)) {
+            productosMapBuy.set(item.productId, {
+              nombre: item.product?.title || 'Sin nombre',
+              total: 0,
+              cantidad: 0
+            });
+          }
+
+          const prod = productosMapBuy.get(item.productId);
+
+          prod.total += total;
+          prod.cantidad += item.quantity || 0;
+        });
+
+        const top10ProductosBuy = Array.from(productosMapBuy.values())
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 10);
           
-    ///intpubpriVal
-    ///entpubpri
+    ///Productos10Buy
 
-            const ordersPubPri = await this.order.findMany({
+    ///Productos10
+            const itemsPro = await this.orderItem.findMany({
+          where: {
+            order: {
+              salbuy: 'SALE',
+              invNum: { gt: 0 },
+              ...fechasInvFilter,
+                  ...configuracionFilter,
+                  ...customerFilter,
+                  ...usuarioFilter,
+                  ...comprobanteFilter,
+                  ...supplierFilter,
+                  ...encargadoFilter,
+                  ...parteFilter,
+            }
+          },
+          include: {
+            product: {
+              select: {
+                title: true,
+                category: true
+              }
+            }
+          }
+        });
+
+        const productosMap = new Map<string, any>();
+
+        itemsPro.forEach(item => {
+          const total = (item.price || 0) * (item.quantity || 0);
+
+          if (!productosMap.has(item.productId)) {
+            productosMap.set(item.productId, {
+              nombre: item.product?.title || 'Sin nombre',
+              total: 0,
+              cantidad: 0
+            });
+          }
+
+          const prod = productosMap.get(item.productId);
+
+          prod.total += total;
+          prod.cantidad += item.quantity || 0;
+        });
+
+        const top10Productos = Array.from(productosMap.values())
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 10);
+          
+    ///Productos10
+
+    ///Categorias10Buy
+            const itemsBuy = await this.orderItem.findMany({
               where: {
-                salbuy: 'SALE',
-                invNum: { gt: 0 },
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...comprobanteFilter,
-                ...supplierFilter,
-                ...encargadoFilter,
-                ...parteFilter,
+                order: {
+                  salbuy: 'BUY',
+                  invNum: { gt: 0 },
+                  ...fechasInvFilter,
+
+                  ...configuracionFilter,
+                  ...customerFilter,
+                  ...usuarioFilter,
+                  ...comprobanteFilter,
+                  ...supplierFilter,
+                  ...encargadoFilter,
+                  ...parteFilter,
+                }
               },
               include: {
-                instrumento: {
+                product: {
                   select: {
-                    publico: true
+                    category: true
                   }
                 }
               }
             });
 
-            const result = {
-              publico: 0,
-              privado: 0
-            };
+            const categoriasMapBuy = new Map<string, number>();
 
-            // for (const order of ordersPubPri) {
+            itemsBuy.forEach(item => {
+              const cat = item.product?.category || 'Sin categoría';
+              const total = (item.price * item.quantity ) || 0; // o quantity * price
 
-            //   if (order.instrumento?.publico) {
-            //     result.publico += order.total || 0;
-            //   } else {
-            //     result.privado += order.total || 0;
-            //   }
+              categoriasMapBuy.set(cat, (categoriasMapBuy.get(cat) || 0) + total);
+            });
 
-            // }
+            const top10CategoriasBuy = Array.from(categoriasMapBuy.entries())
+              .map(([categoria, total]) => ({
+                categoria,
+                total
+              }))
+              .sort((a, b) => b.total - a.total)
+              .slice(0, 10);
+              
+        ///Categorias10Buy
+    ///Categorias10
+            const items = await this.orderItem.findMany({
+              where: {
+                order: {
+                  salbuy: 'SALE',
+                  invNum: { gt: 0 },
+                  ...fechasInvFilter,
 
-              ordersPubPri.forEach(o => {
-                if (o.instrumento?.publico) {
-                  result.publico++;
-                } else {
-                  result.privado++;
+                  ...configuracionFilter,
+                  ...customerFilter,
+                  ...usuarioFilter,
+                  ...comprobanteFilter,
+                  ...supplierFilter,
+                  ...encargadoFilter,
+                  ...parteFilter,
                 }
-              });
-            const PubPri = [
-              { type: 'Publico', total: result.publico },
-              { type: 'Privado', total: result.privado }
-                ]
-          
-    ///entpubpri
-    ///clientestop10
+              },
+              include: {
+                product: {
+                  select: {
+                    category: true
+                  }
+                }
+              }
+            });
+
+            const categoriasMap = new Map<string, number>();
+
+            items.forEach(item => {
+              const cat = item.product?.category || 'Sin categoría';
+              const total = (item.price * item.quantity ) || 0; // o quantity * price
+
+              categoriasMap.set(cat, (categoriasMap.get(cat) || 0) + total);
+            });
+
+            const top10Categorias = Array.from(categoriasMap.entries())
+              .map(([categoria, total]) => ({
+                categoria,
+                total
+              }))
+              .sort((a, b) => b.total - a.total)
+              .slice(0, 10);
+              
+        ///Categorias10
+    ///PVentastop10Buy
+    const topPVentasBuy = await this.order.groupBy({
+          by: ['id_config'],
+          where: {
+            salbuy: 'BUY',
+            invNum: { gt: 0 },
+            id_config: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...comprobanteFilter,
+            ...supplierFilter,
+            ...encargadoFilter,
+            ...parteFilter,
+
+          },
+          _sum: {
+            totalBuy: true
+          },
+          orderBy: {
+            _sum: {
+              totalBuy: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const pventasTopBuy = await this.configuration.findMany({
+          where: {
+            id: { in: topPVentasBuy.map(c => c.id_config!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapPVentasBuy = Object.fromEntries(
+          pventasTopBuy.map(c => [c.id, c.name])
+        );
+
+        const top10PVentasBuy = topPVentasBuy.map(c => ({
+          pventaId: c.id_config,
+          pventa: mapPVentasBuy[c.id_config!],
+          totalBuys: c._sum.totalBuy || 0
+        }));
+
+        ///PVentastop10Buy
+
+        ///PVentastop10
+
+    const topPVentas = await this.order.groupBy({
+          by: ['id_config'],
+          where: {
+            salbuy: 'SALE',
+            invNum: { gt: 0 },
+            id_config: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...comprobanteFilter,
+            ...supplierFilter,
+            ...encargadoFilter,
+            ...parteFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const pventasTop = await this.configuration.findMany({
+          where: {
+            id: { in: topPVentas.map(c => c.id_config!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapPVentas = Object.fromEntries(
+          pventasTop.map(c => [c.id, c.name])
+        );
+
+        const top10PVentas = topPVentas.map(c => ({
+          pventaId: c.id_config,
+          pventa: mapPVentas[c.id_config!],
+          totalSales: c._sum.total || 0
+        }));
+
+
+
+        ///PVentastop10
+
+        ///Userstop10Buy
+    const topUsersBuy = await this.order.groupBy({
+          by: ['user'],
+          where: {
+            salbuy: 'BUY',
+            invNum: { gt: 0 },
+            user: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...comprobanteFilter,
+            ...supplierFilter,
+            ...encargadoFilter,
+            ...parteFilter,
+
+          },
+          _sum: {
+            totalBuy: true
+          },
+          orderBy: {
+            _sum: {
+              totalBuy: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const usersTopBuy = await this.user.findMany({
+          where: {
+            id: { in: topUsersBuy.map(c => c.user!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapUsersBuy = Object.fromEntries(
+          usersTopBuy.map(c => [c.id, c.name])
+        );
+
+        const top10UsersBuy = topUsersBuy.map(c => ({
+          userId: c.user,
+          user: mapUsersBuy[c.user!],
+          totalBuys: c._sum.totalBuy || 0
+        }));
+
+        ///Userstop10Buy
+
+        ///Userstop10
+    const topUsers = await this.order.groupBy({
+          by: ['user'],
+          where: {
+            salbuy: 'SALE',
+            invNum: { gt: 0 },
+            user: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...comprobanteFilter,
+            ...supplierFilter,
+            ...encargadoFilter,
+            ...parteFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const usersTop = await this.user.findMany({
+          where: {
+            id: { in: topUsers.map(c => c.user!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapUsers = Object.fromEntries(
+          usersTop.map(c => [c.id, c.name])
+        );
+
+        const top10Users = topUsers.map(c => ({
+          userId: c.user,
+          user: mapUsers[c.user!],
+          totalSales: c._sum.total || 0
+        }));
+
+        ///Userstop10
+
+    ///Supplierstop10
+    const topSuppliers = await this.order.groupBy({
+          by: ['supplier'],
+          where: {
+            salbuy: 'BUY',
+            invNum: { gt: 0 },
+            supplier: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...comprobanteFilter,
+            ...supplierFilter,
+            ...encargadoFilter,
+            ...parteFilter,
+
+          },
+          _sum: {
+            totalBuy: true
+          },
+          orderBy: {
+            _sum: {
+              totalBuy: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const suppliersTop = await this.supplier.findMany({
+          where: {
+            id: { in: topSuppliers.map(c => c.supplier!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapSuppliers = Object.fromEntries(
+          suppliersTop.map(c => [c.id, c.name])
+        );
+
+        const top10Suppliers = topSuppliers.map(c => ({
+          supplierId: c.supplier,
+          supplier: mapSuppliers[c.supplier!],
+          totalBuys: c._sum.totalBuy || 0
+        }));
+
+        ///Supplierstop10
+
+        ///clientestop10
     const topCustomers = await this.order.groupBy({
           by: ['id_client'],
           where: {
@@ -1084,13 +1311,21 @@ const customers = [
           producIO,
           top10Clients,
           // top10Partes,
-          PubPri,
-          PubPriVal,
-          inster,
-          dilter,
-          dilVal,
-          insterVal
-
+          // PubPri,
+          // PubPriVal,
+          // inster,
+          // insterVal
+          // dilter,
+          // dilVal,
+          top10Suppliers,
+          top10Users,
+          top10UsersBuy,
+          top10PVentas,
+          top10PVentasBuy,
+          top10Categorias,
+          top10CategoriasBuy,
+          top10Productos,
+          top10ProductosBuy
       };
 
 
@@ -1100,7 +1335,7 @@ const customers = [
 
 //////dash
 
-  async dashboard(query: any) {
+  async dashboardTes(query: any) {
   // isAuth,
   // // isAdmin,
     // const numberOfOrders = await Order.count();
