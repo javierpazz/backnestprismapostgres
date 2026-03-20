@@ -63,6 +63,56 @@ const {
 ///filtroparaborrar
 
 
+        ///Userstop10
+    const topUsers = await this.order.groupBy({
+          by: ['user'],
+          where: {
+            terminado:false,
+            id_instru: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...comprobanteFilter,
+            ...parteFilter,
+            
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            user: true   // 👈 cantidad de registros por usuario
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const usersTop = await this.user.findMany({
+          where: {
+            id: { in: topUsers.map(c => c.user!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapUsers = Object.fromEntries(
+          usersTop.map(c => [c.id, c.name])
+        );
+
+        const top10UsersSTVal = topUsers.map(c => ({
+          userId: c.user,
+          user: mapUsers[c.user!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.user
+        }));
+
+        ///Userstop10
 
 
     ///dilval
@@ -83,42 +133,19 @@ const {
         _sum: {
           price: true,
         },
+        _count: {
+          terminado: true,
+        },
+
       });    
       const dilVal = resultdilVal.map(r => ({
         _id: r.terminado ? 'terminado' : 'pendiente',
         total: r._sum.price || 0,
+        totalCan: r._count.terminado || 0,
       }));
     ///dilval
-    ///dilter
-          const resultdil = await this.orderItem.groupBy({
-        by: ['terminado'],
-        where: {
-          order: {
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-
-          },
-        },
-        _count: {
-          id: true,
-        },
-      });
-
-      const dilter = resultdil.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        count: r._count.id,
-      }));
-
-
-    ///dilter
 
     ///intterVal
-/// intterVal
       const resultinsVal = await this.order.groupBy({
         by: ['terminado'],
         where: {
@@ -133,41 +160,17 @@ const {
         _sum: {
           total: true,
         },
+        _count: {
+          id: true,
+        },
+
       });
       const insterVal = resultinsVal.map(r => ({
         _id: r.terminado ? 'terminado' : 'pendiente',
         total: r._sum.total || 0,
-      }));
-/// intterVal
-    ///intterVal
-
-
-
-    ///intter
-      const resultTer = await this.order.groupBy({
-        by: ['terminado'],
-        where: {
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...comprobanteFilter,
-            ...parteFilter,
-
-        },
-        _count: {
-          id: true,
-        },
-      });    
-      const inster = resultTer.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
         count: r._count.id,
       }));
-
-
-
-    ///intter
+    // ///intterVal
 
     ///intpubpriVal
 
@@ -192,74 +195,29 @@ const {
 
             const resultVal = {
               publico: 0,
-              privado: 0
+              privado: 0,
+              countPublico: 0,   // 👈 contador
+              countPrivado: 0    // 👈 contador
             };
 
             for (const order of ordersPubPriVal) {
 
               if (order.instrumento?.publico) {
-                resultVal.publico += order.total || 0;
+                resultVal.publico += order.total ?? 0;
+                resultVal.countPublico += 1;   // 👈 suma cantidad
               } else {
-                resultVal.privado += order.total || 0;
+                resultVal.privado += order.total ?? 0;
+                resultVal.countPrivado += 1;   // 👈 suma cantidad
               }
 
             }
 
             const PubPriVal = [
-              { type: 'Publico', total: resultVal.publico },
-              { type: 'Privado', total: resultVal.privado }
+              { type: 'Publico', total: resultVal.publico, totalcont: resultVal.countPublico },
+              { type: 'Privado', total: resultVal.privado, totalcont: resultVal.countPrivado },
                 ]
           
     ///intpubpriVal
-    ///entpubpri
-
-            const ordersPubPri = await this.order.findMany({
-              where: {
-                id_instru: {not: null},
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...comprobanteFilter,
-                ...parteFilter,
-              },
-              include: {
-                instrumento: {
-                  select: {
-                    publico: true
-                  }
-                }
-              }
-            });
-
-            const result = {
-              publico: 0,
-              privado: 0
-            };
-
-            // for (const order of ordersPubPri) {
-
-            //   if (order.instrumento?.publico) {
-            //     result.publico += order.total || 0;
-            //   } else {
-            //     result.privado += order.total || 0;
-            //   }
-
-            // }
-
-              ordersPubPri.forEach(o => {
-                if (o.instrumento?.publico) {
-                  result.publico++;
-                } else {
-                  result.privado++;
-                }
-              });
-            const PubPri = [
-              { type: 'Publico', total: result.publico },
-              { type: 'Privado', total: result.privado }
-                ]
-          
-    ///entpubpri
     ///clientestop10
     const topCustomers = await this.order.groupBy({
           by: ['id_client'],
@@ -410,8 +368,6 @@ const customers = [
     numCustomers: Customers
   }
   ]
-
-
       return {
           productCategories,
           orders,
@@ -419,13 +375,10 @@ const customers = [
           customers,
           top10Clients,
           top10Partes,
-          PubPri,
           PubPriVal,
-          inster,
-          dilter,
           dilVal,
-          insterVal
-
+          insterVal,
+          top10UsersSTVal
       };
 
 
@@ -2844,7 +2797,7 @@ async createInv(createInvoiceDto: any) {
       //////////  MODIFICA STOCK /////////////////
       
     if (invoiceAux.salbuy === "SALE") {
-    if (invoiceAux.isHaber) {
+    if (!invoiceAux.isHaber) {
       invoiceAux.orderItems.map(async(item) => {
         // const product = await this.product.findById(item._id);
         const product = await this.product.findUnique(
@@ -2895,7 +2848,7 @@ async createInv(createInvoiceDto: any) {
     }
     } else {
 
-      if (!invoiceAux.isHaber) {
+      if (invoiceAux.isHaber) {
         invoiceAux.orderItems.map(async(item) => {
         // const product = await this.product.findById(item._id);
         const product = await this.product.findUnique(

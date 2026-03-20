@@ -13,22 +13,22 @@ export class InvoiceController {
   @Get('orders/summary/esc')
   // async dashboard1(@Query() query: any) {
   @Auth()
-  dashboard1Esc(@Query() query: any) {
+  dashboardEsc(@Query() query: any) {
     return this.invoiceService.dashboardEsc(query);
   }
   @Get('orders/summary')
   // async dashboard1(@Query() query: any) {
   @Auth()
-  dashboard1(@Query() query: any) {
+  dashboardCrm(@Query() query: any) {
     return this.invoiceService.dashboard(query);
   }
   
-  @Get('tes/admin')
-  @Auth()
-  // async dashboard(@Query() query: any) {
-  dashboard(@Query() query: any) {
-    return this.invoiceService.dashboard(query);
-  }
+  // @Get('tes/admin')
+  // @Auth()
+  // // async dashboard(@Query() query: any) {
+  // dashboard(@Query() query: any) {
+  //   return this.invoiceService.dashboard(query);
+  // }
 
   @Get('invoices/proiye')
   // async proiye(@Query() query: any) {
