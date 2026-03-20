@@ -2258,8 +2258,9 @@ const {
   // recibos → haber
   const movimientosRec: CtaSupMovimiento[] = (recibos as any).map((r: any) => ({
     docDat: r.recDat,
-    haber: r.totalBuy,
-    debe: 0,
+    // haber: r.totalBuy,
+    debe: r.totalBuy,
+    haber: 0,
     recNum: r.recNum,
     supplier: r.supplier1,
     configuration: r.configuration,
@@ -2269,13 +2270,16 @@ const {
   // facturas proveedor
   const movimientosInv: CtaSupMovimiento[] = (facturas as any).map((o: any) => ({
     docDat: o.invDat,
-    haber: o.isHaber ? o.totalBuy : 0,
-    debe: !o.isHaber ? o.totalBuy : 0,
     invNum: o.invNum,
     supplier: o.supplier1,
     configuration: o.configuration,
     user: o.user1,
     comprobante: o.comprobante,
+    
+    debe: !o.isHaber ? o.totalBuy : 0,
+    haber: o.isHaber ? o.totalBuy : 0,
+    
+
   }));
 
   const ctacte: CtaSupMovimiento[] = [
@@ -2466,7 +2470,9 @@ const {
   // const movimientosRec: CtaCteMovimiento[] = recibos.map((r) => ({
   const movimientosRec: CtaCteMovimiento[] = (recibos as any).map((r: any) => ({
     docDat: r.recDat,
-    haber: r.total,
+    // haber: r.total,
+    debe: r.total,
+    haber: 0,
     recNum: r.recNum,
     customer: r.customer,
     configuration: r.configuration,
@@ -2475,16 +2481,20 @@ const {
 
   // Convertir facturas
   // const movimientosInv: CtaCteMovimiento[] = facturas.map((o) => ({
-  const movimientosInv: CtaCteMovimiento[] = (facturas as any).map((o: any) => ({
-    docDat: o.invDat,
-    debe: o.total,
-    invNum: o.invNum,
-    customer: o.customer,
-    configuration: o.configuration,
-    user: o.user1,
-    comprobante: o.comprobante,
-  }));
-
+    const movimientosInv: CtaCteMovimiento[] = (facturas as any).map((o: any) => ({
+      docDat: o.invDat,
+      // debe: o.total,
+      invNum: o.invNum,
+      customer: o.customer,
+      configuration: o.configuration,
+      user: o.user1,
+      comprobante: o.comprobante,
+      
+      debe:  o.isHaber ? o.total : 0,
+      haber: !o.isHaber ? o.total : 0,
+      
+    }));
+    
   const ctacte: CtaCteMovimiento[] = [
     ...movimientosRec,
     ...movimientosInv
