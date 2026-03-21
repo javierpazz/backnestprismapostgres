@@ -5,14 +5,17 @@ import { PrismaClient, Valuee } from '@prisma/client';
 import { CreateValoreDto } from './dto/create-valore.dto';
 import { UpdateValoreDto } from './dto/update-valore.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class ValoresService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class ValoresService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class ValoresService {
 
+  constructor(private prisma: PrismaService) {}
 
 
   async create(createValoreDto: CreateValoreDto) {
@@ -20,7 +23,7 @@ export class ValoresService extends PrismaClient implements OnModuleInit {
     const { _id, ...rest } = createValoreDto;
     try {
       const valuee = await 
-      this.valuee.create({data:rest});
+      this.prisma.valuee.create({data:rest});
       return valuee;
       
     } catch (error) {
@@ -34,7 +37,7 @@ export class ValoresService extends PrismaClient implements OnModuleInit {
   // isAuth,
   // // isAdmin,
 
-    const valuees = await this.valuee.findMany({
+    const valuees = await this.prisma.valuee.findMany({
         orderBy: {
           desVal: 'asc',
         },
@@ -50,7 +53,7 @@ export class ValoresService extends PrismaClient implements OnModuleInit {
     
     let valuee: Valuee;
     if ( id ) {
-      valuee = await this.valuee.findUnique({
+      valuee = await this.prisma.valuee.findUnique({
       where: { id },
       });
     }
@@ -68,7 +71,7 @@ async update(updateValoreDto: UpdateValoreDto) {
 
 
   try {
-    const updated = await this.valuee.update({
+    const updated = await this.prisma.valuee.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -93,7 +96,7 @@ async update(updateValoreDto: UpdateValoreDto) {
 
 async remove(id: string) {
   try {
-    await this.valuee.delete({
+    await this.prisma.valuee.delete({
       where: { id },
     });
     return { message: `Valuee con id ${id} eliminado` };

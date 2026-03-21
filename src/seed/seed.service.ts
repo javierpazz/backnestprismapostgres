@@ -4,19 +4,22 @@ import { ProductsService } from './../products/products.service';
 import { initialData } from './data/seed-data';
 import { ValoresService } from '../valores/valores.service';
 import { UsersService } from 'src/users/users.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class SeedService extends PrismaClient implements OnModuleInit {
+// export class SeedService extends PrismaClient implements OnModuleInit {
+//   constructor(private readonly productsService: ProductsService,
+//         private readonly usersService: UsersService,
+//         private readonly valoresService: ValoresService) {
+//     super();
+//   }
+export class SeedService {
   constructor(private readonly productsService: ProductsService,
         private readonly usersService: UsersService,
-        private readonly valoresService: ValoresService) {
-    super();
-  }
+        private readonly valoresService: ValoresService,
+        private prisma: PrismaService
+      ) { }
 
-  async onModuleInit() {
-    await this.$connect();
-    console.log('✅ Database connected');
-  }
   
   async runSeed() {
     

@@ -5,22 +5,24 @@ import { PrismaClient, Comprobante } from '@prisma/client';
 import { CreateComprobanteDto } from './dto/create-comprobante.dto';
 import { UpdateComprobanteDto } from './dto/update-comprobante.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class ComprobanteService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class ComprobanteService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class ComprobanteService {
 
-
+  constructor(private prisma: PrismaService) {}
 
   async create(createComprobanteDto: CreateComprobanteDto, comprobante:Comprobante) {
     // createComprobanteDto.nameCus = createComprobanteDto.nameCus.toLocaleLowerCase();
     const { _id, codCon, codCom, ...rest } = createComprobanteDto;
     try {
       const comprobante = await 
-      this.comprobante.create({
+      this.prisma.comprobante.create({
 
         data: {
         ...rest,
@@ -63,7 +65,7 @@ export class ComprobanteService extends PrismaClient implements OnModuleInit {
       configuracion && configuracion !== 'all' ? { codConId: String(configuracion) } : {codConId: null};
 
 
-    const comprobantes = await this.comprobante.findMany({
+    const comprobantes = await this.prisma.comprobante.findMany({
         where: {
         ...HaberFilter,
         ...configuracionFilter,
@@ -84,7 +86,7 @@ export class ComprobanteService extends PrismaClient implements OnModuleInit {
     
     let comprobante: Comprobante;
     if ( id ) {
-      comprobante = await this.comprobante.findUnique({
+      comprobante = await this.prisma.comprobante.findUnique({
       where: { id },
       });
     }
@@ -104,7 +106,7 @@ async update(updateComprobanteDto: UpdateComprobanteDto) {
   const { _id, codCon, ...rest } = updateComprobanteDto;
 
   try {
-    const updated = await this.comprobante.update({
+    const updated = await this.prisma.comprobante.update({
       where: { id: _id },
       data: {
             nameCom: updateComprobanteDto.nameCom,
@@ -141,7 +143,7 @@ async update(updateComprobanteDto: UpdateComprobanteDto) {
 
 async remove(id: string) {
   try {
-    await this.comprobante.delete({
+    await this.prisma.comprobante.delete({
       where: { id },
     });
     return { message: `Comprobante con id ${id} eliminado` };

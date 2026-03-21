@@ -5,16 +5,19 @@ import { PrismaClient, Customer } from '@prisma/client';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
 // export class CustomersService {
-export class CustomersService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class CustomersService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class CustomersService {
 
 
+  constructor(private prisma: PrismaService) {}
 
 
 
@@ -26,7 +29,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
 
 /////numera cliente
       let cliNumero = 0;
-        const configuracion = await this.configuration.findUnique(
+        const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: rest.punto },
           }
@@ -34,7 +37,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
         if (configuracion) {
           configuracion.numIntCli += 1;
           // await configuracion.save({ session });
-          await this.configuration.update(
+          await this.prisma.configuration.update(
             {
               where: { id: rest.punto },
               data: {
@@ -49,7 +52,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
 /////numera cliente
 
       const customer = await 
-      this.customer.create(
+      this.prisma.customer.create(
         {data: {
           codCus: String(cliNumero),
           nameCus: rest.nameCus,
@@ -71,7 +74,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
     const { _id, ...rest } = createCustomerDto;
     try {
       const customer = await 
-      this.customer.create({data:rest});
+      this.prisma.customer.create({data:rest});
       return customer;
       
     } catch (error) {
@@ -85,7 +88,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
   // isAuth,
   // // isAdmin,
 
-    const customers = await this.customer.findMany({
+    const customers = await this.prisma.customer.findMany({
         orderBy: {
           nameCus: 'asc',
         },
@@ -101,7 +104,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
     
     let customer: Customer;
     if ( id ) {
-      customer = await this.customer.findUnique({
+      customer = await this.prisma.customer.findUnique({
       where: { id },
       });
     }
@@ -117,7 +120,7 @@ export class CustomersService extends PrismaClient implements OnModuleInit {
     
     let customer: Customer;
     if ( email ) {
-      customer = await this.customer.findFirst({
+      customer = await this.prisma.customer.findFirst({
       where: { emailCus :email },
       });
     }
@@ -135,7 +138,7 @@ async update(updateCustomerDto: UpdateCustomerDto) {
 
 
   try {
-    const updated = await this.customer.update({
+    const updated = await this.prisma.customer.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -167,7 +170,7 @@ async update(updateCustomerDto: UpdateCustomerDto) {
     // }
     
 
-    // const { deletedCount } = await this.customer.deleteOne({ _id: id });
+    // const { deletedCount } = await this.prisma.customer.deleteOne({ _id: id });
     // if ( deletedCount === 0 )
     //   throw new BadRequestException(`Registro with id "${ id }" not found`);
 
@@ -175,7 +178,7 @@ async update(updateCustomerDto: UpdateCustomerDto) {
 
 async remove(id: string) {
   try {
-    await this.customer.delete({
+    await this.prisma.customer.delete({
       where: { id },
     });
     return { message: `Customer con id ${id} eliminado` };

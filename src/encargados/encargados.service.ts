@@ -6,13 +6,18 @@ import { CreateEncargadoDto } from './dto/create-encargado.dto';
 import { UpdateEncargadoDto } from './dto/update-encargado.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
+import { PrismaService } from '../prisma/prisma.service';
+
 
 @Injectable()
-export class EncargadosService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class EncargadosService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
 
+export class EncargadosService {
+
+  constructor(private prisma: PrismaService) {}
 
 
   async create(createEncargadoDto: CreateEncargadoDto, encargado:Encargado) {
@@ -20,7 +25,7 @@ export class EncargadosService extends PrismaClient implements OnModuleInit {
     const { _id, ...rest } = createEncargadoDto;
     try {
       const encargado = await 
-      this.encargado.create({data:rest});
+      this.prisma.encargado.create({data:rest});
       return encargado;
       
     } catch (error) {
@@ -34,7 +39,7 @@ export class EncargadosService extends PrismaClient implements OnModuleInit {
   // isAuth,
   // // isAdmin,
 
-    const encargados = await this.encargado.findMany({
+    const encargados = await this.prisma.encargado.findMany({
         orderBy: {
           name: 'asc',
         },
@@ -50,7 +55,7 @@ export class EncargadosService extends PrismaClient implements OnModuleInit {
     
     let encargado: Encargado;
     if ( id ) {
-      encargado = await this.encargado.findUnique({
+      encargado = await this.prisma.encargado.findUnique({
       where: { id },
       });
     }
@@ -68,7 +73,7 @@ async update(updateEncargadoDto: UpdateEncargadoDto) {
 
 
   try {
-    const updated = await this.encargado.update({
+    const updated = await this.prisma.encargado.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -93,7 +98,7 @@ async update(updateEncargadoDto: UpdateEncargadoDto) {
 
 async remove(id: string) {
   try {
-    await this.encargado.delete({
+    await this.prisma.encargado.delete({
       where: { id },
     });
     return { message: `Encargado con id ${id} eliminado` };

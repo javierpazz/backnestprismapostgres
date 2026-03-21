@@ -7,25 +7,33 @@ import { PrismaClient, User } from '@prisma/client';
 import { LoginUserDto, CreateUserDto } from './dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { CustomersService } from 'src/customers/customers.service';
-
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class AuthService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class AuthService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+
+export class AuthService {
+
+  // constructor(
+  //   private readonly jwtService: JwtService,
+  //   // private readonly customersService: CustomersService,    
+  // ) {super()}
 
   constructor(
     private readonly jwtService: JwtService,
+    private prisma: PrismaService
     // private readonly customersService: CustomersService,    
-  ) {super()}
+  ) {}
 
 
   async create( createUserDto: CreateUserDto, user:User) {
     
     try {
       const { password, ...userData } = createUserDto;
-          user = await this.user.create({
+          user = await this.prisma.user.create({
             data: {
               ...userData,
               role: "client",
@@ -77,7 +85,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
     const { password, email } = loginUserDto;
     
 
-    const user = await this.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email },
       // select: { email: true, password: true, id: true } //! OJO!
     });
@@ -110,7 +118,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 ///// control logs
       const log = user.numLogs + 1;
       if(log > 5) {
-      await this.user.update({
+      await this.prisma.user.update({
           where: { id: user.id },
           data: {
             // numLogs: 0,
@@ -128,7 +136,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
       // user.numLogs = log;    
       // await user.save();
 
-        await this.user.update({
+        await this.prisma.user.update({
             where: { id: user.id },
             data: {
               numLogs: log
@@ -159,7 +167,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
     const {role, roles, name, id, isAdmin, isActive} = user;
 
 ///// control logs
-  await this.user.update({
+  await this.prisma.user.update({
     where: { id: user.id },
     data: { numLogs: 0 }
   });
@@ -184,7 +192,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
     const { password, email } = loginUserDto;
     
 
-    const user = await this.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email },
       // select: { email: true, password: true, id: true } //! OJO!
     });
@@ -212,7 +220,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 ///// control logs
       const log = user.numLogs + 1;
       if(log > 5) {
-      await this.user.update({
+      await this.prisma.user.update({
           where: { id: user.id },
           data: {
             // numLogs: 0,
@@ -230,7 +238,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
       // user.numLogs = log;    
       // await user.save();
 
-        await this.user.update({
+        await this.prisma.user.update({
             where: { id: user.id },
             data: {
               numLogs: log
@@ -261,7 +269,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
     const {role, roles, name, id, isAdmin, isActive} = user;
 
 ///// control logs
-  await this.user.update({
+  await this.prisma.user.update({
     where: { id: user.id },
     data: { numLogs: 0 }
   });///// control logs
@@ -328,7 +336,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
     // const { password, email } = loginUserDto;
 
-    const user = await this.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id },
       // select: { email: true, password: true, id: true } //! OJO!
     });

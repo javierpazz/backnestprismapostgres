@@ -5,15 +5,18 @@ import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { ConfigService } from '@nestjs/config';
 
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class ConfigurationsService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class ConfigurationsService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class ConfigurationsService {
 
 
+  constructor(private prisma: PrismaService) {}
 
 
 
@@ -21,7 +24,7 @@ export class ConfigurationsService extends PrismaClient implements OnModuleInit 
     const { _id, ...rest } = createconfigurationDto;
     try {
       const configuration = await 
-      this.configuration.create({data:rest});
+      this.prisma.configuration.create({data:rest});
       return configuration;
       
     } catch (error) {
@@ -33,7 +36,7 @@ export class ConfigurationsService extends PrismaClient implements OnModuleInit 
 
 
   async findAlladm() {
-  const data = await this.configuration.findMany();
+  const data = await this.prisma.configuration.findMany();
   const configuraciones = data.map(item => ({
       ...item,
       _id: item.id.toString(), // agregamos _id
@@ -44,7 +47,7 @@ export class ConfigurationsService extends PrismaClient implements OnModuleInit 
   }
 
   async findAll() {
-  const data = await this.configuration.findMany();
+  const data = await this.prisma.configuration.findMany();
   return {
     configurations: data.map(item => ({
       ...item,
@@ -54,7 +57,7 @@ export class ConfigurationsService extends PrismaClient implements OnModuleInit 
   }
 
   async findAllV() {
-  const data = await this.configuration.findMany();
+  const data = await this.prisma.configuration.findMany();
   const configurations = data.map(item => ({
     ...item,
     _id: item.id.toString(), // agregamos _id
@@ -67,7 +70,7 @@ export class ConfigurationsService extends PrismaClient implements OnModuleInit 
     
     let configuration: Configuration;
     if ( id ) {
-      configuration = await this.configuration.findUnique({
+      configuration = await this.prisma.configuration.findUnique({
       where: { id },
       });
     }
@@ -85,7 +88,7 @@ async update(updateConfigurationDto: UpdateConfigurationDto) {
 
 
   try {
-    const updated = await this.configuration.update({
+    const updated = await this.prisma.configuration.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -110,7 +113,7 @@ async update(updateConfigurationDto: UpdateConfigurationDto) {
 
 async remove(id: string) {
   try {
-    await this.configuration.delete({
+    await this.prisma.configuration.delete({
       where: { id },
     });
     return { message: `P.Venta/Registro con id ${id} eliminado` };

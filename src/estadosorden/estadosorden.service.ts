@@ -5,14 +5,17 @@ import { PrismaClient, StateOrd } from '@prisma/client';
 import { CreateEstadosordenDto } from './dto/create-estadosorden.dto';
 import { UpdateEstadosordenDto } from './dto/update-estadosorden.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class EstadosordenService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class EstadosordenService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class EstadosordenService {
 
+  constructor(private prisma: PrismaService) {}
 
 
   async create(createEstadosordenDto: CreateEstadosordenDto, stateOrd:StateOrd) {
@@ -20,7 +23,7 @@ export class EstadosordenService extends PrismaClient implements OnModuleInit {
     const { _id, ...rest } = createEstadosordenDto;
     try {
       const stateOrd = await 
-      this.stateOrd.create({data:rest});
+      this.prisma.stateOrd.create({data:rest});
       return stateOrd;
       
     } catch (error) {
@@ -34,7 +37,7 @@ export class EstadosordenService extends PrismaClient implements OnModuleInit {
   // isAuth,
   // // isAdmin,
 
-    const estadosOrden = await this.stateOrd.findMany({
+    const estadosOrden = await this.prisma.stateOrd.findMany({
         orderBy: {
           name: 'asc',
         },
@@ -50,7 +53,7 @@ export class EstadosordenService extends PrismaClient implements OnModuleInit {
     
     let stateOrd: StateOrd;
     if ( id ) {
-      stateOrd = await this.stateOrd.findUnique({
+      stateOrd = await this.prisma.stateOrd.findUnique({
       where: { id },
       });
     }
@@ -68,7 +71,7 @@ async update(updateEstadosordenDto: UpdateEstadosordenDto) {
 
 
   try {
-    const updated = await this.stateOrd.update({
+    const updated = await this.prisma.stateOrd.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -93,7 +96,7 @@ async update(updateEstadosordenDto: UpdateEstadosordenDto) {
 
 async remove(id: string) {
   try {
-    await this.stateOrd.delete({
+    await this.prisma.stateOrd.delete({
       where: { id },
     });
     return { message: `EstadosOrden con id ${id} eliminado` };

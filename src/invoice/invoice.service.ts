@@ -9,19 +9,27 @@ import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
 import { ProductoFacService } from 'src/producto-fac/producto-fac.service';
 
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class InvoiceService extends PrismaClient implements OnModuleInit {
+// export class InvoiceService extends PrismaClient implements OnModuleInit {
+
+//   constructor(private readonly configurationsService: ConfigurationsService,
+//               private readonly productoFacService: ProductoFacService
+//   ) {
+//     super();
+//   }
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+  
+export class InvoiceService {
 
   constructor(private readonly configurationsService: ConfigurationsService,
-              private readonly productoFacService: ProductoFacService
-  ) {
-    super();
-  }
-  async onModuleInit() {
-    await this.$connect();
-  }
+              private readonly productoFacService: ProductoFacService,
+              private prisma: PrismaService) {}
+
   
 
 //////dash1esc
@@ -64,7 +72,7 @@ const {
 
 
         ///Userstop10
-    const topUsers = await this.order.groupBy({
+    const topUsers = await this.prisma.order.groupBy({
           by: ['user'],
           where: {
             terminado:false,
@@ -91,7 +99,7 @@ const {
           take: 10
         });
 
-        const usersTop = await this.user.findMany({
+        const usersTop = await this.prisma.user.findMany({
           where: {
             id: { in: topUsers.map(c => c.user!) },
           },
@@ -116,7 +124,7 @@ const {
 
 
     ///dilval
-      const resultdilVal = await this.orderItem.groupBy({
+      const resultdilVal = await this.prisma.orderItem.groupBy({
         by: ['terminado'],
         where: {
           order: {
@@ -146,7 +154,7 @@ const {
     ///dilval
 
     ///intterVal
-      const resultinsVal = await this.order.groupBy({
+      const resultinsVal = await this.prisma.order.groupBy({
         by: ['terminado'],
         where: {
             id_instru: {not: null},
@@ -174,7 +182,7 @@ const {
 
     ///intpubpriVal
 
-            const ordersPubPriVal = await this.order.findMany({
+            const ordersPubPriVal = await this.prisma.order.findMany({
               where: {
                 id_instru: {not: null},
                 ...fechasInvFilter,
@@ -219,7 +227,7 @@ const {
           
     ///intpubpriVal
     ///clientestop10
-    const topCustomers = await this.order.groupBy({
+    const topCustomers = await this.prisma.order.groupBy({
           by: ['id_client'],
           where: {
             id_instru: {not: null},
@@ -243,7 +251,7 @@ const {
           take: 10
         });
 
-        const customersTop = await this.customer.findMany({
+        const customersTop = await this.prisma.customer.findMany({
           where: {
             id: { in: topCustomers.map(c => c.id_client!) },
           },
@@ -265,7 +273,7 @@ const {
 
         ///clientestop10
     ///partetop10
-        const topPartes = await this.order.groupBy({
+        const topPartes = await this.prisma.order.groupBy({
           by: ['id_parte'],
           where: {
             id_instru: {not: null},
@@ -290,7 +298,7 @@ const {
           take: 10
         });
 
-        const partesTop = await this.parte.findMany({
+        const partesTop = await this.prisma.parte.findMany({
           where: {
             id: { in: topPartes.map(c => c.id_parte!) },
           },
@@ -313,7 +321,7 @@ const {
         ///partetop10
 
     ///categorias    
-      const categories = await this.product.groupBy({
+      const categories = await this.prisma.product.groupBy({
         by: ['category'],
         _count: {
           category: true,
@@ -327,7 +335,7 @@ const {
 ///categorias    
 
 ///orders
-const ordersData = await this.order.aggregate({
+const ordersData = await this.prisma.order.aggregate({
   where: {
             id_instru: {not: null},
         ...fechasInvFilter,
@@ -354,14 +362,14 @@ const orders = [
 ];
 ///orders
 
-const Users = await this.user.count();
+const Users = await this.prisma.user.count();
 const users = [
   {
     _id: null,
     numUsers: Users
   }
   ]
-const Customers = await this.customer.count();
+const Customers = await this.prisma.customer.count();
 const customers = [
   {
     _id: null,
@@ -439,7 +447,7 @@ const {
 
 
     ///Productos10Buy
-            const itemsProBuy = await this.orderItem.findMany({
+            const itemsProBuy = await this.prisma.orderItem.findMany({
           where: {
             order: {
               salbuy: 'BUY',
@@ -490,7 +498,7 @@ const {
     ///Productos10Buy
 
     ///Productos10
-            const itemsPro = await this.orderItem.findMany({
+            const itemsPro = await this.prisma.orderItem.findMany({
           where: {
             order: {
               salbuy: 'SALE',
@@ -541,7 +549,7 @@ const {
     ///Productos10
 
     ///Categorias10Buy
-            const itemsBuy = await this.orderItem.findMany({
+            const itemsBuy = await this.prisma.orderItem.findMany({
               where: {
                 order: {
                   salbuy: 'BUY',
@@ -585,7 +593,7 @@ const {
               
         ///Categorias10Buy
     ///Categorias10
-            const items = await this.orderItem.findMany({
+            const items = await this.prisma.orderItem.findMany({
               where: {
                 order: {
                   salbuy: 'SALE',
@@ -629,7 +637,7 @@ const {
               
         ///Categorias10
     ///PVentastop10Buy
-    const topPVentasBuy = await this.order.groupBy({
+    const topPVentasBuy = await this.prisma.order.groupBy({
           by: ['id_config'],
           where: {
             salbuy: 'BUY',
@@ -656,7 +664,7 @@ const {
           take: 10
         });
 
-        const pventasTopBuy = await this.configuration.findMany({
+        const pventasTopBuy = await this.prisma.configuration.findMany({
           where: {
             id: { in: topPVentasBuy.map(c => c.id_config!) },
           },
@@ -680,7 +688,7 @@ const {
 
         ///PVentastop10
 
-    const topPVentas = await this.order.groupBy({
+    const topPVentas = await this.prisma.order.groupBy({
           by: ['id_config'],
           where: {
             salbuy: 'SALE',
@@ -707,7 +715,7 @@ const {
           take: 10
         });
 
-        const pventasTop = await this.configuration.findMany({
+        const pventasTop = await this.prisma.configuration.findMany({
           where: {
             id: { in: topPVentas.map(c => c.id_config!) },
           },
@@ -732,7 +740,7 @@ const {
         ///PVentastop10
 
         ///Userstop10Buy
-    const topUsersBuy = await this.order.groupBy({
+    const topUsersBuy = await this.prisma.order.groupBy({
           by: ['user'],
           where: {
             salbuy: 'BUY',
@@ -759,7 +767,7 @@ const {
           take: 10
         });
 
-        const usersTopBuy = await this.user.findMany({
+        const usersTopBuy = await this.prisma.user.findMany({
           where: {
             id: { in: topUsersBuy.map(c => c.user!) },
           },
@@ -782,7 +790,7 @@ const {
         ///Userstop10Buy
 
         ///Userstop10
-    const topUsers = await this.order.groupBy({
+    const topUsers = await this.prisma.order.groupBy({
           by: ['user'],
           where: {
             salbuy: 'SALE',
@@ -809,7 +817,7 @@ const {
           take: 10
         });
 
-        const usersTop = await this.user.findMany({
+        const usersTop = await this.prisma.user.findMany({
           where: {
             id: { in: topUsers.map(c => c.user!) },
           },
@@ -832,7 +840,7 @@ const {
         ///Userstop10
 
     ///Supplierstop10
-    const topSuppliers = await this.order.groupBy({
+    const topSuppliers = await this.prisma.order.groupBy({
           by: ['supplier'],
           where: {
             salbuy: 'BUY',
@@ -859,7 +867,7 @@ const {
           take: 10
         });
 
-        const suppliersTop = await this.supplier.findMany({
+        const suppliersTop = await this.prisma.supplier.findMany({
           where: {
             id: { in: topSuppliers.map(c => c.supplier!) },
           },
@@ -882,7 +890,7 @@ const {
         ///Supplierstop10
 
         ///clientestop10
-    const topCustomers = await this.order.groupBy({
+    const topCustomers = await this.prisma.order.groupBy({
           by: ['id_client'],
           where: {
             salbuy: 'SALE',
@@ -909,7 +917,7 @@ const {
           take: 10
         });
 
-        const customersTop = await this.customer.findMany({
+        const customersTop = await this.prisma.customer.findMany({
           where: {
             id: { in: topCustomers.map(c => c.id_client!) },
           },
@@ -935,7 +943,7 @@ const {
         ///partetop10
 
     ///categorias    
-      const categories = await this.product.groupBy({
+      const categories = await this.prisma.product.groupBy({
         by: ['category'],
         _count: {
           category: true,
@@ -956,7 +964,7 @@ const {
     };
     // const { fechasFilter, configuracionFilter, customerFilter, usuarioFilter } = query;
 
-    const invoices = await this.order.findMany({
+    const invoices = await this.prisma.order.findMany({
       where: {
         invNum: { gt: 0 },
         ...fechasInvFilter,
@@ -1007,7 +1015,7 @@ type DailyMoney = {
   inputs: number;
   outputs: number;
 };
-  const receipts = await this.receipt.findMany({
+  const receipts = await this.prisma.receipt.findMany({
     // where: {
     //   recNum: { gt: 0 },
     // },
@@ -1056,7 +1064,7 @@ type DailyMoney = {
 
 ///dailymoney      
 ///orders
-const ordersData = await this.order.aggregate({
+const ordersData = await this.prisma.order.aggregate({
   where: {
     invNum: { gt: 0 },
     salbuy: 'SALE',
@@ -1095,7 +1103,7 @@ type CtacteDaily = {
 };
 
 
-  const receipts1 = await this.receipt.findMany({
+  const receipts1 = await this.prisma.receipt.findMany({
     where: {
       recNum: { gt: 0 },
         ...fechasRecFilter,
@@ -1114,7 +1122,7 @@ type CtacteDaily = {
     },
   });
 
-  const invoices1 = await this.order.findMany({
+  const invoices1 = await this.prisma.order.findMany({
     where: {
       invNum: { gt: 0 },
         ...fechasInvFilter,
@@ -1183,7 +1191,7 @@ type ProductIO = {
 };
 
 
-  const invoices2 = await this.order.findMany({
+  const invoices2 = await this.prisma.order.findMany({
     where: {
         ...fechasInvFilter,
         ...configuracionFilter,
@@ -1237,14 +1245,14 @@ type ProductIO = {
 
 ///proIO
 
-const Users = await this.user.count();
+const Users = await this.prisma.user.count();
 const users = [
   {
     _id: null,
     numUsers: Users
   }
   ]
-const Customers = await this.customer.count();
+const Customers = await this.prisma.customer.count();
 const customers = [
   {
     _id: null,
@@ -1298,23 +1306,23 @@ const customers = [
     // const productsWithNoInventory = await Product.find({ inStock: 0 }).count();
     // const lowInventory = await Product.find({ inStock: { $lte: 10 } }).count();
     
-    const numberOfOrders = await this.order.count();
+    const numberOfOrders = await this.prisma.order.count();
 
-    const paidOrders = await this.order.count({
+    const paidOrders = await this.prisma.order.count({
       where: { isPaid: true },
     });
 
-    const numberOfClients = await this.user.count({
+    const numberOfClients = await this.prisma.user.count({
       where: { role: 'client' },
     });
 
-    const numberOfProducts = await this.product.count();
+    const numberOfProducts = await this.prisma.product.count();
 
-    const productsWithNoInventory = await this.product.count({
+    const productsWithNoInventory = await this.prisma.product.count({
       where: { inStock: 0 },
     });
 
-    const lowInventory = await this.product.count({
+    const lowInventory = await this.prisma.product.count({
       where: { inStock: { lte: 10 } },
     });
 
@@ -1376,7 +1384,7 @@ const {
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
 
 ///filtroparaborrar
-  const invoices = await this.order.findMany({
+  const invoices = await this.prisma.order.findMany({
     where: {
         invNum: {gt : 0},
         ...fechasInvFilter,
@@ -1527,7 +1535,7 @@ const {
       ? { invDat: { gte: f1 } }
       : { invDat: { gte: f1, lte: f2 } };
 
-  const orders = await this.order.findMany({
+  const orders = await this.prisma.order.findMany({
    
     where: {
       salbuy: factura, invNum: {gt : 0},
@@ -1687,7 +1695,7 @@ const {
   const f2 = fech2 ? new Date(fech2) : null;
 
 
-  const orders = await this.order.findMany({
+  const orders = await this.prisma.order.findMany({
 
     where: {
       salbuy: factura, invNum: {gt : 0},
@@ -1848,7 +1856,7 @@ const {
   const f2 = fech2 ? new Date(fech2) : null;
 
 
-  const orders = await this.order.findMany({
+  const orders = await this.prisma.order.findMany({
 
     where: {
       salbuy: factura, invNum: {gt : 0},
@@ -2004,7 +2012,7 @@ const {
   const f2 = fech2 ? new Date(fech2) : null;
 
 
-  const orders = await this.order.findMany({
+  const orders = await this.prisma.order.findMany({
     where: {
       salbuy: factura, invNum: {gt : 0},
         ...fechasInvFilter,
@@ -2162,7 +2170,7 @@ const {
   const f2 = fech2 ? new Date(fech2) : null;
 
 
-  const recibos = await this.receipt.findMany({
+  const recibos = await this.prisma.receipt.findMany({
       
       where: {
         salbuy: factura,
@@ -2185,7 +2193,7 @@ const {
     },
   });
 
-  const facturas = await this.order.findMany({
+  const facturas = await this.prisma.order.findMany({
     
     where: {
       salbuy: factura, invNum: {gt : 0},
@@ -2372,7 +2380,7 @@ const {
   const f1 = fech1 ? new Date(fech1) : null;
   const f2 = fech2 ? new Date(fech2) : null;
 
-  const recibos = await this.receipt.findMany({
+  const recibos = await this.prisma.receipt.findMany({
     where: {
         salbuy: factura,
         ...fechasRecFilter,
@@ -2393,7 +2401,7 @@ const {
     },
   });
 
-  const facturas = await this.order.findMany({
+  const facturas = await this.prisma.order.findMany({
     
     ///filtroparaborrar
     where: {
@@ -2548,14 +2556,14 @@ async geninvRem(createInvoiceDto: any, id:any) {
         {recNumero = receiptAux.recNum }
         else {
           const configId = receiptAux.codCon._id;
-          const configuracion = await this.configuration.findUnique(
+          const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
         );
 
           if (configuracion) {
-            await this.configuration.update(
+            await this.prisma.configuration.update(
                           {
               where: { id: configId },
               data: {
@@ -2569,7 +2577,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
         };
         //////////  numera RECIBO /////////////////
   
-      const receipt = await this.receipt.create({
+      const receipt = await this.prisma.receipt.create({
           data: {
       subTotal: receiptAux.subTotal,
       total: receiptAux.total,
@@ -2626,8 +2634,8 @@ async geninvRem(createInvoiceDto: any, id:any) {
         {invNumero = invoiceAux.invNum }
         else {
           const comproId = invoiceAux.codCom;
-          // const comprobante = await this.comprobante.findById(comproId);
-          const comprobante = await this.comprobante.findUnique(
+          // const comprobante = await this.prisma.comprobante.findById(comproId);
+          const comprobante = await this.prisma.comprobante.findUnique(
           {
             where: { id: comproId },
           }
@@ -2638,7 +2646,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
           // }
           
           if (comprobante) {
-            await this.comprobante.update(
+            await this.prisma.comprobante.update(
               {
                 where: { id: comproId },
                 data: {
@@ -2661,7 +2669,7 @@ async geninvRem(createInvoiceDto: any, id:any) {
             // invrecDat =  invoiceAux.recDat;
           };
 ///***
-      const invoice = await this.order.update({
+      const invoice = await this.prisma.order.update({
       where: { id: id},
       data: {
           notes : invoiceAux.notes,
@@ -2722,14 +2730,14 @@ async createInv(createInvoiceDto: any) {
         {recNumero = receiptAux.recNum }
         else {
           const configId = receiptAux.codCon;
-          const configuracion = await this.configuration.findUnique(
+          const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
         );
 
           if (configuracion) {
-            await this.configuration.update(
+            await this.prisma.configuration.update(
                           {
               where: { id: configId },
               data: {
@@ -2743,7 +2751,7 @@ async createInv(createInvoiceDto: any) {
         };
         //////////  numera RECIBO /////////////////
   
-      const receipt = await this.receipt.create({
+      const receipt = await this.prisma.receipt.create({
           data: {
       subTotal: receiptAux.subTotal,
       total: receiptAux.total,
@@ -2799,14 +2807,14 @@ async createInv(createInvoiceDto: any) {
     if (invoiceAux.salbuy === "SALE") {
     if (!invoiceAux.isHaber) {
       invoiceAux.orderItems.map(async(item) => {
-        // const product = await this.product.findById(item._id);
-        const product = await this.product.findUnique(
+        // const product = await this.prisma.product.findById(item._id);
+        const product = await this.prisma.product.findUnique(
           {
             where: { id: item._id },
           }
         );
         if (product) {
-          await this.product.update(
+          await this.prisma.product.update(
             {
               where: { id: item._id },
               data: {
@@ -2825,13 +2833,13 @@ async createInv(createInvoiceDto: any) {
 
       invoiceAux.orderItems.map(async(item) => {
         // const product = await Product.findById(item._id);
-        const product = await this.product.findUnique(
+        const product = await this.prisma.product.findUnique(
           {
             where: { id: item._id },
           }
         );
         if (product) {
-          await this.product.update(
+          await this.prisma.product.update(
             {
               where: { id: item._id },
               data: {
@@ -2850,15 +2858,15 @@ async createInv(createInvoiceDto: any) {
 
       if (invoiceAux.isHaber) {
         invoiceAux.orderItems.map(async(item) => {
-        // const product = await this.product.findById(item._id);
-        const product = await this.product.findUnique(
+        // const product = await this.prisma.product.findById(item._id);
+        const product = await this.prisma.product.findUnique(
           {
             where: { id: item._id },
           }
         );
 
           if (product) {
-          await this.product.update(
+          await this.prisma.product.update(
             {
               where: { id: item._id },
               data: {
@@ -2877,8 +2885,8 @@ async createInv(createInvoiceDto: any) {
       } else {
   
         invoiceAux.orderItems.map(async(item) => {
-          // const product = await this.product.findById(item._id);
-        const product = await this.product.findUnique(
+          // const product = await this.prisma.product.findById(item._id);
+        const product = await this.prisma.product.findUnique(
           {
             where: { id: item._id },
           }
@@ -2886,7 +2894,7 @@ async createInv(createInvoiceDto: any) {
 
 
           if (product) {
-          await this.product.update(
+          await this.prisma.product.update(
             {
               where: { id: item._id },
               data: {
@@ -2913,8 +2921,8 @@ async createInv(createInvoiceDto: any) {
         {invNumero = invoiceAux.invNum }
         else {
           const comproId = invoiceAux.codCom;
-          // const comprobante = await this.comprobante.findById(comproId);
-          const comprobante = await this.comprobante.findUnique(
+          // const comprobante = await this.prisma.comprobante.findById(comproId);
+          const comprobante = await this.prisma.comprobante.findUnique(
           {
             where: { id: comproId },
           }
@@ -2925,7 +2933,7 @@ async createInv(createInvoiceDto: any) {
           // }
           
           if (comprobante) {
-            await this.comprobante.update(
+            await this.prisma.comprobante.update(
               {
                 where: { id: comproId },
                 data: {
@@ -2951,14 +2959,14 @@ async createInv(createInvoiceDto: any) {
             {remNumero = invoiceAux.remNum }
             else {
           const configId = receiptAux.codCon;
-          const configuracion = await this.configuration.findUnique(
+          const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
         );
 
           if (configuracion) {
-            await this.configuration.update(
+            await this.prisma.configuration.update(
                           {
               where: { id: configId },
               data: {
@@ -2984,7 +2992,7 @@ async createInv(createInvoiceDto: any) {
             // invrecDat =  invoiceAux.recDat;
           };
 ///***
-      const invoice = await this.order.create({
+      const invoice = await this.prisma.order.create({
           data: {
             // orderAddress: invoiceAux.orderAddress,
             paymentMethod: invoiceAux.paymentMethod,
@@ -3091,7 +3099,7 @@ async createRem(createInvoiceDto: any) {
       } else {
         const configId = orderData.codCon;
         // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.configuration.findUnique(
+        const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
@@ -3099,7 +3107,7 @@ async createRem(createInvoiceDto: any) {
         if (configuracion) {
           configuracion.numIntRem += 1;
           // await configuracion.save({ session });
-          await this.configuration.update(
+          await this.prisma.configuration.update(
             {
               where: { id: configId },
               data: {
@@ -3118,7 +3126,7 @@ async createRem(createInvoiceDto: any) {
 
 
 
-            const invoice = await this.order.create({
+            const invoice = await this.prisma.order.create({
           data: {
       orderAddress: orderData.orderAddress,
       paymentMethod: orderData.paymentMethod,
@@ -3210,8 +3218,8 @@ async createOrd(createInvoiceDto: any) {
   // Crear un arreglo con los productos que la persona quiere
     const productsIds = orderItems.map( product => product._id );
 
-    // const dbProducts = await this.product.find({ _id: { $in: productsIds } });
-    const dbProducts = await this.product.findMany({
+    // const dbProducts = await this.prisma.product.find({ _id: { $in: productsIds } });
+    const dbProducts = await this.prisma.product.findMany({
       where: {
         id: {
           in: productsIds,
@@ -3249,7 +3257,7 @@ async createOrd(createInvoiceDto: any) {
     // await newOrder.save();
 //////crea
 
-      const invoice = await this.order.create({
+      const invoice = await this.prisma.order.create({
       data: {
 ////agrearemito
       isPaid: false,
@@ -3402,7 +3410,7 @@ async createMov(createInvoiceDto: any) {
       } else {
         const configId = orderData.codCon;
         // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.configuration.findUnique(
+        const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
@@ -3410,7 +3418,7 @@ async createMov(createInvoiceDto: any) {
         if (configuracion) {
           configuracion.numIntMov += 1;
           // await configuracion.save({ session });
-          await this.configuration.update(
+          await this.prisma.configuration.update(
             {
               where: { id: configId },
               data: {
@@ -3429,7 +3437,7 @@ async createMov(createInvoiceDto: any) {
 
 
 
-            const invoice = await this.order.create({
+            const invoice = await this.prisma.order.create({
           data: {
       orderAddress: orderData.orderAddress,
       paymentMethod: orderData.paymentMethod,
@@ -3596,7 +3604,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...productFilter,
@@ -3730,7 +3738,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...productFilter,
@@ -3858,7 +3866,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...productFilter,
@@ -3984,7 +3992,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const ordersWork = await this.order.findMany({
+    const ordersWork = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...productFilter,
@@ -4053,7 +4061,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const ordersWork = await this.order.findMany({
+    const ordersWork = await this.prisma.order.findMany({
       where: {
         ...usuarioFilter,
         ...existeIns,
@@ -4179,7 +4187,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...productFilter,
@@ -4304,7 +4312,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...productFilter,
@@ -4427,7 +4435,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...productFilter,
@@ -4488,7 +4496,7 @@ const obserFilter: Prisma.OrderWhereInput =
   async findAlldil(query: any) {
 
 // Traemos todos los OrderItems con sus Order relacionados
-const orderItemsWithOrder = await this.orderItem.findMany({
+const orderItemsWithOrder = await this.prisma.orderItem.findMany({
   include: {
     order: {
       include: {
@@ -4590,7 +4598,7 @@ const invoices = orderItemsWithOrder.map(item => ({
 async findOne(id: string) {
   if (!id) throw new NotFoundException(`Entrada with id "${id}" not found`);
 
-  const invoice = await this.order.findUnique({
+  const invoice = await this.prisma.order.findUnique({
     where: { id },
     include: {
       customer: true,       // id_client
@@ -4658,7 +4666,7 @@ async nullinvoice(updateInvoiceDto: any, id: string) {
   // };
 
   try {
-    const updated = await this.order.update({
+    const updated = await this.prisma.order.update({
       where: { id: id},
       data: {
           remNum : null,
@@ -4687,7 +4695,7 @@ async nullremit(updateInvoiceDto: any, id: string) {
   // };
 
   try {
-    const updated = await this.order.update({
+    const updated = await this.prisma.order.update({
       where: { id: id},
       data: {
             remNum: null,
@@ -4713,7 +4721,7 @@ async updateS(updateInvoiceDto: any, id: string) {
 
   console.log(updateInvoiceDto)
   try {
-    const updated = await this.order.updateMany({
+    const updated = await this.prisma.order.updateMany({
       where: { recNum: updateInvoiceDto.recNum, id_client: updateInvoiceDto.customer },
       data: {
             recNum: 0,
@@ -4737,7 +4745,7 @@ async updateB(updateInvoiceDto: any, id: string) {
   // };
 
   try {
-    const updated = await this.order.updateMany({
+    const updated = await this.prisma.order.updateMany({
       where: { recNum: updateInvoiceDto.recNum, supplier: updateInvoiceDto.supplier },
       data: {
             recNum: 0,
@@ -4757,10 +4765,10 @@ async updateB(updateInvoiceDto: any, id: string) {
 
 async remove(id: string) {
   try {
-    await this.orderItem.deleteMany({
+    await this.prisma.orderItem.deleteMany({
       where: { orderId: id },
     });
-    await this.order.delete({
+    await this.prisma.order.delete({
       where: { id },
     });
     return { message: `Documento con id ${id} eliminado` };

@@ -5,17 +5,23 @@ import { CreateEntradaDto } from './dto/create-entrada.dto';
 import { UpdateEntradaDto } from './dto/update-entrada.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
 
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class EntradasService extends PrismaClient implements OnModuleInit {
+// export class EntradasService extends PrismaClient implements OnModuleInit {
 
-  constructor(private readonly configurationsService: ConfigurationsService) {
-    super();
-  }
-  async onModuleInit() {
-    await this.$connect();
-  }
+//   constructor(private readonly configurationsService: ConfigurationsService) {
+//     super();
+//   }
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class EntradasService {
+
+  constructor(private readonly configurationsService: ConfigurationsService,
+              private prisma: PrismaService
+            ) {}  
 
 // @Injectable()
 // export class EntradasService {
@@ -40,7 +46,7 @@ async create(createEntradaDto: any) {
       } else {
         const configId = orderData.codCon;
         // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.configuration.findUnique(
+        const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
@@ -48,7 +54,7 @@ async create(createEntradaDto: any) {
         if (configuracion) {
           configuracion.numIntRem += 1;
           // await configuracion.save({ session });
-          await this.configuration.update(
+          await this.prisma.configuration.update(
             {
               where: { id: configId },
               data: {
@@ -67,7 +73,7 @@ async create(createEntradaDto: any) {
 
 
 
-            const invoice = await this.order.create({
+            const invoice = await this.prisma.order.create({
           data: {
             paymentMethod: orderData.paymentMethod,
             subTotal: orderData.subTotal,
@@ -256,7 +262,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
         ...parteFilter,
@@ -427,7 +433,7 @@ const obserFilter: Prisma.OrderWhereInput =
       : { order: { remDat: 'asc' as const } };
 
   // --- Query final ---
-  const orderItemsWithOrder = await this.orderItem.findMany({
+  const orderItemsWithOrder = await this.prisma.orderItem.findMany({
 
     where: {
       ...productFilter,
@@ -553,7 +559,7 @@ _id: item.order?.id,
 async findOne(id: string) {
   if (!id) throw new NotFoundException(`Entrada with id "${id}" not found`);
 
-  const invoice = await this.order.findUnique({
+  const invoice = await this.prisma.order.findUnique({
     where: { id },
     include: {
       customer: true,       // id_client
@@ -679,7 +685,7 @@ async findOne(id: string) {
   
 
 
-    const invoice = await this.order.findUnique({
+    const invoice = await this.prisma.order.findUnique({
     where: { id },
     include: {
       customer: true,       // id_client
@@ -745,7 +751,7 @@ async findOne(id: string) {
             // console.log('ID del order:', id);
             // console.log('IDs de productos:', formattedInvoice.orderItems.map(i => i.productId));
 
-      await this.order.update(
+      await this.prisma.order.update(
             ({
           where: { id: id }, // Prisma usa 'id'
         data: {
@@ -825,10 +831,10 @@ async findOne(id: string) {
 
 async remove(id: string) {
   try {
-    await this.orderItem.deleteMany({
+    await this.prisma.orderItem.deleteMany({
       where: { orderId: id },
     });
-    await this.order.delete({
+    await this.prisma.order.delete({
       where: { id },
     });
     return { message: `Documento con id ${id} eliminado` };

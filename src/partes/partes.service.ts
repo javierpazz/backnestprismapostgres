@@ -5,14 +5,17 @@ import { PrismaClient, Parte } from '@prisma/client';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class PartesService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class PartesService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class PartesService {
 
+  constructor(private prisma: PrismaService) {}
 
 
   async create(createParteDto: CreateParteDto, parte:Parte) {
@@ -20,7 +23,7 @@ export class PartesService extends PrismaClient implements OnModuleInit {
     const { _id, ...rest } = createParteDto;
     try {
       const parte = await 
-      this.parte.create({data:rest});
+      this.prisma.parte.create({data:rest});
       return parte;
       
     } catch (error) {
@@ -34,7 +37,7 @@ export class PartesService extends PrismaClient implements OnModuleInit {
   // isAuth,
   // // isAdmin,
 
-    const partes = await this.parte.findMany({
+    const partes = await this.prisma.parte.findMany({
         orderBy: {
           name: 'asc',
         },
@@ -50,7 +53,7 @@ export class PartesService extends PrismaClient implements OnModuleInit {
     
     let parte: Parte;
     if ( id ) {
-      parte = await this.parte.findUnique({
+      parte = await this.prisma.parte.findUnique({
       where: { id },
       });
     }
@@ -68,7 +71,7 @@ async update(updateParteDto: UpdateParteDto) {
 
 
   try {
-    const updated = await this.parte.update({
+    const updated = await this.prisma.parte.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -93,7 +96,7 @@ async update(updateParteDto: UpdateParteDto) {
 
 async remove(id: string) {
   try {
-    await this.parte.delete({
+    await this.prisma.parte.delete({
       where: { id },
     });
     return { message: `Parte con id ${id} eliminado` };

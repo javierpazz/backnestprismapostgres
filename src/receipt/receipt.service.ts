@@ -5,18 +5,22 @@ import { CreateReceiptDto } from './dto/create-receipt.dto';
 import { UpdateReceiptDto } from './dto/update-receipt.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
 // seria valuee import { ProductoFacService } from 'src/producto-fac/producto-fac.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class ReceiptService extends PrismaClient implements OnModuleInit {
+export class ReceiptService {
 
+  // constructor(private readonly configurationsService: ConfigurationsService,
+  // ) {
+  //   super();
+  // }
+  // async onModuleInit() {
+  //   await this.$connect();
+  // }
   constructor(private readonly configurationsService: ConfigurationsService,
-  ) {
-    super();
-  }
-  async onModuleInit() {
-    await this.$connect();
-  }
+              private prisma: PrismaService
+  ) {}
 
 ///////cajingegr
 async searchingegrSB(query: any) {
@@ -51,7 +55,7 @@ async searchingegrSB(query: any) {
     };
   }
 
-  const recibos = await this.receipt.findMany({
+  const recibos = await this.prisma.receipt.findMany({
     where: {
       ...fechasFilter,
 
@@ -152,7 +156,7 @@ async searchcajSB(query: any) {
     };
   }
 
-  const recibos = await this.receipt.findMany({
+  const recibos = await this.prisma.receipt.findMany({
 
     where: {
       ...fechasFilter,
@@ -261,13 +265,13 @@ async searchcajSB(query: any) {
       } else {
         const configId = createReceiptDto.codCon;
         // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.configuration.findUnique(
+        const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
         );
         if (configuracion) {
-          await this.configuration.update(
+          await this.prisma.configuration.update(
             {
               where: { id: configId },
               data: {
@@ -282,7 +286,7 @@ async searchcajSB(query: any) {
       }
 //////////////
 
-      const receipt = await this.receipt.create({
+      const receipt = await this.prisma.receipt.create({
           data: {
       subTotal: createReceiptDto.subTotal,
       total: createReceiptDto.total,
@@ -357,13 +361,13 @@ async searchcajSB(query: any) {
       } else {
         const configId = createReceiptDto.codCon;
         // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.configuration.findUnique(
+        const configuracion = await this.prisma.configuration.findUnique(
           {
             where: { id: configId },
           }
         );
         if (configuracion) {
-          await this.configuration.update(
+          await this.prisma.configuration.update(
             {
               where: { id: configId },
               data: {
@@ -378,7 +382,7 @@ async searchcajSB(query: any) {
       }
 //////////////
 
-      const receipt = await this.receipt.create({
+      const receipt = await this.prisma.receipt.create({
           data: {
       subTotal: createReceiptDto.subTotal,
       total: createReceiptDto.total,
@@ -508,7 +512,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
 
 ///////query
 
-    const receiptsAll = await this.receipt.findMany({
+    const receiptsAll = await this.prisma.receipt.findMany({
       where: {
         ...fechasFilter,
         ...encargadoFilter,
@@ -622,7 +626,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
 
 ///////query
 
-    const receiptsAll = await this.receipt.findMany({
+    const receiptsAll = await this.prisma.receipt.findMany({
       where: {
         ...fechasFilter,
         ...encargadoFilter,
@@ -737,7 +741,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
 
 ///////query
 
-    const receiptsAll = await this.receipt.findMany({
+    const receiptsAll = await this.prisma.receipt.findMany({
       where: {
         ...fechasFilter,
         ...customerFilter,
@@ -852,7 +856,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
 
 ///////query
 
-    const receiptsAll = await this.receipt.findMany({
+    const receiptsAll = await this.prisma.receipt.findMany({
       where: {
         ...fechasFilter,
         ...supplierFilter,
@@ -901,7 +905,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
 async findOne(id: string) {
   if (!id) throw new NotFoundException(`Entrada with id "${id}" not found`);
 
-  const receipt = await this.receipt.findUnique({
+  const receipt = await this.prisma.receipt.findUnique({
     where: { id },
     include: {
       customer: true,       // id_client
@@ -966,10 +970,10 @@ async findOne(id: string) {
 
 async remove(id: string) {
   try {
-    await this.receiptItem.deleteMany({
+    await this.prisma.receiptItem.deleteMany({
       where: { receiptId: id },
     });
-    await this.receipt.delete({
+    await this.prisma.receipt.delete({
       where: { id },
     });
     return { message: `Recibo con id ${id} eliminado` };

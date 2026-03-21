@@ -8,22 +8,25 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 // import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtPayload } from 'src/auth/interfaces';
 
 @Injectable()
-export class UsersService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class UsersService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class UsersService {
 
 
   constructor(
     private readonly jwtService: JwtService,
-    // private readonly customersService: CustomersService,    
-  ) {super()}
+    // private readonly customersService: CustomersService,
+    private prisma: PrismaService
+  ) {}
 
 
   async forget(createUserDto: CreateUserDto) {
@@ -51,7 +54,7 @@ const mailgun = mg({
     const { _id, ...rest } = createUserDto;
 
     try {
-      const userInDB = await this.user.findUnique({
+      const userInDB = await this.prisma.user.findUnique({
         where: { email : createUserDto.email },
       });
       if ( userInDB ) {
@@ -63,7 +66,7 @@ const mailgun = mg({
       //////// modifica resetToken
         const user = await this.findOne(userInDB.id);
 
-        const updated = await this.user.update({
+        const updated = await this.prisma.user.update({
           where: { id: userInDB.id }, // Prisma usa 'id'
           data: {
             resetToken : token,
@@ -134,7 +137,7 @@ const mailgun = mg({
         //   res.status(404).send({ message: 'User not found' });
         // }
       try {
-          const userInDB = await this.user.findFirst({
+          const userInDB = await this.prisma.user.findFirst({
             where: { resetToken : createUserDto.token},
             // where: { email : createUserDto.email },
           });
@@ -143,7 +146,7 @@ const mailgun = mg({
       //////// modifica password
               const user = await this.findOne(userInDB.id);
 
-                const updated = await this.user.update({
+                const updated = await this.prisma.user.update({
                   where: { id: userInDB.id }, // Prisma usa 'id'
                   data: {
                     password: bcrypt.hashSync(createUserDto.password, 10),
@@ -167,7 +170,7 @@ const mailgun = mg({
   async create(createUserDto: CreateUserDto) {
     // createUserDto.nameCus = createUserDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createUserDto;
-    const userInDB = await this.user.findUnique({
+    const userInDB = await this.prisma.user.findUnique({
       where: { email : createUserDto.email },
     });
     if ( userInDB ) {
@@ -180,7 +183,7 @@ const mailgun = mg({
     
     try {
       const user = await 
-      this.user.create({
+      this.prisma.user.create({
         data: {
           resetToken : "",
           name: createUserDto.name,
@@ -208,7 +211,7 @@ const mailgun = mg({
   // isAuth,
   // // isAdmin,
 
-    const users = await this.user.findMany({
+    const users = await this.prisma.user.findMany({
         orderBy: {
           name: 'asc',
         },
@@ -224,7 +227,7 @@ const mailgun = mg({
     
     let user: User;
     if ( id ) {
-      user = await this.user.findUnique({
+      user = await this.prisma.user.findUnique({
       where: { id },
       });
     }
@@ -258,7 +261,7 @@ async updatePerfil(updateUserDto: UpdateUserDto) {
 
 
 
-    const updated = await this.user.update({
+    const updated = await this.prisma.user.update({
       where: { id: _id }, // Prisma usa 'id'
             data: {
           name: updateUserDto.name,
@@ -309,7 +312,7 @@ async update(updateUserDto: UpdateUserDto) {
 
 
 
-    const updated = await this.user.update({
+    const updated = await this.prisma.user.update({
       where: { id: _id }, // Prisma usa 'id'
             data: {
           name: updateUserDto.name,
@@ -342,7 +345,7 @@ async update(updateUserDto: UpdateUserDto) {
 async updateRole(updateUserDto: UpdateUserDto) {
   const { userId, ...data } = updateUserDto;
   try {
-    const updated = await this.user.update({
+    const updated = await this.prisma.user.update({
       where: { id: userId }, // Prisma usa 'id'
             data: {
           role: updateUserDto.role,
@@ -358,7 +361,7 @@ async updateRole(updateUserDto: UpdateUserDto) {
 async updateisActive(updateUserDto: UpdateUserDto) {
   const { userId, ...data } = updateUserDto;
   try {
-    const updated = await this.user.update({
+    const updated = await this.prisma.user.update({
       where: { id: userId }, // Prisma usa 'id'
             data: {
           isActive: updateUserDto.isActive,
@@ -374,7 +377,7 @@ async updateisActive(updateUserDto: UpdateUserDto) {
 
 async remove(id: string) {
   try {
-    await this.user.delete({
+    await this.prisma.user.delete({
       where: { id },
     });
     return { message: `User con id ${id} eliminado` };

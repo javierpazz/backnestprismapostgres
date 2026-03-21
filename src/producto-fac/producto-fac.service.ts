@@ -5,16 +5,21 @@ import { UpdateProductoFacDto } from './dto/update-producto-fac.dto';
 import { PrismaClient, Product } from '@prisma/client';
 
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class ProductoFacService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class ProductoFacService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class ProductoFacService {
+
+  constructor(private prisma: PrismaService) {}
+
 
 async listByConfig(configId: string): Promise<any[]> {
-  const products = await this.product.findMany({
+  const products = await this.prisma.product.findMany({
     where: { id_config: configId },
     include: {
       supplier: true, // muy importante
@@ -47,7 +52,7 @@ async listByConfig(configId: string): Promise<any[]> {
   // }
   try {
       const product = await 
-      this.product.create({
+      this.prisma.product.create({
         
         data: {
         ...rest,
@@ -88,7 +93,7 @@ async listByConfig(configId: string): Promise<any[]> {
   // }
   try {
       const product = await 
-      this.product.create({
+      this.prisma.product.create({
         
         data: {
         ...rest,
@@ -123,7 +128,7 @@ async listByConfig(configId: string): Promise<any[]> {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
 
-    const products = await this.product.findMany({
+    const products = await this.prisma.product.findMany({
       where: {
         ...configuracionFilter,
       },
@@ -164,7 +169,7 @@ async listByConfig(configId: string): Promise<any[]> {
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
 
 
-    const categories = await this.product.groupBy({
+    const categories = await this.prisma.product.groupBy({
         by: ['category'],
       where: {
         ...configuracionFilter,
@@ -212,7 +217,7 @@ async listByConfig(configId: string): Promise<any[]> {
                     };
 
   try {
-          const products = await this.product.findMany({
+          const products = await this.prisma.product.findMany({
             where: {
               ...productsFilter,
               ...supplierFilter,
@@ -228,7 +233,7 @@ async listByConfig(configId: string): Promise<any[]> {
               (product.price * (1 + porcen / 100)).toFixed(2)
             );
 
-            return this.product.update({
+            return this.prisma.product.update({
               where: { id: product.id },
               data: { price: newPrice },
             });
@@ -280,7 +285,7 @@ async listByConfig(configId: string): Promise<any[]> {
                     };
 
   try {
-          const products = await this.product.findMany({
+          const products = await this.prisma.product.findMany({
             where: {
               ...productsFilter,
               ...supplierFilter,
@@ -297,7 +302,7 @@ async listByConfig(configId: string): Promise<any[]> {
               (product.price - (product.price * (porcen / 100))).toFixed(2)
             );
 
-            return this.product.update({
+            return this.prisma.product.update({
               where: { id: product.id },
               data: { price: newPrice },
             });
@@ -315,7 +320,7 @@ async listByConfig(configId: string): Promise<any[]> {
   async findOne(id: string) {
     let productT;
     if ( id ) {
-      productT = await this.product.findFirst({
+      productT = await this.prisma.product.findFirst({
         where: { slug : id },
         include: {
           supplier: true,
@@ -349,7 +354,7 @@ async update(updateProductoFacDto: UpdateProductoFacDto) {
   const { _id, supplier, reviews, images, categoryId, id_config, ...rest } = updateProductoFacDto;
 
   try {
-    const product = await this.product.update({
+    const product = await this.prisma.product.update({
       where: { id: _id },
 
       data: {
@@ -427,7 +432,7 @@ async updateFac(updateProductoFacDto: UpdateProductoFacDto) {
   };
 
   try {
-    const updated = await this.product.update({
+    const updated = await this.prisma.product.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -452,13 +457,13 @@ async updateFac(updateProductoFacDto: UpdateProductoFacDto) {
 async downstock(id: string, updateProductoFacDto: any) {
 
 
-        const product = await this.product.findUnique(
+        const product = await this.prisma.product.findUnique(
           {
             where: { id: id },
           }
         );
         if (product) {
-          await this.product.update(
+          await this.prisma.product.update(
             {
               where: { id: id },
               data: {
@@ -474,13 +479,13 @@ async downstock(id: string, updateProductoFacDto: any) {
 async upstock(id: string, updateProductoFacDto: any) {
 
 
-        const product = await this.product.findUnique(
+        const product = await this.prisma.product.findUnique(
           {
             where: { id: id },
           }
         );
         if (product) {
-          await this.product.update(
+          await this.prisma.product.update(
             {
               where: { id: id },
               data: {

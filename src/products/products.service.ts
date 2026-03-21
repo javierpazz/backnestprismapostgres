@@ -4,14 +4,17 @@ import { PrismaClient, Product } from '@prisma/client';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class ProductsService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class ProductsService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class ProductsService {
 
+  constructor(private prisma: PrismaService) {}
 
 
   async create(createProductDto: CreateProductDto, product:Product) {
@@ -22,8 +25,8 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   // }
   try {
       const product = await 
-      // this.product.create({data:rest});
-      this.product.create({data:{
+      // this.prisma.product.create({data:rest});
+      this.prisma.product.create({data:{
           ...rest,
 
         // 🔗 Supplier (si viene)
@@ -60,7 +63,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     q: query,
   } = paginationDto;
 
-  const data = await this.configuration.findFirst({
+  const data = await this.prisma.configuration.findFirst({
       where: { codCon : "0001" },
   });
   const configuracion = data.id;
@@ -95,7 +98,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       : undefined,
   };
   const [products, totalProducts] = await Promise.all([
-    this.product.findMany({
+    this.prisma.product.findMany({
       take: limit,
       skip: offset,
       where,
@@ -107,7 +110,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       },
     }),
 
-    this.product.count({ where }),
+    this.prisma.product.count({ where }),
   ]);
 
 
@@ -146,7 +149,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     q: query,
   } = paginationDto;
 
-  const data = await this.configuration.findFirst({
+  const data = await this.prisma.configuration.findFirst({
       where: { codCon : "0001" },
   });
   const configuracion = data.id;
@@ -180,7 +183,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       : undefined,
   };
   const [products, totalProducts] = await Promise.all([
-    this.product.findMany({
+    this.prisma.product.findMany({
       // take: limit,
       // skip: offset,
       where,
@@ -197,7 +200,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
       },
     }),
 
-    this.product.count({ where }),
+    this.prisma.product.count({ where }),
   ]);
 
 
@@ -235,7 +238,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   // async findAll(query: any) {
   async findAll() {
 
-  const data = await this.configuration.findFirst({
+  const data = await this.prisma.configuration.findFirst({
       where: { codCon : "0001" },
   });
   const configuracion = data.id;
@@ -243,7 +246,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {id_config: null};
 
-    const products = await this.product.findMany({
+    const products = await this.prisma.product.findMany({
       where: {
         ...configuracionFilter,
       },
@@ -280,7 +283,7 @@ export class ProductsService extends PrismaClient implements OnModuleInit {
   async updateecoActive(updateProductDto: UpdateProductDto) {
     const { productId, ...data } = updateProductDto;
     try {
-      const updated = await this.product.update({
+      const updated = await this.prisma.product.update({
         where: { id: productId }, // Prisma usa 'id'
               data: {
             ecoActive: updateProductDto.ecoActive,
@@ -315,7 +318,7 @@ async update(updateProductDto: UpdateProductDto) {
   };
 
   try {
-    const updated = await this.product.update({
+    const updated = await this.prisma.product.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -340,7 +343,7 @@ async update(updateProductDto: UpdateProductDto) {
 
 async remove(id: string) {
   try {
-    await this.product.delete({
+    await this.prisma.product.delete({
       where: { id },
     });
     return { message: `Product con id ${id} eliminado` };

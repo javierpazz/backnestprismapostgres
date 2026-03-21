@@ -3,15 +3,18 @@ import { PrismaClient, Supplier } from '@prisma/client';
 
 import { CreateProveedoreDto } from './dto/create-proveedore.dto';
 import { UpdateProveedoreDto } from './dto/update-proveedore.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 // export class ProveedoresService {
 
-export class ProveedoresService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class ProveedoresService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class ProveedoresService {
 
+  constructor(private prisma: PrismaService) {}
 
   // create(createProveedoreDto: CreateProveedoreDto) {
   //   return 'This action adds a new proveedor';
@@ -23,7 +26,7 @@ export class ProveedoresService extends PrismaClient implements OnModuleInit {
     const { _id, ...rest } = createProveedoreDto;
     try {
       const supplier = await 
-      this.supplier.create({data:rest});
+      this.prisma.supplier.create({data:rest});
       return supplier;
       
     } catch (error) {
@@ -40,7 +43,7 @@ export class ProveedoresService extends PrismaClient implements OnModuleInit {
   // isAuth,
   // // isAdmin,
 
-    const supplier = await this.supplier.findMany({
+    const supplier = await this.prisma.supplier.findMany({
         orderBy: {
           name: 'asc',
         },
@@ -56,7 +59,7 @@ export class ProveedoresService extends PrismaClient implements OnModuleInit {
     
     let supplier: Supplier;
     if ( id ) {
-      supplier = await this.supplier.findUnique({
+      supplier = await this.prisma.supplier.findUnique({
       where: { id },
       });
     }
@@ -75,7 +78,7 @@ async update(updateProveedoreDto: UpdateProveedoreDto) {
 
 
   try {
-    const updated = await this.supplier.update({
+    const updated = await this.prisma.supplier.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -107,7 +110,7 @@ async update(updateProveedoreDto: UpdateProveedoreDto) {
     // }
     
 
-    // const { deletedCount } = await this.supplier.deleteOne({ _id: id });
+    // const { deletedCount } = await this.prisma.supplier.deleteOne({ _id: id });
     // if ( deletedCount === 0 )
     //   throw new BadRequestException(`Registro with id "${ id }" not found`);
 
@@ -115,7 +118,7 @@ async update(updateProveedoreDto: UpdateProveedoreDto) {
 
 async remove(id: string) {
   try {
-    await this.supplier.delete({
+    await this.prisma.supplier.delete({
       where: { id },
     });
     return { message: `Proveedor con id ${id} eliminado` };

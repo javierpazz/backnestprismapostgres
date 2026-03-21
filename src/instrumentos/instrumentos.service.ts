@@ -5,14 +5,17 @@ import { CreateInstrumentoDto } from './dto/create-instrumento.dto';
 import { UpdateInstrumentoDto } from './dto/update-instrumento.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { CreateParamsDto } from './dto/create-params.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
-export class InstrumentosService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+// export class InstrumentosService extends PrismaClient implements OnModuleInit {
+//   async onModuleInit() {
+//     await this.$connect();
+//   }
+export class InstrumentosService {
 
+  constructor(private prisma: PrismaService) {}
 
 
   async create(createInstrumentoDto: CreateInstrumentoDto, instrumento:Instrumento) {
@@ -20,7 +23,7 @@ export class InstrumentosService extends PrismaClient implements OnModuleInit {
     const { _id, ...rest } = createInstrumentoDto;
     try {
       const instrumento = await 
-      this.instrumento.create({data:rest});
+      this.prisma.instrumento.create({data:rest});
       return instrumento;
       
     } catch (error) {
@@ -34,7 +37,7 @@ export class InstrumentosService extends PrismaClient implements OnModuleInit {
   // isAuth,
   // // isAdmin,
 
-    const instrumentos = await this.instrumento.findMany({
+    const instrumentos = await this.prisma.instrumento.findMany({
         orderBy: {
           name: 'asc',
         },
@@ -60,7 +63,7 @@ export class InstrumentosService extends PrismaClient implements OnModuleInit {
     
     let instrumento: Instrumento;
     if ( id ) {
-      instrumento = await this.instrumento.findUnique({
+      instrumento = await this.prisma.instrumento.findUnique({
       where: { id },
       });
     }
@@ -78,7 +81,7 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
 
 
   try {
-    const updated = await this.instrumento.update({
+    const updated = await this.prisma.instrumento.update({
       where: { id: _id }, // Prisma usa 'id'
       data,
     });
@@ -105,7 +108,7 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
     const { _id, ...data } = createParamsDto.body;
 
     try {
-      await this.instrumento.update(
+      await this.prisma.instrumento.update(
             ({
           where: { id: _id }, // Prisma usa 'id'
         data: {
@@ -141,10 +144,10 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
 
 async remove(id: string) {
   try {
-    await this.paramItem.deleteMany({
+    await this.prisma.paramItem.deleteMany({
       where: { instrumentoId: id },
     });
-    await this.instrumento.delete({
+    await this.prisma.instrumento.delete({
       where: { id },
     });
     return { message: `Instrumento con id ${id} eliminado` };
