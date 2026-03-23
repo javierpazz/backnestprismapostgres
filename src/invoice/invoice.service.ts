@@ -1455,7 +1455,7 @@ const {
 ///filtroparaborrar
   const invoices = await this.prisma.order.findMany({
     where: {
-        invNum: {gt : 0},
+        invNum: {gt : 0}, ajuste: false,
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1514,7 +1514,7 @@ const {
       product.totalQuantity += item.quantity;
       product.totalAmount += amount;
 
-      if (inv.isHaber) {
+      if (inv.salbuy === "SALE") {
         product.totalIngreso += item.quantity;
         product.totalMontoIngreso += amount;
         map[configId].totalAmountClient += amount;
@@ -1607,7 +1607,7 @@ const {
   const orders = await this.prisma.order.findMany({
    
     where: {
-      salbuy: factura, invNum: {gt : 0},
+      salbuy: factura, invNum: {gt : 0}, ajuste: false,
       ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1767,7 +1767,7 @@ const {
   const orders = await this.prisma.order.findMany({
 
     where: {
-      salbuy: factura, invNum: {gt : 0},
+      salbuy: factura, invNum: {gt : 0}, ajuste: false,
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1928,7 +1928,7 @@ const {
   const orders = await this.prisma.order.findMany({
 
     where: {
-      salbuy: factura, invNum: {gt : 0},
+      salbuy: factura, invNum: {gt : 0}, ajuste:false,
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -2083,7 +2083,7 @@ const {
 
   const orders = await this.prisma.order.findMany({
     where: {
-      salbuy: factura, invNum: {gt : 0},
+      salbuy: factura, invNum: {gt : 0}, ajuste: false,
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,

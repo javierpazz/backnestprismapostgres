@@ -46,17 +46,19 @@ export class ComprobanteService {
     // isAuth,
     // // isAdmin,
     const {
-      isHaber,
+      isAjuste,
       id_config,
     } = query;
-    // console.log(isHaber)
     // const Haber = JSON.parse(isHaber) || '';
     // console.log(Haber)
-    const Haber = isHaber ? JSON.parse(isHaber) : '';
-    const HaberFilter =
-        Haber && Haber !== 'all'
+    const Ajuste = isAjuste ? JSON.parse(isAjuste) : '';
+    console.log("Ajuste")
+    console.log(Ajuste)
+    console.log("Ajuste")
+    const AjusteFilter =
+        Ajuste && Ajuste === 'false'
           ? {
-            isHaber: Haber
+            isAjuste: false
             }
           : {};
 
@@ -67,7 +69,7 @@ export class ComprobanteService {
 
     const comprobantes = await this.prisma.comprobante.findMany({
         where: {
-        ...HaberFilter,
+        ...AjusteFilter,
         ...configuracionFilter,
       },
         orderBy: {

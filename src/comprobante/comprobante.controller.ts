@@ -21,7 +21,7 @@ export class ComprobanteController {
   @Auth()
   // findAllAdm( @Query() paginationDto: PaginationDto ) {
   findAll(@Query() query: any) {
-  return this.comprobanteService.findAll(query);
+    return this.comprobanteService.findAll(query);
   }
 
 
