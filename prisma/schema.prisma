@@ -122,6 +122,7 @@ model Comprobante {
   nameCom    String?
   claCom     String?
   isHaber    Boolean       @default(true)
+  isAjuste   Boolean       @default(false)
   noDisc     Boolean       @default(true)
   toDisc     Boolean       @default(false)
   itDisc     Boolean       @default(false)
@@ -393,6 +394,7 @@ model Order {
   terminado      Boolean      @default(false)
 
   isHaber        Boolean?
+  ajuste         Boolean?
   user           String?
   user1  User?   @relation(fields: [user], references: [id], onDelete: Restrict)
   id_delivery    String?

@@ -1093,7 +1093,7 @@ const orders = [
   },
 ];
 ///orders
-///ctacte
+///ctacteV
 type CtacteDaily = {
   _id: string;
   salesS: number;
@@ -1122,9 +1122,33 @@ type CtacteDaily = {
     },
   });
 
-  const invoices1 = await this.prisma.order.findMany({
+  const invoicesSale = await this.prisma.order.findMany({
     where: {
       invNum: { gt: 0 },
+      // ajuste: false,
+      salbuy: "SALE",
+      isHaber: false,
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...supplierFilter,
+        ...encargadoFilter,
+        ...parteFilter,
+    },
+    select: {
+      invDat: true,
+      total: true,
+      totalBuy: true,
+    },
+  });
+
+  const invoicesBuy = await this.prisma.order.findMany({
+    where: {
+      invNum: { gt: 0 },
+      salbuy: "BUY",
+      isHaber: true,
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1162,7 +1186,7 @@ type CtacteDaily = {
   }
 
   // invoices (sales)
-  for (const inv of invoices1) {
+  for (const inv of invoicesSale) {
     const date = inv.invDat.toISOString().split('T')[0];
 
     if (!map[date]) {
@@ -1179,7 +1203,50 @@ type CtacteDaily = {
     map[date].salesB += inv.totalBuy || 0;
   }
 
-  const ctacte = Object.values(map).sort((a, b) =>
+
+  const ctacteSale = Object.values(map).sort((a, b) =>
+    a._id.localeCompare(b._id)
+  );
+  // invoices (buys)
+
+  const mapBuy: Record<string, CtacteDaily> = {};
+
+// receipts (inputs)
+  for (const rec of receipts1) {
+    const date = rec.recDat.toISOString().split('T')[0];
+
+    if (!mapBuy[date]) {
+      mapBuy[date] = {
+        _id: date,
+        salesS: 0,
+        inputsS: 0,
+        salesB: 0,
+        inputsB: 0,
+      };
+    }
+
+    mapBuy[date].inputsS += rec.total || 0;
+    mapBuy[date].inputsB += rec.totalBuy || 0;
+  }
+
+  for (const inv of invoicesBuy) {
+    const date = inv.invDat.toISOString().split('T')[0];
+
+    if (!mapBuy[date]) {
+      mapBuy[date] = {
+        _id: date,
+        salesS: 0,
+        inputsS: 0,
+        salesB: 0,
+        inputsB: 0,
+      };
+    }
+
+    mapBuy[date].salesS += inv.total || 0;
+    mapBuy[date].salesB += inv.totalBuy || 0;
+  }
+
+  const ctacteBuy = Object.values(mapBuy).sort((a, b) =>
     a._id.localeCompare(b._id)
   );
 ///ctacte
@@ -1193,6 +1260,7 @@ type ProductIO = {
 
   const invoices2 = await this.prisma.order.findMany({
     where: {
+        ajuste: false,
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -1268,7 +1336,8 @@ const customers = [
           orders,
           users,
           customers,
-          ctacte,
+          ctacteSale,
+          ctacteBuy,
           producIO,
           top10Clients,
           // top10Partes,
@@ -3026,6 +3095,7 @@ async createInv(createInvoiceDto: any) {
             desVal: invoiceAux.desVal,
             notes: invoiceAux.notes,
             salbuy: invoiceAux.salbuy,
+            ajuste: invoiceAux.ajuste,
 //arreglaishaber          // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
           isHaber: (invoiceAux.salbuy === "SALE") ? invoiceAux.isHaber : !invoiceAux.isHaber,
             // isHaber: invoiceAux.isHaber,

@@ -113,6 +113,7 @@ async update(updateComprobanteDto: UpdateComprobanteDto) {
             codComC: updateComprobanteDto.codCom,
             claCom: updateComprobanteDto.claCom,
             isHaber: updateComprobanteDto.isHaber,
+            isAjuste: updateComprobanteDto.isAjuste,
             noDisc: updateComprobanteDto.noDisc,
             toDisc: updateComprobanteDto.toDisc,
             itDisc: updateComprobanteDto.itDisc,

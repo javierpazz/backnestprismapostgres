@@ -23,6 +23,10 @@ export class CreateComprobanteDto {
 
   @IsOptional()
   @IsBoolean()
+  isAjuste?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
   noDisc?: boolean;
 
   @IsOptional()
