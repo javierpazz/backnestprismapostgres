@@ -2,17 +2,12 @@ import { BadRequestException, Injectable, InternalServerErrorException, OnModule
 import { PrismaClient } from '@prisma/client';
 import { ProductsService } from './../products/products.service';
 import { initialData } from './data/seed-data';
+import { countries } from './data/seed-countries';
 import { ValoresService } from '../valores/valores.service';
 import { UsersService } from 'src/users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-// export class SeedService extends PrismaClient implements OnModuleInit {
-//   constructor(private readonly productsService: ProductsService,
-//         private readonly usersService: UsersService,
-//         private readonly valoresService: ValoresService) {
-//     super();
-//   }
 export class SeedService {
   constructor(private readonly productsService: ProductsService,
         private readonly usersService: UsersService,
@@ -23,54 +18,151 @@ export class SeedService {
   
   async runSeed() {
     
-    ////////
-    
-    // try {
-    //     await this.user.deleteMany({
-    //     where: {}, // elimina todos
-    //   });
-    // } catch (error) {
-    //   this.handleExceptions(error);
-    // }
-    
-    ////////
-    ////////
-    const users = initialData.users;
-    
-    const insertPromises = [];
-    
-    users.forEach( use => {
-      insertPromises.push( this.usersService.create( use ) );
-    });
-    
-    await Promise.all( insertPromises );
-    console.log('🌱 Running seed...');
-    return `Seed completed`;
-    ////////
-    // ////////
-    
-    // try {
-    //     await this.valuee.deleteMany({
-    //     where: {}, // elimina todos
-    //   });
-    // } catch (error) {
-    //   this.handleExceptions(error);
-    // }
-    
-    // ////////
-    // ////////
-    // const valuees = initialData.valuee;
-    
-    // const insertPromises = [];
-    
-    // valuees.forEach( valu => {
-    //   insertPromises.push( this.valoresService.create( valu ) );
-    // });
-    
-    // await Promise.all( insertPromises );
-    // console.log('🌱 Running seed...');
-    // return `Seed completed`;
-    // ////////
+          
+    try {
+/////borrado
+  await this.prisma.orderAddress.deleteMany();
+  await this.prisma.orderItem.deleteMany();
+  await this.prisma.order.deleteMany();
+  await this.prisma.receiptItem.deleteMany();
+  await this.prisma.receipt.deleteMany();
+  await this.prisma.paramItem.deleteMany();
+
+
+  await this.prisma.userAddress.deleteMany();
+  await this.prisma.user.deleteMany();
+  await this.prisma.country.deleteMany();
+  
+  await this.prisma.productImage.deleteMany();
+  await this.prisma.product.deleteMany();
+  await this.prisma.category.deleteMany();
+  
+  await this.prisma.stateOrd.deleteMany();
+  await this.prisma.parte.deleteMany();
+  await this.prisma.valuee.deleteMany();
+  await this.prisma.instrumento.deleteMany();
+  await this.prisma.customer.deleteMany();
+  await this.prisma.encargado.deleteMany();
+  await this.prisma.supplier.deleteMany();
+  await this.prisma.comprobante.deleteMany();
+  await this.prisma.configuration.deleteMany();
+
+/////borrado
+        console.log('🌱 Running seed...');  
+
+
+        const { categories, products, users, configurations, estados, partes, valuees, instrumentos, customers, encargados, suppliers, } = initialData;
+
+        // const users = initialData.users;
+        
+
+        // const insertPromises = [];
+        // users.forEach( use => {
+        //   insertPromises.push( this.usersService.createMany( use ) );
+        // });
+
+        // await Promise.all( insertPromises );
+
+          await this.prisma.configuration.createMany({
+            data: configurations
+          });
+            const createdConfiguration = await this.prisma.configuration.findMany();
+            const CONFIG1 = createdConfiguration[0].id;
+            const CONFIG2 = createdConfiguration[1].id;
+
+            await this.prisma.comprobante.createMany({
+              data: initialData.comprobantes.map((c, index) => ({
+                ...c,
+                codConId: index < 6 ? CONFIG1 : CONFIG2
+                // codConId: CONFIG1 
+              }))
+            });    
+            
+          await this.prisma.instrumento.createMany({
+            data: instrumentos
+          });
+          await this.prisma.supplier.createMany({
+            data: suppliers
+          });
+          await this.prisma.encargado.createMany({
+            data: encargados
+          });
+          await this.prisma.customer.createMany({
+            data: customers
+          });
+          await this.prisma.valuee.createMany({
+            data: valuees
+          });
+          await this.prisma.stateOrd.createMany({
+            data: estados
+          });
+          await this.prisma.parte.createMany({
+            data: partes
+          });
+
+          await this.prisma.user.createMany({
+            data: users
+          });
+
+          await this.prisma.country.createMany({
+            data: countries
+          });
+
+
+
+          //  Categorias
+          // {
+          //   name: 'Shirt'
+          // }
+          const categoriesData = categories.map( (name) => ({ name }));
+          
+          await this.prisma.category.createMany({
+            data: categoriesData
+          });
+
+          
+          const categoriesDB = await this.prisma.category.findMany();
+          
+          const categoriesMap = categoriesDB.reduce( (map, category) => {
+            map[ category.name.toLowerCase()] = category.id;
+            return map;
+          }, {} as Record<string, string>); //<string=shirt, string=categoryID>
+          
+          
+
+          // Productos
+
+          products.forEach( async(product) => {
+
+            const { type, images, ...rest } = product;
+
+            const dbProduct = await this.prisma.product.create({
+              data: {
+                ...rest,
+                categoryId: categoriesMap[type],
+                id_config: CONFIG1 
+              }
+            })
+
+
+            // Images
+            const imagesData = images.map( image => ({
+              url: image,
+              productId: dbProduct.id
+            }));
+
+            await this.prisma.productImage.createMany({
+              data: imagesData
+            });
+
+          });
+
+        return `Seed completed`;
+
+      } catch (error) {
+          this.handleExceptions(error);
+        }
+
   }
   
   private handleExceptions( error: any ) {
