@@ -52,9 +52,6 @@ export class ComprobanteService {
     // const Haber = JSON.parse(isHaber) || '';
     // console.log(Haber)
     const Ajuste = isAjuste ? JSON.parse(isAjuste) : '';
-    console.log("Ajuste")
-    console.log(Ajuste)
-    console.log("Ajuste")
     const AjusteFilter =
         Ajuste && Ajuste === 'false'
           ? {

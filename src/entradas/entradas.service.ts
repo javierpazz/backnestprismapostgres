@@ -32,125 +32,257 @@ export class EntradasService {
 
 
 
+// async create(createEntradaDto: any) {
+//   const { orderItems, orderAddress, ...orderData } = createEntradaDto;
+
+//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+//     try {
+
+
+// //////////////
+//       let remNumero;
+//       if (orderData.remNum > 0) {
+//         remNumero = orderData.remNum;
+//       } else {
+//         const configId = orderData.codCon;
+//         // const configuracion = await Configuration.findById(configId).session(session);
+//         const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
+//         if (configuracion) {
+//           configuracion.numIntRem += 1;
+//           // await configuracion.save({ session });
+//           await this.prisma.configuration.update(
+//             {
+//               where: { id: configId },
+//               data: {
+//                 numIntRem: { increment: 1 },
+//               },
+//             }
+//           );
+//           remNumero = configuracion.numIntRem;
+//         } else {
+//           throw new Error('Configuración no encontrada');
+//         }
+//       }
+//       orderData.remNum = remNumero;    
+// //////////////
+
+
+
+
+//             const invoice = await this.prisma.order.create({
+//           data: {
+//             paymentMethod: orderData.paymentMethod,
+//             subTotal: orderData.subTotal,
+//             shippingPrice: orderData.shippingPrice,
+//             tax: orderData.tax,
+//             total: orderData.total,
+//             totalBuy: orderData.totalBuy,
+//             itemsInOrder:0,
+//             libNum: orderData.libNum,
+//             folNum: orderData.folNum,
+//             asiNum: orderData.asiNum,
+//             asiDat: safeDate(orderData.asiDat),
+//             escNum: orderData.escNum,
+//             asieNum: orderData.asieNum,
+//             asieDat: safeDate(orderData.asieDat),
+//             terminado: orderData.terminado,
+//             movpvNum: orderData.movpvNum,
+//             movpvDat: safeDate(orderData.movpvDat),
+//             codConNum: orderData.codConNum,
+//             // codCom: orderData.codCom,
+//             // supplier: orderData.supplier,
+//             remNum: orderData.remNum,
+//             // remNum: 1234,
+//             remDat: safeDate(orderData.remDat),
+//             dueDat: safeDate(orderData.dueDat),
+//             invNum: orderData.invNum,
+//             invDat: safeDate(orderData.invDat),
+//             recNum: orderData.recNum,
+//             recDat: safeDate(orderData.recDat),
+//             desVal: orderData.desVal,
+//             notes: orderData.notes,
+//             salbuy: orderData.salbuy,
+
+//             // relaciones
+//             customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
+//             parte: orderData.codPar ? { connect: { id: orderData.codPar } } : undefined,
+//             instrumento: orderData.codIns ? { connect: { id: orderData.codIns } } : undefined,
+//             configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
+//             user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
+
+
+            
+//             // order items
+//             orderItems: {
+//               create: orderItems.map(item => ({
+//                 slug: item.slug,
+//                 title: item.title,
+//                 medPro: item.medPro,
+//                 quantity: item.quantity,
+//                 image: item.image,
+//                 price: item.price,
+//                 size: item.size,
+//                 porIva: item.porIva,
+//                 venDat: safeDate(item.venDat),
+//                 observ: item.observ,
+//                 terminado: item.terminado,
+//                 // productId: item.productId,
+//                 productId: item._id,
+//                 // instrumentoId: item.instrumentoId,
+
+
+
+//               }))
+//             }
+//           },
+//           include: { orderItems: true }, // incluye los items en la respuesta
+//         });
+
+//         return { invoice };
+            
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+
+// }
+
 async create(createEntradaDto: any) {
+
   const { orderItems, orderAddress, ...orderData } = createEntradaDto;
 
-  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-    try {
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
 
+  try {
 
-//////////////
-      let remNumero;
+    const result = await this.prisma.$transaction(async (tx) => {
+
+      let remNumero = 0;
+
+      // =========================
+      // 🔢 NUMERADOR REMITO
+      // =========================
       if (orderData.remNum > 0) {
         remNumero = orderData.remNum;
       } else {
-        const configId = orderData.codCon;
-        // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
-          }
-        );
-        if (configuracion) {
-          configuracion.numIntRem += 1;
-          // await configuracion.save({ session });
-          await this.prisma.configuration.update(
-            {
-              where: { id: configId },
-              data: {
-                numIntRem: { increment: 1 },
-              },
-            }
-          );
-          remNumero = configuracion.numIntRem;
-        } else {
-          throw new Error('Configuración no encontrada');
-        }
-      }
-      orderData.remNum = remNumero;    
-//////////////
 
-
-
-
-            const invoice = await this.prisma.order.create({
+        const config = await tx.configuration.update({
+          where: { id: orderData.codCon },
           data: {
-            paymentMethod: orderData.paymentMethod,
-            subTotal: orderData.subTotal,
-            shippingPrice: orderData.shippingPrice,
-            tax: orderData.tax,
-            total: orderData.total,
-            totalBuy: orderData.totalBuy,
-            itemsInOrder:0,
-            libNum: orderData.libNum,
-            folNum: orderData.folNum,
-            asiNum: orderData.asiNum,
-            asiDat: safeDate(orderData.asiDat),
-            escNum: orderData.escNum,
-            asieNum: orderData.asieNum,
-            asieDat: safeDate(orderData.asieDat),
-            terminado: orderData.terminado,
-            movpvNum: orderData.movpvNum,
-            movpvDat: safeDate(orderData.movpvDat),
-            codConNum: orderData.codConNum,
-            // codCom: orderData.codCom,
-            // supplier: orderData.supplier,
-            remNum: orderData.remNum,
-            // remNum: 1234,
-            remDat: safeDate(orderData.remDat),
-            dueDat: safeDate(orderData.dueDat),
-            invNum: orderData.invNum,
-            invDat: safeDate(orderData.invDat),
-            recNum: orderData.recNum,
-            recDat: safeDate(orderData.recDat),
-            desVal: orderData.desVal,
-            notes: orderData.notes,
-            salbuy: orderData.salbuy,
-
-            // relaciones
-            customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
-            parte: orderData.codPar ? { connect: { id: orderData.codPar } } : undefined,
-            instrumento: orderData.codIns ? { connect: { id: orderData.codIns } } : undefined,
-            configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
-            user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
-
-
-            
-            // order items
-            orderItems: {
-              create: orderItems.map(item => ({
-                slug: item.slug,
-                title: item.title,
-                medPro: item.medPro,
-                quantity: item.quantity,
-                image: item.image,
-                price: item.price,
-                size: item.size,
-                porIva: item.porIva,
-                venDat: safeDate(item.venDat),
-                observ: item.observ,
-                terminado: item.terminado,
-                // productId: item.productId,
-                productId: item._id,
-                // instrumentoId: item.instrumentoId,
-
-
-
-              }))
-            }
+            numIntRem: { increment: 1 },
           },
-          include: { orderItems: true }, // incluye los items en la respuesta
         });
 
-        return { invoice };
-            
-    } catch (error) {
-      this.handleExceptions( error );
-    }
+        remNumero = config.numIntRem;
+      }
 
+      // =========================
+      // 🧾 CREAR ORDER
+      // =========================
+      const order = await tx.order.create({
+        data: {
+
+          paymentMethod: orderData.paymentMethod,
+          subTotal: orderData.subTotal,
+          shippingPrice: orderData.shippingPrice,
+          tax: orderData.tax,
+          total: orderData.total,
+          totalBuy: orderData.totalBuy,
+
+          itemsInOrder: orderItems?.length || 0,
+
+          libNum: orderData.libNum,
+          folNum: orderData.folNum,
+          asiNum: orderData.asiNum,
+          asiDat: safeDate(orderData.asiDat),
+
+          escNum: orderData.escNum,
+          asieNum: orderData.asieNum,
+          asieDat: safeDate(orderData.asieDat),
+
+          terminado: orderData.terminado,
+
+          movpvNum: orderData.movpvNum,
+          movpvDat: safeDate(orderData.movpvDat),
+
+          codConNum: orderData.codConNum,
+
+          // 🔢 remito seguro
+          remNum: remNumero,
+          remDat: safeDate(orderData.remDat),
+
+          dueDat: safeDate(orderData.dueDat),
+
+          invNum: orderData.invNum,
+          invDat: safeDate(orderData.invDat),
+
+          recNum: orderData.recNum,
+          recDat: safeDate(orderData.recDat),
+
+          desVal: orderData.desVal,
+          notes: orderData.notes,
+          salbuy: orderData.salbuy,
+
+          // =========================
+          // 🔗 RELACIONES
+          // =========================
+          customer: orderData.codCus
+            ? { connect: { id: orderData.codCus } }
+            : undefined,
+
+          parte: orderData.codPar
+            ? { connect: { id: orderData.codPar } }
+            : undefined,
+
+          instrumento: orderData.codIns
+            ? { connect: { id: orderData.codIns } }
+            : undefined,
+
+          configuration: orderData.codCon
+            ? { connect: { id: orderData.codCon } }
+            : undefined,
+
+          user1: orderData.user
+            ? { connect: { id: orderData.user } }
+            : undefined,
+
+          // =========================
+          // 📦 ITEMS
+          // =========================
+          orderItems: {
+            create: orderItems.map(item => ({
+              slug: item.slug,
+              title: item.title,
+              medPro: item.medPro,
+              quantity: item.quantity,
+              image: item.image,
+              price: item.price,
+              size: item.size,
+              porIva: item.porIva,
+              venDat: safeDate(item.venDat),
+              observ: item.observ,
+              terminado: item.terminado,
+              productId: item._id,
+            }))
+          }
+
+        },
+        include: { orderItems: true },
+      });
+
+      return order;
+    });
+
+    return { invoice: result };
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
 }
 
-  
   async findAll(query: any) {
   // isAuth,
   // // isAdmin,
@@ -681,125 +813,261 @@ async findOne(id: string) {
 
 
 
-  async update(updateEntradaDto: any, id : string) {
+  // async update(updateEntradaDto: any, id : string) {
   
 
 
-    const invoice = await this.prisma.order.findUnique({
-    where: { id },
-    include: {
-      customer: true,       // id_client
-      configuration: true,  // id_config
-      instrumento: true,    // id_instru
-      parte: true,          // id_parte
-      user1: true,          // usuario
-      orderItems: true,
-    },
-  });
-  if (!invoice) throw new NotFoundException(`Entrada with id "${id}" not found`);
+  //   const invoice = await this.prisma.order.findUnique({
+  //   where: { id },
+  //   include: {
+  //     customer: true,       // id_client
+  //     configuration: true,  // id_config
+  //     instrumento: true,    // id_instru
+  //     parte: true,          // id_parte
+  //     user1: true,          // usuario
+  //     orderItems: true,
+  //   },
+  // });
+  // if (!invoice) throw new NotFoundException(`Entrada with id "${id}" not found`);
   
-  // Mapear el resultado al formato deseado
-  const formattedInvoice = {
-    _id: invoice.id,
-    ...invoice,
+  // // Mapear el resultado al formato deseado
+  // const formattedInvoice = {
+  //   _id: invoice.id,
+  //   ...invoice,
 
-    id_client: typeof updateEntradaDto.codCus === 'object'
-    ? updateEntradaDto.codCus._id
-    : updateEntradaDto.codCus,
-    id_config: typeof updateEntradaDto.codCon === 'object'
-    ? updateEntradaDto.codCon._id
-    : updateEntradaDto.codCon,
-    id_instru: typeof updateEntradaDto.codIns === 'object'
-    ? updateEntradaDto.codIns._id
-    : updateEntradaDto.codIns,
-    // id_parte: typeof updateEntradaDto.codPar === 'object'
-    // ? updateEntradaDto.codPar._id
-    // : updateEntradaDto.codPar,
-    id_parte: !updateEntradaDto.codPar
-      ? null
-      : typeof updateEntradaDto.codPar === 'object'
-        ? updateEntradaDto.codPar._id
-        : updateEntradaDto.codPar,
-    user: typeof updateEntradaDto.user === 'object'
-    ? updateEntradaDto.user._id
-    : updateEntradaDto.user,
-
-
-    // orderItems: updateEntradaDto.orderItems.map(item => ({
-    //   slug: item.slug,
-    //   title: item.title,
-    //   medPro: item.medPro,
-    //   quantity: item.quantity,
-    //   price: item.price,
-    //   porIva: item.porIva,
-    //   venDat: item.venDat,
-    //   size: item.size,
-    //   observ: item.observ,
-    //   terminado: item.terminado,
-    //   productId: item.productId,
-    // })),
-  };
-
-  // console.log(formattedInvoice)
-
-    const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+  //   id_client: typeof updateEntradaDto.codCus === 'object'
+  //   ? updateEntradaDto.codCus._id
+  //   : updateEntradaDto.codCus,
+  //   id_config: typeof updateEntradaDto.codCon === 'object'
+  //   ? updateEntradaDto.codCon._id
+  //   : updateEntradaDto.codCon,
+  //   id_instru: typeof updateEntradaDto.codIns === 'object'
+  //   ? updateEntradaDto.codIns._id
+  //   : updateEntradaDto.codIns,
+  //   // id_parte: typeof updateEntradaDto.codPar === 'object'
+  //   // ? updateEntradaDto.codPar._id
+  //   // : updateEntradaDto.codPar,
+  //   id_parte: !updateEntradaDto.codPar
+  //     ? null
+  //     : typeof updateEntradaDto.codPar === 'object'
+  //       ? updateEntradaDto.codPar._id
+  //       : updateEntradaDto.codPar,
+  //   user: typeof updateEntradaDto.user === 'object'
+  //   ? updateEntradaDto.user._id
+  //   : updateEntradaDto.user,
 
 
+  //   // orderItems: updateEntradaDto.orderItems.map(item => ({
+  //   //   slug: item.slug,
+  //   //   title: item.title,
+  //   //   medPro: item.medPro,
+  //   //   quantity: item.quantity,
+  //   //   price: item.price,
+  //   //   porIva: item.porIva,
+  //   //   venDat: item.venDat,
+  //   //   size: item.size,
+  //   //   observ: item.observ,
+  //   //   terminado: item.terminado,
+  //   //   productId: item.productId,
+  //   // })),
+  // };
 
-    try {
-            // console.log(formattedInvoice.orderItems)
-            // console.log('ID del order:', id);
-            // console.log('IDs de productos:', formattedInvoice.orderItems.map(i => i.productId));
+  // // console.log(formattedInvoice)
 
-      await this.prisma.order.update(
-            ({
-          where: { id: id }, // Prisma usa 'id'
+  //   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+
+
+
+  //   try {
+  //           // console.log(formattedInvoice.orderItems)
+  //           // console.log('ID del order:', id);
+  //           // console.log('IDs de productos:', formattedInvoice.orderItems.map(i => i.productId));
+
+  //     await this.prisma.order.update(
+  //           ({
+  //         where: { id: id }, // Prisma usa 'id'
+  //       data: {
+  //         paymentMethod: updateEntradaDto.paymentMethod,
+  //         subTotal: updateEntradaDto.subTotal,
+  //         shippingPrice: updateEntradaDto.shippingPrice,
+  //         tax: updateEntradaDto.tax,
+  //         total: updateEntradaDto.total,
+  //         totalBuy: updateEntradaDto.totalBuy,
+  //         libNum: updateEntradaDto.libNum,
+  //         folNum: updateEntradaDto.folNum,
+  //         asiNum: updateEntradaDto.asiNum,
+  //         asiDat: safeDate(updateEntradaDto.asiDat),
+  //         escNum: updateEntradaDto.escNum,
+  //         asieNum: updateEntradaDto.asieNum,
+  //         asieDat: safeDate(updateEntradaDto.asieDat),
+  //         terminado: updateEntradaDto.terminado,
+  //         movpvNum: updateEntradaDto.movpvNum,
+  //         movpvDat: safeDate(updateEntradaDto.movpvDat),
+  //         codConNum: updateEntradaDto.codConNum,
+  //         // codCom: updateEntradaDto.codCom,
+  //         supplier: updateEntradaDto.supplier,
+  //         // remNum: updateEntradaDto.remNum,
+  //         // remNum: 1234,
+  //         remDat: safeDate(updateEntradaDto.remDat),
+  //         dueDat: safeDate(updateEntradaDto.dueDat),
+  //         invNum: updateEntradaDto.invNum,
+  //         invDat: safeDate(updateEntradaDto.invDat),
+  //         recNum: updateEntradaDto.recNum,
+  //         recDat: safeDate(updateEntradaDto.recDat),
+  //         desVal: updateEntradaDto.desVal,
+  //         notes: updateEntradaDto.notes,
+  //         salbuy: updateEntradaDto.salbuy,
+
+  //     // customer: { connect: { id: formattedInvoice.id_client } },
+  //     // parte: { connect: { id: formattedInvoice.id_parte } },
+  //     // instrumento: { connect: { id: formattedInvoice.id_instru } },
+  //     // configuration: { connect: { id: formattedInvoice.id_config } },
+  //     // user1: { connect: { id: formattedInvoice.user } },
+  //     id_client: formattedInvoice.id_client ,
+  //     id_parte: formattedInvoice.id_parte,
+  //     id_instru: formattedInvoice.id_instru,
+  //     id_config: formattedInvoice.id_config,
+  //     user: formattedInvoice.user,
+
+
+  //         orderItems: {
+  //           deleteMany: {orderId: id}, // borra todos los actuales
+  //           create: updateEntradaDto.orderItems?.map((oi) => ({
+  //             title: oi.title,
+  //             medPro: oi.medPro,
+  //             quantity: oi.quantity,
+  //             price: oi.price,
+  //             porIva: oi.porIva,
+  //             venDat: safeDate(oi.venDat),
+  //             observ: oi.observ,
+  //             slug: oi.slug,
+  //             size: oi.size,
+  //             terminado: oi.terminado,
+  //             // productId: oi.productId,  // en lugar de oi._id
+  //             productId: oi._id,
+  //           })),
+  //         },
+  //       },
+  //      })
+  //     );
+  //     return { updateEntradaDto };
+      
+  //   } catch (error) {
+  //     this.handleExceptions( error );
+  //   }
+  // }
+
+async update(updateEntradaDto: any, id: string) {
+
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
+
+  try {
+
+    const result = await this.prisma.$transaction(async (tx) => {
+
+      // =========================
+      // 🔍 VALIDAR EXISTENCIA
+      // =========================
+      const invoice = await tx.order.findUnique({
+        where: { id },
+      });
+
+      if (!invoice) {
+        throw new NotFoundException(`Entrada with id "${id}" not found`);
+      }
+
+      // =========================
+      // 🧠 NORMALIZAR IDS
+      // =========================
+      const getId = (field: any) =>
+        typeof field === 'object' ? field?._id : field;
+
+      const id_client = getId(updateEntradaDto.codCus);
+      const id_config = getId(updateEntradaDto.codCon);
+      const id_instru = getId(updateEntradaDto.codIns);
+      const id_parte = updateEntradaDto.codPar
+        ? getId(updateEntradaDto.codPar)
+        : null;
+      const user = getId(updateEntradaDto.user);
+
+      // =========================
+      // 🧾 UPDATE
+      // =========================
+      const order = await tx.order.update({
+        where: { id },
         data: {
+
           paymentMethod: updateEntradaDto.paymentMethod,
           subTotal: updateEntradaDto.subTotal,
           shippingPrice: updateEntradaDto.shippingPrice,
           tax: updateEntradaDto.tax,
           total: updateEntradaDto.total,
           totalBuy: updateEntradaDto.totalBuy,
+
           libNum: updateEntradaDto.libNum,
           folNum: updateEntradaDto.folNum,
+
           asiNum: updateEntradaDto.asiNum,
           asiDat: safeDate(updateEntradaDto.asiDat),
+
           escNum: updateEntradaDto.escNum,
           asieNum: updateEntradaDto.asieNum,
           asieDat: safeDate(updateEntradaDto.asieDat),
+
           terminado: updateEntradaDto.terminado,
+
           movpvNum: updateEntradaDto.movpvNum,
           movpvDat: safeDate(updateEntradaDto.movpvDat),
+
           codConNum: updateEntradaDto.codConNum,
-          // codCom: updateEntradaDto.codCom,
-          supplier: updateEntradaDto.supplier,
-          // remNum: updateEntradaDto.remNum,
-          // remNum: 1234,
+
+          // ❌ ELIMINADO: supplier incorrecto
+          // ✅ SI EXISTE RELACIÓN:
+          supplier1: updateEntradaDto.codSup
+            ? { connect: { id: updateEntradaDto.codSup } }
+            : undefined,
+
           remDat: safeDate(updateEntradaDto.remDat),
           dueDat: safeDate(updateEntradaDto.dueDat),
+
           invNum: updateEntradaDto.invNum,
           invDat: safeDate(updateEntradaDto.invDat),
+
           recNum: updateEntradaDto.recNum,
           recDat: safeDate(updateEntradaDto.recDat),
+
           desVal: updateEntradaDto.desVal,
           notes: updateEntradaDto.notes,
           salbuy: updateEntradaDto.salbuy,
 
-      // customer: { connect: { id: formattedInvoice.id_client } },
-      // parte: { connect: { id: formattedInvoice.id_parte } },
-      // instrumento: { connect: { id: formattedInvoice.id_instru } },
-      // configuration: { connect: { id: formattedInvoice.id_config } },
-      // user1: { connect: { id: formattedInvoice.user } },
-      id_client: formattedInvoice.id_client ,
-      id_parte: formattedInvoice.id_parte,
-      id_instru: formattedInvoice.id_instru,
-      id_config: formattedInvoice.id_config,
-      user: formattedInvoice.user,
+          // =========================
+          // 🔗 RELACIONES CORRECTAS
+          // =========================
+          customer: id_client
+            ? { connect: { id: id_client } }
+            : undefined,
 
+          parte: id_parte
+            ? { connect: { id: id_parte } }
+            : undefined,
 
+          instrumento: id_instru
+            ? { connect: { id: id_instru } }
+            : undefined,
+
+          configuration: id_config
+            ? { connect: { id: id_config } }
+            : undefined,
+
+          user1: user
+            ? { connect: { id: user } }
+            : undefined,
+
+          // =========================
+          // 📦 ITEMS
+          // =========================
           orderItems: {
-            deleteMany: {orderId: id}, // borra todos los actuales
+            deleteMany: { orderId: id },
             create: updateEntradaDto.orderItems?.map((oi) => ({
               title: oi.title,
               medPro: oi.medPro,
@@ -811,21 +1079,30 @@ async findOne(id: string) {
               slug: oi.slug,
               size: oi.size,
               terminado: oi.terminado,
-              // productId: oi.productId,  // en lugar de oi._id
               productId: oi._id,
-            })),
+            })) || [],
           },
+
+          itemsInOrder: updateEntradaDto.orderItems?.length || 0,
+
         },
-       })
-      );
-      return { updateEntradaDto };
-      
-    } catch (error) {
-      this.handleExceptions( error );
-    }
+        include: { orderItems: true },
+      });
+
+      return order;
+    });
+
+    return {
+      invoice: {
+        ...result,
+        _id: result.id,
+      }
+    };
+
+  } catch (error) {
+    this.handleExceptions(error);
   }
-
-
+}
 
 
 

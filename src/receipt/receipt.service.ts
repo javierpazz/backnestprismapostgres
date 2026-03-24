@@ -251,197 +251,385 @@ async searchcajSB(query: any) {
 
 
 
-  async create(createReceiptDto: any) {
+//   async create(createReceiptDto: any) {
 
 
-  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-    try {
+//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+//     try {
 
 
-//////////////
-      let recNumero = 0;
-      if (createReceiptDto.remNum > 0) {
-        recNumero = createReceiptDto.remNum;
-      } else {
-        const configId = createReceiptDto.codCon;
-        // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
-          }
-        );
-        if (configuracion) {
-          await this.prisma.configuration.update(
-            {
-              where: { id: configId },
-              data: {
-                numIntRec: { increment: 1 },
-              },
-            }
-          );
-          recNumero = configuracion.numIntRec += 1;
-        } else {
-          throw new Error('Configuración no encontrada');
-        }
-      }
-//////////////
+// //////////////
+//       let recNumero = 0;
+//       if (createReceiptDto.remNum > 0) {
+//         recNumero = createReceiptDto.remNum;
+//       } else {
+//         const configId = createReceiptDto.codCon;
+//         // const configuracion = await Configuration.findById(configId).session(session);
+//         const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
+//         if (configuracion) {
+//           await this.prisma.configuration.update(
+//             {
+//               where: { id: configId },
+//               data: {
+//                 numIntRec: { increment: 1 },
+//               },
+//             }
+//           );
+//           recNumero = configuracion.numIntRec += 1;
+//         } else {
+//           throw new Error('Configuración no encontrada');
+//         }
+//       }
+// //////////////
 
-      const receipt = await this.prisma.receipt.create({
-          data: {
-      subTotal: createReceiptDto.subTotal,
-      total: createReceiptDto.total,
-      totalBuy: createReceiptDto.totalBuy,
-      // user: createReceiptDto.codUse,
-      // id_client: createReceiptDto.codCus,
-      // id_config: createReceiptDto.codCon,
-      // user: createReceiptDto.user,
-      // id_config2: createReceiptDto.codCon2,
-      codConNum: +createReceiptDto.codConNum,
-      // codCom: createReceiptDto.codCom,
-      // supplier: createReceiptDto.codSup,
-      //////////  numera remito /////////////////
-      recNum: recNumero,
-      //////////  numera remito /////////////////
-      recDat: safeDate(createReceiptDto.recDat),
-      desval: createReceiptDto.receiptItems[0].desval,
-      notes: createReceiptDto.notes,
-      salbuy: createReceiptDto.salbuy,
-/////////////
+//       const receipt = await this.prisma.receipt.create({
+//           data: {
+//       subTotal: createReceiptDto.subTotal,
+//       total: createReceiptDto.total,
+//       totalBuy: createReceiptDto.totalBuy,
+//       // user: createReceiptDto.codUse,
+//       // id_client: createReceiptDto.codCus,
+//       // id_config: createReceiptDto.codCon,
+//       // user: createReceiptDto.user,
+//       // id_config2: createReceiptDto.codCon2,
+//       codConNum: +createReceiptDto.codConNum,
+//       // codCom: createReceiptDto.codCom,
+//       // supplier: createReceiptDto.codSup,
+//       //////////  numera remito /////////////////
+//       recNum: recNumero,
+//       //////////  numera remito /////////////////
+//       recDat: safeDate(createReceiptDto.recDat),
+//       desval: createReceiptDto.receiptItems[0].desval,
+//       notes: createReceiptDto.notes,
+//       salbuy: createReceiptDto.salbuy,
+// /////////////
 
 
 
-            // relaciones
-            customer: createReceiptDto.codCus ? { connect: { id: createReceiptDto.codCus } } : undefined,
-            configuration: createReceiptDto.codCon ? { connect: { id: createReceiptDto.codCon } } : undefined,
-            supplier1: createReceiptDto.codSup ? { connect: { id: createReceiptDto.codSup } } : undefined,
-            user1: createReceiptDto.user ? { connect: { id: createReceiptDto.user } } : undefined,
+//             // relaciones
+//             customer: createReceiptDto.codCus ? { connect: { id: createReceiptDto.codCus } } : undefined,
+//             configuration: createReceiptDto.codCon ? { connect: { id: createReceiptDto.codCon } } : undefined,
+//             supplier1: createReceiptDto.codSup ? { connect: { id: createReceiptDto.codSup } } : undefined,
+//             user1: createReceiptDto.user ? { connect: { id: createReceiptDto.user } } : undefined,
 
 
             
-            // order items
-            receiptItems: {
-              create: createReceiptDto.receiptItems.map(item => ({
-                desval: item.desval,
-                numval: +item.numval,
-                amountval: +item.amountval,
-                // venDat: safeDate(item.venDat),
-                // productId: item.productId,
-                valuee: item._id,
-              }))
-            }
+//             // order items
+//             receiptItems: {
+//               create: createReceiptDto.receiptItems.map(item => ({
+//                 desval: item.desval,
+//                 numval: +item.numval,
+//                 amountval: +item.amountval,
+//                 // venDat: safeDate(item.venDat),
+//                 // productId: item.productId,
+//                 valuee: item._id,
+//               }))
+//             }
+//           },
+//           include: { receiptItems: true }, // incluye los items en la respuesta
+//         });
+
+//         // return { invoice };
+//       const invoiceWithMongoId = {
+//         ...receipt,
+//         _id: receipt.id,
+//       };
+
+//       return { receipt: invoiceWithMongoId };            
+
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+
+//   }
+
+async create(createReceiptDto: any) {
+
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
+
+  try {
+
+    const result = await this.prisma.$transaction(async (tx) => {
+
+      let recNumero = 0;
+
+      // =========================
+      // 🔢 NUMERADOR RECIBO
+      // =========================
+      if (createReceiptDto.recNum > 0) {
+        recNumero = createReceiptDto.recNum;
+      } else {
+
+        const config = await tx.configuration.update({
+          where: { id: createReceiptDto.codCon },
+          data: {
+            numIntRec: { increment: 1 },
           },
-          include: { receiptItems: true }, // incluye los items en la respuesta
         });
 
-        // return { invoice };
-      const invoiceWithMongoId = {
-        ...receipt,
-        _id: receipt.id,
-      };
+        recNumero = config.numIntRec;
+      }
 
-      return { receipt: invoiceWithMongoId };            
+      // =========================
+      // 🧾 CREAR RECIBO
+      // =========================
+      const receipt = await tx.receipt.create({
+        data: {
 
-    } catch (error) {
-      this.handleExceptions( error );
-    }
+          subTotal: createReceiptDto.subTotal,
+          total: createReceiptDto.total,
+          totalBuy: createReceiptDto.totalBuy,
 
+          codConNum: +createReceiptDto.codConNum,
+
+          recNum: recNumero,
+          recDat: safeDate(createReceiptDto.recDat),
+
+          // ⚠️ mantenemos tu lógica original
+          desval: createReceiptDto.receiptItems?.[0]?.desval,
+
+          notes: createReceiptDto.notes,
+          salbuy: createReceiptDto.salbuy,
+
+          // relaciones
+          customer: createReceiptDto.codCus
+            ? { connect: { id: createReceiptDto.codCus } }
+            : undefined,
+
+          configuration: createReceiptDto.codCon
+            ? { connect: { id: createReceiptDto.codCon } }
+            : undefined,
+
+          supplier1: createReceiptDto.codSup
+            ? { connect: { id: createReceiptDto.codSup } }
+            : undefined,
+
+          user1: createReceiptDto.user
+            ? { connect: { id: createReceiptDto.user } }
+            : undefined,
+
+          // items
+          receiptItems: {
+            create: createReceiptDto.receiptItems.map(item => ({
+              desval: item.desval,
+              numval: +item.numval,
+              amountval: +item.amountval,
+              valuee: item._id,
+            }))
+          }
+
+        },
+        include: { receiptItems: true },
+      });
+
+      return receipt;
+    });
+
+    return {
+      receipt: {
+        ...result,
+        _id: result.id,
+      }
+    };
+
+  } catch (error) {
+    this.handleExceptions(error);
   }
+}
 
-  async createCaj(createReceiptDto: any) {
-
-
-  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-    try {
+//   async createCaj(createReceiptDto: any) {
 
 
-//////////////
+//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+//     try {
+
+
+// //////////////
+//       let cajNumero = 0;
+//       if (createReceiptDto.cajNum > 0) {
+//         cajNumero = createReceiptDto.cajNum;
+//       } else {
+//         const configId = createReceiptDto.codCon;
+//         // const configuracion = await Configuration.findById(configId).session(session);
+//         const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
+//         if (configuracion) {
+//           await this.prisma.configuration.update(
+//             {
+//               where: { id: configId },
+//               data: {
+//                 numIntCaj: { increment: 1 },
+//               },
+//             }
+//           );
+//           cajNumero = configuracion.numIntCaj += 1;
+//         } else {
+//           throw new Error('Configuración no encontrada');
+//         }
+//       }
+// //////////////
+
+//       const receipt = await this.prisma.receipt.create({
+//           data: {
+//       subTotal: createReceiptDto.subTotal,
+//       total: createReceiptDto.total,
+//       totalBuy: createReceiptDto.totalBuy,
+//       // user: createReceiptDto.codUse,
+//       // id_client: createReceiptDto.codCus,
+//       // id_config: createReceiptDto.codCon,
+//       // user: createReceiptDto.user,
+//       // id_config2: createReceiptDto.codCon2,
+//       codConNum: +createReceiptDto.codConNum,
+//       // codCom: createReceiptDto.codCom,
+//       // supplier: createReceiptDto.codSup,
+//       //////////  numera remito /////////////////
+//       cajNum: cajNumero,
+//       //////////  numera remito /////////////////
+//       cajDat: safeDate(createReceiptDto.cajDat),
+//       desval: createReceiptDto.receiptItems[0].desval,
+//       notes: createReceiptDto.notes,
+//       salbuy: createReceiptDto.salbuy,
+// /////////////
+
+
+
+//             // relaciones
+//             encargado: createReceiptDto.codEnc ? { connect: { id: createReceiptDto.codEnc } } : undefined,
+//             configuration: createReceiptDto.codCon ? { connect: { id: createReceiptDto.codCon } } : undefined,
+//             supplier1: createReceiptDto.codSup ? { connect: { id: createReceiptDto.codSup } } : undefined,
+//             user1: createReceiptDto.user ? { connect: { id: createReceiptDto.user } } : undefined,
+
+
+            
+//             // order items
+//             receiptItems: {
+//               create: createReceiptDto.receiptItems.map(item => ({
+//                 desval: item.desval,
+//                 numval: +item.numval,
+//                 amountval: +item.amountval,
+//                 // venDat: safeDate(item.venDat),
+//                 // productId: item.productId,
+//                 valuee: item._id,
+//               }))
+//             }
+//           },
+//           include: { receiptItems: true }, // incluye los items en la respuesta
+//         });
+
+//         // return { invoice };
+//       const invoiceWithMongoId = {
+//         ...receipt,
+//         _id: receipt.id,
+//       };
+
+//       return { receipt: invoiceWithMongoId };            
+
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+
+//   }
+
+async createCaj(createReceiptDto: any) {
+
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
+
+  try {
+
+    const result = await this.prisma.$transaction(async (tx) => {
+
       let cajNumero = 0;
+
+      // =========================
+      // 🔢 NUMERADOR CAJA
+      // =========================
       if (createReceiptDto.cajNum > 0) {
         cajNumero = createReceiptDto.cajNum;
       } else {
-        const configId = createReceiptDto.codCon;
-        // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
-          }
-        );
-        if (configuracion) {
-          await this.prisma.configuration.update(
-            {
-              where: { id: configId },
-              data: {
-                numIntCaj: { increment: 1 },
-              },
-            }
-          );
-          cajNumero = configuracion.numIntCaj += 1;
-        } else {
-          throw new Error('Configuración no encontrada');
-        }
-      }
-//////////////
 
-      const receipt = await this.prisma.receipt.create({
+        const config = await tx.configuration.update({
+          where: { id: createReceiptDto.codCon },
           data: {
-      subTotal: createReceiptDto.subTotal,
-      total: createReceiptDto.total,
-      totalBuy: createReceiptDto.totalBuy,
-      // user: createReceiptDto.codUse,
-      // id_client: createReceiptDto.codCus,
-      // id_config: createReceiptDto.codCon,
-      // user: createReceiptDto.user,
-      // id_config2: createReceiptDto.codCon2,
-      codConNum: +createReceiptDto.codConNum,
-      // codCom: createReceiptDto.codCom,
-      // supplier: createReceiptDto.codSup,
-      //////////  numera remito /////////////////
-      cajNum: cajNumero,
-      //////////  numera remito /////////////////
-      cajDat: safeDate(createReceiptDto.cajDat),
-      desval: createReceiptDto.receiptItems[0].desval,
-      notes: createReceiptDto.notes,
-      salbuy: createReceiptDto.salbuy,
-/////////////
-
-
-
-            // relaciones
-            encargado: createReceiptDto.codEnc ? { connect: { id: createReceiptDto.codEnc } } : undefined,
-            configuration: createReceiptDto.codCon ? { connect: { id: createReceiptDto.codCon } } : undefined,
-            supplier1: createReceiptDto.codSup ? { connect: { id: createReceiptDto.codSup } } : undefined,
-            user1: createReceiptDto.user ? { connect: { id: createReceiptDto.user } } : undefined,
-
-
-            
-            // order items
-            receiptItems: {
-              create: createReceiptDto.receiptItems.map(item => ({
-                desval: item.desval,
-                numval: +item.numval,
-                amountval: +item.amountval,
-                // venDat: safeDate(item.venDat),
-                // productId: item.productId,
-                valuee: item._id,
-              }))
-            }
+            numIntCaj: { increment: 1 },
           },
-          include: { receiptItems: true }, // incluye los items en la respuesta
         });
 
-        // return { invoice };
-      const invoiceWithMongoId = {
-        ...receipt,
-        _id: receipt.id,
-      };
+        cajNumero = config.numIntCaj;
+      }
 
-      return { receipt: invoiceWithMongoId };            
+      // =========================
+      // 🧾 CREAR MOVIMIENTO DE CAJA
+      // =========================
+      const receipt = await tx.receipt.create({
+        data: {
 
-    } catch (error) {
-      this.handleExceptions( error );
-    }
+          subTotal: createReceiptDto.subTotal,
+          total: createReceiptDto.total,
+          totalBuy: createReceiptDto.totalBuy,
 
+          codConNum: +createReceiptDto.codConNum,
+
+          cajNum: cajNumero,
+          cajDat: safeDate(createReceiptDto.cajDat),
+
+          // protegemos acceso
+          desval: createReceiptDto.receiptItems?.[0]?.desval,
+
+          notes: createReceiptDto.notes,
+          salbuy: createReceiptDto.salbuy,
+
+          // relaciones
+          encargado: createReceiptDto.codEnc
+            ? { connect: { id: createReceiptDto.codEnc } }
+            : undefined,
+
+          configuration: createReceiptDto.codCon
+            ? { connect: { id: createReceiptDto.codCon } }
+            : undefined,
+
+          supplier1: createReceiptDto.codSup
+            ? { connect: { id: createReceiptDto.codSup } }
+            : undefined,
+
+          user1: createReceiptDto.user
+            ? { connect: { id: createReceiptDto.user } }
+            : undefined,
+
+          // items
+          receiptItems: {
+            create: createReceiptDto.receiptItems.map(item => ({
+              desval: item.desval,
+              numval: +item.numval,
+              amountval: +item.amountval,
+              valuee: item._id,
+            }))
+          }
+
+        },
+        include: { receiptItems: true },
+      });
+
+      return receipt;
+    });
+
+    return {
+      receipt: {
+        ...result,
+        _id: result.id,
+      }
+    };
+
+  } catch (error) {
+    this.handleExceptions(error);
   }
+}
 
   async searchcajS(query: any) {
   // isAuth,

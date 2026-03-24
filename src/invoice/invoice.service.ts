@@ -2600,686 +2600,1124 @@ const {
 }///// ctacte
 
 
-async geninvRem(createInvoiceDto: any, id:any) {
-  const {invoiceAux, receiptAux} = createInvoiceDto;
-  const { orderItems, orderAddress } = invoiceAux;
-  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+// async geninvRem(createInvoiceDto: any, id:any) {
+//   const {invoiceAux, receiptAux} = createInvoiceDto;
+//   const { orderItems, orderAddress } = invoiceAux;
+//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
 
-    try {
-//////////////inv
-    //////////  GENERA RECIBO /////////////////
-    let recAux = 0;
-    let recNumero = 0;
-    let invNumero = 0;
-    let remNumero = 0;
-    let invrecNum = 0;
-    let invrecDat = null;
+//     try {
+// //////////////inv
+//     //////////  GENERA RECIBO /////////////////
+//     let recAux = 0;
+//     let recNumero = 0;
+//     let invNumero = 0;
+//     let remNumero = 0;
+//     let invrecNum = 0;
+//     let invrecDat = null;
 
 
-    if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
-      //////////  numera RECIBO /////////////////
-      invrecDat = invoiceAux.invDat;
+//     if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
+//       //////////  numera RECIBO /////////////////
+//       invrecDat = invoiceAux.invDat;
       
-      if (receiptAux.recNum > 0)
-        {recNumero = receiptAux.recNum }
-        else {
-          const configId = receiptAux.codCon._id;
-          const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
-          }
-        );
+//       if (receiptAux.recNum > 0)
+//         {recNumero = receiptAux.recNum }
+//         else {
+//           const configId = receiptAux.codCon._id;
+//           const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
 
-          if (configuracion) {
-            await this.prisma.configuration.update(
-                          {
-              where: { id: configId },
-              data: {
-                numIntRec: { increment: 1 },
-              },
-            }
+//           if (configuracion) {
+//             await this.prisma.configuration.update(
+//                           {
+//               where: { id: configId },
+//               data: {
+//                 numIntRec: { increment: 1 },
+//               },
+//             }
 
-            );
-          }
-          recNumero = configuracion.numIntRec + 1;
-        };
-        //////////  numera RECIBO /////////////////
+//             );
+//           }
+//           recNumero = configuracion.numIntRec + 1;
+//         };
+//         //////////  numera RECIBO /////////////////
   
-      const receipt = await this.prisma.receipt.create({
-          data: {
-      subTotal: receiptAux.subTotal,
-      total: receiptAux.total,
-      totalBuy: receiptAux.totalBuy,
-      // user: receiptAux.codUse,
-      // id_client: receiptAux.codCus,
-      // id_config: receiptAux.codCon,
-      // user: receiptAux.user,
-      // id_config2: receiptAux.codCon2,
-      codConNum: +receiptAux.codConNum,
-      // codCom: receiptAux.codCom,
-      // supplier: receiptAux.codSup,
-      //////////  numera remito /////////////////
-      recNum: recNumero,
-      //////////  numera remito /////////////////
-      recDat: safeDate(receiptAux.recDat),
-      desval: receiptAux.desVal,
-      notes: receiptAux.notes,
-      salbuy: receiptAux.salbuy,
-/////////////
+//       const receipt = await this.prisma.receipt.create({
+//           data: {
+//       subTotal: receiptAux.subTotal,
+//       total: receiptAux.total,
+//       totalBuy: receiptAux.totalBuy,
+//       // user: receiptAux.codUse,
+//       // id_client: receiptAux.codCus,
+//       // id_config: receiptAux.codCon,
+//       // user: receiptAux.user,
+//       // id_config2: receiptAux.codCon2,
+//       codConNum: +receiptAux.codConNum,
+//       // codCom: receiptAux.codCom,
+//       // supplier: receiptAux.codSup,
+//       //////////  numera remito /////////////////
+//       recNum: recNumero,
+//       //////////  numera remito /////////////////
+//       recDat: safeDate(receiptAux.recDat),
+//       desval: receiptAux.desVal,
+//       notes: receiptAux.notes,
+//       salbuy: receiptAux.salbuy,
+// /////////////
 
 
 
-            // relaciones
-            customer: receiptAux.codCus._id ? { connect: { id: receiptAux.codCus._id } } : undefined,
-            configuration: receiptAux.codCon._id ? { connect: { id: receiptAux.codCon._id } } : undefined,
-            supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
-            user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
+//             // relaciones
+//             customer: receiptAux.codCus._id ? { connect: { id: receiptAux.codCus._id } } : undefined,
+//             configuration: receiptAux.codCon._id ? { connect: { id: receiptAux.codCon._id } } : undefined,
+//             supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
+//             user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
 
 
             
-            // order items
+//             // order items
+//             receiptItems: {
+//               create: receiptAux.receiptItems.map(item => ({
+//                 desval: item.desval,
+//                 numval: +item.numval,
+//                 amountval: +item.amountval,
+//                 // venDat: safeDate(item.venDat),
+//                 // productId: item.productId,
+//                 valuee: item._id,
+//               }))
+//             }
+//           },
+//           include: { receiptItems: true }, // incluye los items en la respuesta
+//         });
+//   }else{
+//     recAux = 0;  
+//     // recDat = null;
+//   }
+//       //////////  GENERA RECIBO /////////////////
+//         //////////  numera factura /////////////////
+      
+//       if (invoiceAux.invNum > 0)
+//         {invNumero = invoiceAux.invNum }
+//         else {
+//           const comproId = invoiceAux.codCom;
+//           // const comprobante = await this.prisma.comprobante.findById(comproId);
+//           const comprobante = await this.prisma.comprobante.findUnique(
+//           {
+//             where: { id: comproId },
+//           }
+//         );
+//           // if (comprobante) {
+//           //   comprobante.numInt = comprobante.numInt + 1;
+//           //   await comprobante.save();
+//           // }
+          
+//           if (comprobante) {
+//             await this.prisma.comprobante.update(
+//               {
+//                 where: { id: comproId },
+//                 data: {
+//                   numInt: { increment: 1 },
+//                 },
+//               }
+              
+//             );
+//           }
+//           invNumero = comprobante.numInt + 1;
+
+//         };
+//         //////////  numera factura /////////////////
+
+//         if (recAux > 0) {
+//           invrecNum = recAux;
+//           // invrecDat =  invoiceAux.invDat;
+//           }else{
+//             invrecNum = recAux;
+//             // invrecDat =  invoiceAux.recDat;
+//           };
+// ///***
+//       const invoice = await this.prisma.order.update({
+//       where: { id: id},
+//       data: {
+//           notes : invoiceAux.notes,
+//           isHaber: invoiceAux.isHaber,
+//           // codCom : invoiceAux.codCom,
+//           // dueDat : invoiceAux.dueDat,
+//           // invDat : invoiceAux.invDat,
+//           invNum : invNumero,
+//           recNum : recNumero,
+//           // recDat : invoiceAux.invDat,
+//           dueDat: safeDate(invoiceAux.dueDat),
+//           invDat: safeDate(invoiceAux.invDat),
+//           recDat: safeDate(invrecDat),
+//           // relaciones
+//           comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
+            
+//           },
+//           include: { orderItems: true }, // incluye los items en la respuesta
+//         });
+
+//         // return { invoice };
+//       const invoiceWithMongoId = {
+//         ...invoice,
+//         _id: invoice.id,
+//       };
+
+//       return { invoice: invoiceWithMongoId };            
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+      
+//         ///***
+// //////////////inv
+
+// }
+// async createInv(createInvoiceDto: any) {
+//   const {invoiceAux, receiptAux} = createInvoiceDto;
+//   const { orderItems, orderAddress } = invoiceAux;
+//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+
+
+//     try {
+// //////////////inv
+//     //////////  GENERA RECIBO /////////////////
+//     let recAux = 0;
+//     let recNumero = 0;
+//     let invNumero = 0;
+//     let remNumero = 0;
+//     let invrecNum = 0;
+//     let invrecDat = null;
+
+
+//     if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
+//       //////////  numera RECIBO /////////////////
+//       invrecDat = invoiceAux.invDat;
+      
+//       if (receiptAux.recNum > 0)
+//         {recNumero = receiptAux.recNum }
+//         else {
+//           const configId = receiptAux.codCon;
+//           const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
+
+//           if (configuracion) {
+//             await this.prisma.configuration.update(
+//                           {
+//               where: { id: configId },
+//               data: {
+//                 numIntRec: { increment: 1 },
+//               },
+//             }
+
+//             );
+//           }
+//           recNumero = configuracion.numIntRec + 1;
+//         };
+//         //////////  numera RECIBO /////////////////
+  
+//       const receipt = await this.prisma.receipt.create({
+//           data: {
+//       subTotal: receiptAux.subTotal,
+//       total: receiptAux.total,
+//       totalBuy: receiptAux.totalBuy,
+//       // user: receiptAux.codUse,
+//       // id_client: receiptAux.codCus,
+//       // id_config: receiptAux.codCon,
+//       // user: receiptAux.user,
+//       // id_config2: receiptAux.codCon2,
+//       codConNum: +receiptAux.codConNum,
+//       // codCom: receiptAux.codCom,
+//       // supplier: receiptAux.codSup,
+//       //////////  numera remito /////////////////
+//       recNum: recNumero,
+//       //////////  numera remito /////////////////
+//       recDat: safeDate(receiptAux.recDat),
+//       desval: receiptAux.desVal,
+//       notes: receiptAux.notes,
+//       salbuy: receiptAux.salbuy,
+// /////////////
+
+
+
+//             // relaciones
+//             customer: receiptAux.codCus ? { connect: { id: receiptAux.codCus } } : undefined,
+//             configuration: receiptAux.codCon ? { connect: { id: receiptAux.codCon } } : undefined,
+//             supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
+//             user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
+
+
+            
+//             // order items
+//             receiptItems: {
+//               create: receiptAux.receiptItems.map(item => ({
+//                 desval: item.desval,
+//                 numval: +item.numval,
+//                 amountval: +item.amountval,
+//                 // venDat: safeDate(item.venDat),
+//                 // productId: item.productId,
+//                 valuee: item._id,
+//               }))
+//             }
+//           },
+//           include: { receiptItems: true }, // incluye los items en la respuesta
+//         });
+//   }else{
+//     recAux = 0;  
+//     // recDat = null;
+//   }
+//       //////////  GENERA RECIBO /////////////////
+//       //////////  MODIFICA STOCK /////////////////
+      
+//     if (invoiceAux.salbuy === "SALE") {
+//     if (!invoiceAux.isHaber) {
+//       invoiceAux.orderItems.map(async(item) => {
+//         // const product = await this.prisma.product.findById(item._id);
+//         const product = await this.prisma.product.findUnique(
+//           {
+//             where: { id: item._id },
+//           }
+//         );
+//         if (product) {
+//           await this.prisma.product.update(
+//             {
+//               where: { id: item._id },
+//               data: {
+//                 inStock: { decrement: item.quantity },
+//               },
+//             }
+//           );
+//         }else {
+//           throw new Error('Product no encontrado');
+//         }
+
+//   }
+//       )
+
+//     } else {
+
+//       invoiceAux.orderItems.map(async(item) => {
+//         // const product = await Product.findById(item._id);
+//         const product = await this.prisma.product.findUnique(
+//           {
+//             where: { id: item._id },
+//           }
+//         );
+//         if (product) {
+//           await this.prisma.product.update(
+//             {
+//               where: { id: item._id },
+//               data: {
+//                 inStock: { increment: item.quantity },
+//               },
+//             }
+//           );
+//         }else {
+//           throw new Error('Product no encontrado');
+//         }
+//   }
+//       )
+
+//     }
+//     } else {
+
+//       if (invoiceAux.isHaber) {
+//         invoiceAux.orderItems.map(async(item) => {
+//         // const product = await this.prisma.product.findById(item._id);
+//         const product = await this.prisma.product.findUnique(
+//           {
+//             where: { id: item._id },
+//           }
+//         );
+
+//           if (product) {
+//           await this.prisma.product.update(
+//             {
+//               where: { id: item._id },
+//               data: {
+//                 inStock: { decrement: item.quantity },
+//               },
+//             }
+//           );
+//         }else {
+//           throw new Error('Product no encontrado');
+//         }
+
+          
+//     }
+//         )
+  
+//       } else {
+  
+//         invoiceAux.orderItems.map(async(item) => {
+//           // const product = await this.prisma.product.findById(item._id);
+//         const product = await this.prisma.product.findUnique(
+//           {
+//             where: { id: item._id },
+//           }
+//         );
+
+
+//           if (product) {
+//           await this.prisma.product.update(
+//             {
+//               where: { id: item._id },
+//               data: {
+//                 inStock: { increment: item.quantity },
+//               },
+//             }
+//           );
+//         }else {
+//           throw new Error('Product no encontrado');
+//         }
+     
+//     }
+//         )
+  
+//       }
+//     }
+
+    
+
+//     //////////  MODIFICA STOCK /////////////////
+//         //////////  numera factura /////////////////
+      
+//       if (invoiceAux.invNum > 0)
+//         {invNumero = invoiceAux.invNum }
+//         else {
+//           const comproId = invoiceAux.codCom;
+//           // const comprobante = await this.prisma.comprobante.findById(comproId);
+//           const comprobante = await this.prisma.comprobante.findUnique(
+//           {
+//             where: { id: comproId },
+//           }
+//         );
+//           // if (comprobante) {
+//           //   comprobante.numInt = comprobante.numInt + 1;
+//           //   await comprobante.save();
+//           // }
+          
+//           if (comprobante) {
+//             await this.prisma.comprobante.update(
+//               {
+//                 where: { id: comproId },
+//                 data: {
+//                   numInt: { increment: 1 },
+//                 },
+//               }
+              
+//             );
+//           }
+//           invNumero = comprobante.numInt + 1;
+
+//         };
+//         //////////  numera factura /////////////////
+
+//         //////////  numera remito /////////////////
+//         if (invoiceAux.salbuy === "BUY") {
+//         remNumero = invoiceAux.remNum;
+//         }else {
+//         remNumero = 0;          
+//         if (invoiceAux.geRem) {
+
+//           if (invoiceAux.remNum > 0)
+//             {remNumero = invoiceAux.remNum }
+//             else {
+//           const configId = receiptAux.codCon;
+//           const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
+
+//           if (configuracion) {
+//             await this.prisma.configuration.update(
+//                           {
+//               where: { id: configId },
+//               data: {
+//                 numIntRem: { increment: 1 },
+//               },
+//             }
+
+//             );
+//           }
+//               remNumero = configuracion.numIntRem + 1;
+//             };
+//         };
+//       };
+
+//           //////////  numera remito /////////////////
+
+        
+//         if (recAux > 0) {
+//           invrecNum = recAux;
+//           // invrecDat =  invoiceAux.invDat;
+//           }else{
+//             invrecNum = recAux;
+//             // invrecDat =  invoiceAux.recDat;
+//           };
+// ///***
+//       const invoice = await this.prisma.order.create({
+//           data: {
+//             // orderAddress: invoiceAux.orderAddress,
+//             paymentMethod: invoiceAux.paymentMethod,
+//             subTotal: invoiceAux.subTotal,
+//             shippingPrice: invoiceAux.shippingPrice,
+//             tax: invoiceAux.tax,
+//             total: invoiceAux.total,
+//             totalBuy: invoiceAux.totalBuy,
+//             itemsInOrder:0,
+//             // user: invoiceAux.codUse,
+//             // id_client: invoiceAux.codCus,
+//             // id_config: invoiceAux.codCon,
+//             // user: invoiceAux.user,
+//             // id_config2: invoiceAux.codCon2,
+//             codConNum: invoiceAux.codConNum,
+//             // codCom: invoiceAux.codCom,
+//             // supplier: invoiceAux.codSup,
+//             //////////  numera remito /////////////////
+//             invNum: invNumero,
+//             remNum: remNumero,
+//             // movpvNum: invoiceAux.movpvNum,
+//             //////////  numera remito /////////////////
+//             remDat: safeDate(invoiceAux.remDat),
+//             movpvDat: safeDate(invoiceAux.movpvDat),
+//             dueDat: safeDate(invoiceAux.dueDat),
+//             // invNum: invoiceAux.invNum,
+//             invDat: safeDate(invoiceAux.invDat),
+//             // recNum: invoiceAux.recNum,
+//             recNum: recNumero,
+//             recDat: safeDate(invrecDat),
+//             desVal: invoiceAux.desVal,
+//             notes: invoiceAux.notes,
+//             salbuy: invoiceAux.salbuy,
+//             ajuste: invoiceAux.ajuste,
+// //arreglaishaber          // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
+//           isHaber: (invoiceAux.salbuy === "SALE") ? invoiceAux.isHaber : !invoiceAux.isHaber,
+//             // isHaber: invoiceAux.isHaber,
+//           // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
+
+// /////////////
+
+
+
+//             // relaciones
+//             customer: invoiceAux.codCus ? { connect: { id: invoiceAux.codCus } } : undefined,
+//             supplier1: invoiceAux.codSup ? { connect: { id: invoiceAux.codSup } } : undefined,
+//             comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
+//             configuration: invoiceAux.codCon ? { connect: { id: invoiceAux.codCon } } : undefined,
+//             configuration2: invoiceAux.codCon2 ? { connect: { id: invoiceAux.codCon2 } } : undefined,
+//             // supplier1: invoiceAux.codSup ? { connect: { id: invoiceAux.codSup } } : undefined,
+//             user1: invoiceAux.user ? { connect: { id: invoiceAux.user } } : undefined,
+
+
+            
+//             // order items
+//             orderItems: {
+//               create: orderItems.map(item => ({
+//                 slug: item.slug,
+//                 title: item.title,
+//                 medPro: item.medPro,
+//                 quantity: item.quantity,
+//                 image: item.image,
+//                 price: item.price,
+//                 size: item.size,
+//                 porIva: item.porIva,
+//                 venDat: safeDate(item.venDat),
+//                 observ: item.observ,
+//                 terminado: item.terminado,
+//                 // productId: item.productId,
+//                 productId: item._id,
+//                 instrumentoId: item.instrumentoId,
+//               }))
+//             }
+//           },
+//           include: { orderItems: true }, // incluye los items en la respuesta
+//         });
+
+//         // return { invoice };
+//       const invoiceWithMongoId = {
+//         ...invoice,
+//         _id: invoice.id,
+//       };
+
+//       return { invoice: invoiceWithMongoId };            
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+      
+//         ///***
+// //////////////inv
+
+// }
+
+// async createRem(createInvoiceDto: any) {
+//   const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
+
+//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+//     try {
+
+
+// //////////////
+//       let remNumero = 0;
+//       if (orderData.remNum > 0) {
+//         remNumero = orderData.remNum;
+//       } else {
+//         const configId = orderData.codCon;
+//         // const configuracion = await Configuration.findById(configId).session(session);
+//         const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
+//         if (configuracion) {
+//           configuracion.numIntRem += 1;
+//           // await configuracion.save({ session });
+//           await this.prisma.configuration.update(
+//             {
+//               where: { id: configId },
+//               data: {
+//                 numIntRem: { increment: 1 },
+//               },
+//             }
+//           );
+//           remNumero = configuracion.numIntRem;
+//         } else {
+//           throw new Error('Configuración no encontrada');
+//         }
+//       }
+//       orderData.remNum = remNumero;    
+// //////////////
+
+
+
+
+//             const invoice = await this.prisma.order.create({
+//           data: {
+//       orderAddress: orderData.orderAddress,
+//       paymentMethod: orderData.paymentMethod,
+//       subTotal: orderData.subTotal,
+//       shippingPrice: orderData.shippingPrice,
+//       tax: orderData.tax,
+//       total: orderData.total,
+//       totalBuy: orderData.totalBuy,
+//       itemsInOrder:0,
+//       // user: orderData.codUse,
+//       // id_client: orderData.codCus,
+//       // id_config: orderData.codCon,
+//       // user: orderData.user,
+//       // id_config2: orderData.codCon2,
+//       movpvNum: orderData.movpvNum,
+//       movpvDat: safeDate(orderData.movpvDat),
+//       codConNum: orderData.codConNum,
+//       // codCom: orderData.codCom,
+//       // supplier: orderData.codSup,
+//       //////////  numera remito /////////////////
+//       remNum: orderData.remNum,
+//       //////////  numera remito /////////////////
+//       remDat: safeDate(orderData.remDat),
+//       dueDat: safeDate(orderData.dueDat),
+//       invNum: orderData.invNum,
+//       invDat: safeDate(orderData.invDat),
+//       recNum: orderData.recNum,
+//       recDat: safeDate(orderData.recDat),
+//       desVal: orderData.desVal,
+//       notes: orderData.notes,
+//       salbuy: orderData.salbuy,
+// /////////////
+
+
+
+//             // relaciones
+//             customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
+//             comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
+//             configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
+//             supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
+//             user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
+
+
+            
+//             // order items
+//             orderItems: {
+//               create: orderItems.map(item => ({
+//                 slug: item.slug,
+//                 title: item.title,
+//                 medPro: item.medPro,
+//                 quantity: item.quantity,
+//                 image: item.image,
+//                 price: item.price,
+//                 size: item.size,
+//                 porIva: item.porIva,
+//                 venDat: safeDate(item.venDat),
+//                 observ: item.observ,
+//                 terminado: item.terminado,
+//                 // productId: item.productId,
+//                 productId: item._id,
+//                 instrumentoId: item.instrumentoId,
+
+
+
+//               }))
+//             }
+//           },
+//           include: { orderItems: true }, // incluye los items en la respuesta
+//         });
+
+//         // return { invoice };
+//       const invoiceWithMongoId = {
+//         ...invoice,
+//         _id: invoice.id,
+//       };
+
+//       return { invoice: invoiceWithMongoId };            
+
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+
+// }
+
+async geninvRem(createInvoiceDto: any, id: any) {
+
+  const { invoiceAux, receiptAux } = createInvoiceDto;
+  const { orderItems } = invoiceAux;
+
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
+
+  try {
+
+    const result = await this.prisma.$transaction(async (tx) => {
+
+      let recNumero = 0;
+      let invNumero = 0;
+      let invrecDat: Date | null = null;
+
+      // =========================
+      // 🧾 RECIBO
+      // =========================
+      if (receiptAux?.recDat && receiptAux?.desVal) {
+
+        invrecDat = safeDate(invoiceAux.invDat);
+
+        if (receiptAux.recNum > 0) {
+          recNumero = receiptAux.recNum;
+        } else {
+
+          const config = await tx.configuration.update({
+            where: { id: receiptAux.codCon._id },
+            data: {
+              numIntRec: { increment: 1 },
+            },
+          });
+
+          recNumero = config.numIntRec;
+        }
+
+        await tx.receipt.create({
+          data: {
+            subTotal: receiptAux.subTotal,
+            total: receiptAux.total,
+            totalBuy: receiptAux.totalBuy,
+            codConNum: +receiptAux.codConNum,
+
+            recNum: recNumero,
+            recDat: safeDate(receiptAux.recDat),
+
+            desval: receiptAux.desVal,
+            notes: receiptAux.notes,
+            salbuy: receiptAux.salbuy,
+
+            // relaciones
+            customer: receiptAux.codCus?._id
+              ? { connect: { id: receiptAux.codCus._id } }
+              : undefined,
+
+            configuration: receiptAux.codCon?._id
+              ? { connect: { id: receiptAux.codCon._id } }
+              : undefined,
+
+            supplier1: receiptAux.codSup
+              ? { connect: { id: receiptAux.codSup } }
+              : undefined,
+
+            user1: receiptAux.user
+              ? { connect: { id: receiptAux.user } }
+              : undefined,
+
             receiptItems: {
               create: receiptAux.receiptItems.map(item => ({
                 desval: item.desval,
                 numval: +item.numval,
                 amountval: +item.amountval,
-                // venDat: safeDate(item.venDat),
-                // productId: item.productId,
                 valuee: item._id,
               }))
             }
           },
-          include: { receiptItems: true }, // incluye los items en la respuesta
+          include: { receiptItems: true },
         });
-  }else{
-    recAux = 0;  
-    // recDat = null;
-  }
-      //////////  GENERA RECIBO /////////////////
-        //////////  numera factura /////////////////
-      
-      if (invoiceAux.invNum > 0)
-        {invNumero = invoiceAux.invNum }
-        else {
-          const comproId = invoiceAux.codCom;
-          // const comprobante = await this.prisma.comprobante.findById(comproId);
-          const comprobante = await this.prisma.comprobante.findUnique(
-          {
-            where: { id: comproId },
-          }
-        );
-          // if (comprobante) {
-          //   comprobante.numInt = comprobante.numInt + 1;
-          //   await comprobante.save();
-          // }
-          
-          if (comprobante) {
-            await this.prisma.comprobante.update(
-              {
-                where: { id: comproId },
-                data: {
-                  numInt: { increment: 1 },
-                },
-              }
-              
-            );
-          }
-          invNumero = comprobante.numInt + 1;
+      }
 
-        };
-        //////////  numera factura /////////////////
+      // =========================
+      // 🧾 NUMERO FACTURA
+      // =========================
+      if (invoiceAux.invNum > 0) {
+        invNumero = invoiceAux.invNum;
+      } else {
 
-        if (recAux > 0) {
-          invrecNum = recAux;
-          // invrecDat =  invoiceAux.invDat;
-          }else{
-            invrecNum = recAux;
-            // invrecDat =  invoiceAux.recDat;
-          };
-///***
-      const invoice = await this.prisma.order.update({
-      where: { id: id},
-      data: {
-          notes : invoiceAux.notes,
+        const comprobante = await tx.comprobante.update({
+          where: { id: invoiceAux.codCom },
+          data: {
+            numInt: { increment: 1 },
+          },
+        });
+
+        invNumero = comprobante.numInt;
+      }
+
+      // =========================
+      // 🧾 UPDATE FACTURA EXISTENTE
+      // =========================
+      const invoice = await tx.order.update({
+        where: { id: id },
+        data: {
+
+          notes: invoiceAux.notes,
           isHaber: invoiceAux.isHaber,
-          // codCom : invoiceAux.codCom,
-          // dueDat : invoiceAux.dueDat,
-          // invDat : invoiceAux.invDat,
-          invNum : invNumero,
-          recNum : recNumero,
-          // recDat : invoiceAux.invDat,
+
+          invNum: invNumero,
+          recNum: recNumero,
+
           dueDat: safeDate(invoiceAux.dueDat),
           invDat: safeDate(invoiceAux.invDat),
-          recDat: safeDate(invrecDat),
-          // relaciones
-          comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
-            
-          },
-          include: { orderItems: true }, // incluye los items en la respuesta
-        });
+          recDat: invrecDat,
 
-        // return { invoice };
-      const invoiceWithMongoId = {
-        ...invoice,
-        _id: invoice.id,
-      };
+          comprobante: invoiceAux.codCom
+            ? { connect: { id: invoiceAux.codCom } }
+            : undefined,
+        },
+        include: { orderItems: true },
+      });
 
-      return { invoice: invoiceWithMongoId };            
-    } catch (error) {
-      this.handleExceptions( error );
-    }
-      
-        ///***
-//////////////inv
+      return invoice;
+    });
 
+    return {
+      invoice: {
+        ...result,
+        _id: result.id,
+      }
+    };
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
 }
+
 async createInv(createInvoiceDto: any) {
-  const {invoiceAux, receiptAux} = createInvoiceDto;
-  const { orderItems, orderAddress } = invoiceAux;
-  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
+  const { invoiceAux, receiptAux } = createInvoiceDto;
+  const { orderItems } = invoiceAux;
 
-    try {
-//////////////inv
-    //////////  GENERA RECIBO /////////////////
-    let recAux = 0;
-    let recNumero = 0;
-    let invNumero = 0;
-    let remNumero = 0;
-    let invrecNum = 0;
-    let invrecDat = null;
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
 
+  try {
 
-    if ( receiptAux.recDat !== "" && receiptAux.desVal !== "") {
-      //////////  numera RECIBO /////////////////
-      invrecDat = invoiceAux.invDat;
-      
-      if (receiptAux.recNum > 0)
-        {recNumero = receiptAux.recNum }
-        else {
-          const configId = receiptAux.codCon;
-          const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
-          }
-        );
+    const result = await this.prisma.$transaction(async (tx) => {
 
-          if (configuracion) {
-            await this.prisma.configuration.update(
-                          {
-              where: { id: configId },
-              data: {
-                numIntRec: { increment: 1 },
-              },
-            }
+      let recNumero = 0;
+      let invNumero = 0;
+      let remNumero = 0;
+      let invrecDat: Date | null = null;
 
-            );
-          }
-          recNumero = configuracion.numIntRec + 1;
-        };
-        //////////  numera RECIBO /////////////////
-  
-      const receipt = await this.prisma.receipt.create({
+      // =========================
+      // 🧾 RECIBO
+      // =========================
+      if (receiptAux?.recDat && receiptAux?.desVal) {
+
+        invrecDat = safeDate(invoiceAux.invDat);
+
+        if (receiptAux.recNum > 0) {
+          recNumero = receiptAux.recNum;
+        } else {
+          const config = await tx.configuration.update({
+            where: { id: receiptAux.codCon },
+            data: { numIntRec: { increment: 1 } },
+          });
+
+          recNumero = config.numIntRec;
+        }
+
+        await tx.receipt.create({
           data: {
-      subTotal: receiptAux.subTotal,
-      total: receiptAux.total,
-      totalBuy: receiptAux.totalBuy,
-      // user: receiptAux.codUse,
-      // id_client: receiptAux.codCus,
-      // id_config: receiptAux.codCon,
-      // user: receiptAux.user,
-      // id_config2: receiptAux.codCon2,
-      codConNum: +receiptAux.codConNum,
-      // codCom: receiptAux.codCom,
-      // supplier: receiptAux.codSup,
-      //////////  numera remito /////////////////
-      recNum: recNumero,
-      //////////  numera remito /////////////////
-      recDat: safeDate(receiptAux.recDat),
-      desval: receiptAux.desVal,
-      notes: receiptAux.notes,
-      salbuy: receiptAux.salbuy,
-/////////////
+            subTotal: receiptAux.subTotal,
+            total: receiptAux.total,
+            totalBuy: receiptAux.totalBuy,
+            codConNum: +receiptAux.codConNum,
+            recNum: recNumero,
+            recDat: safeDate(receiptAux.recDat),
+            desval: receiptAux.desVal,
+            notes: receiptAux.notes,
+            salbuy: receiptAux.salbuy,
 
-
-
-            // relaciones
             customer: receiptAux.codCus ? { connect: { id: receiptAux.codCus } } : undefined,
             configuration: receiptAux.codCon ? { connect: { id: receiptAux.codCon } } : undefined,
             supplier1: receiptAux.codSup ? { connect: { id: receiptAux.codSup } } : undefined,
             user1: receiptAux.user ? { connect: { id: receiptAux.user } } : undefined,
 
-
-            
-            // order items
             receiptItems: {
               create: receiptAux.receiptItems.map(item => ({
                 desval: item.desval,
                 numval: +item.numval,
                 amountval: +item.amountval,
-                // venDat: safeDate(item.venDat),
-                // productId: item.productId,
                 valuee: item._id,
               }))
             }
           },
-          include: { receiptItems: true }, // incluye los items en la respuesta
+          include: { receiptItems: true },
         });
-  }else{
-    recAux = 0;  
-    // recDat = null;
-  }
-      //////////  GENERA RECIBO /////////////////
-      //////////  MODIFICA STOCK /////////////////
-      
-    if (invoiceAux.salbuy === "SALE") {
-    if (!invoiceAux.isHaber) {
-      invoiceAux.orderItems.map(async(item) => {
-        // const product = await this.prisma.product.findById(item._id);
-        const product = await this.prisma.product.findUnique(
-          {
-            where: { id: item._id },
-          }
-        );
-        if (product) {
-          await this.prisma.product.update(
-            {
-              where: { id: item._id },
-              data: {
-                inStock: { decrement: item.quantity },
-              },
-            }
-          );
-        }else {
-          throw new Error('Product no encontrado');
-        }
-
-  }
-      )
-
-    } else {
-
-      invoiceAux.orderItems.map(async(item) => {
-        // const product = await Product.findById(item._id);
-        const product = await this.prisma.product.findUnique(
-          {
-            where: { id: item._id },
-          }
-        );
-        if (product) {
-          await this.prisma.product.update(
-            {
-              where: { id: item._id },
-              data: {
-                inStock: { increment: item.quantity },
-              },
-            }
-          );
-        }else {
-          throw new Error('Product no encontrado');
-        }
-  }
-      )
-
-    }
-    } else {
-
-      if (invoiceAux.isHaber) {
-        invoiceAux.orderItems.map(async(item) => {
-        // const product = await this.prisma.product.findById(item._id);
-        const product = await this.prisma.product.findUnique(
-          {
-            where: { id: item._id },
-          }
-        );
-
-          if (product) {
-          await this.prisma.product.update(
-            {
-              where: { id: item._id },
-              data: {
-                inStock: { decrement: item.quantity },
-              },
-            }
-          );
-        }else {
-          throw new Error('Product no encontrado');
-        }
-
-          
-    }
-        )
-  
-      } else {
-  
-        invoiceAux.orderItems.map(async(item) => {
-          // const product = await this.prisma.product.findById(item._id);
-        const product = await this.prisma.product.findUnique(
-          {
-            where: { id: item._id },
-          }
-        );
-
-
-          if (product) {
-          await this.prisma.product.update(
-            {
-              where: { id: item._id },
-              data: {
-                inStock: { increment: item.quantity },
-              },
-            }
-          );
-        }else {
-          throw new Error('Product no encontrado');
-        }
-     
-    }
-        )
-  
       }
-    }
 
-    
+      // =========================
+      // 📦 STOCK (CORRECTO)
+      // =========================
+      for (const item of orderItems) {
 
-    //////////  MODIFICA STOCK /////////////////
-        //////////  numera factura /////////////////
-      
-      if (invoiceAux.invNum > 0)
-        {invNumero = invoiceAux.invNum }
-        else {
-          const comproId = invoiceAux.codCom;
-          // const comprobante = await this.prisma.comprobante.findById(comproId);
-          const comprobante = await this.prisma.comprobante.findUnique(
-          {
-            where: { id: comproId },
-          }
-        );
-          // if (comprobante) {
-          //   comprobante.numInt = comprobante.numInt + 1;
-          //   await comprobante.save();
-          // }
-          
-          if (comprobante) {
-            await this.prisma.comprobante.update(
-              {
-                where: { id: comproId },
-                data: {
-                  numInt: { increment: 1 },
-                },
-              }
-              
-            );
-          }
-          invNumero = comprobante.numInt + 1;
+        const isSale = invoiceAux.salbuy === "SALE";
 
-        };
-        //////////  numera factura /////////////////
+        let increment = 0;
 
-        //////////  numera remito /////////////////
-        if (invoiceAux.salbuy === "BUY") {
+        if (isSale) {
+          increment = invoiceAux.isHaber ? item.quantity : -item.quantity;
+        } else {
+          increment = invoiceAux.isHaber ? -item.quantity : item.quantity;
+        }
+
+        await tx.product.update({
+          where: { id: item._id },
+          data: {
+            inStock: { increment },
+          },
+        });
+      }
+
+      // =========================
+      // 🧾 NUMERO FACTURA
+      // =========================
+      if (invoiceAux.invNum > 0) {
+        invNumero = invoiceAux.invNum;
+      } else {
+        const comp = await tx.comprobante.update({
+          where: { id: invoiceAux.codCom },
+          data: { numInt: { increment: 1 } },
+        });
+
+        invNumero = comp.numInt;
+      }
+
+      // =========================
+      // 🚚 REMITO
+      // =========================
+      if (invoiceAux.salbuy === "BUY") {
         remNumero = invoiceAux.remNum;
-        }else {
-        remNumero = 0;          
+      } else {
         if (invoiceAux.geRem) {
 
-          if (invoiceAux.remNum > 0)
-            {remNumero = invoiceAux.remNum }
-            else {
-          const configId = receiptAux.codCon;
-          const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
+          if (invoiceAux.remNum > 0) {
+            remNumero = invoiceAux.remNum;
+          } else {
+            const config = await tx.configuration.update({
+              where: { id: invoiceAux.codCon },
+              data: { numIntRem: { increment: 1 } },
+            });
+
+            remNumero = config.numIntRem;
           }
-        );
+        }
+      }
 
-          if (configuracion) {
-            await this.prisma.configuration.update(
-                          {
-              where: { id: configId },
-              data: {
-                numIntRem: { increment: 1 },
-              },
-            }
+      // =========================
+      // 🧾 FACTURA FINAL
+      // =========================
+      const invoice = await tx.order.create({
+        data: {
 
-            );
+          paymentMethod: invoiceAux.paymentMethod,
+          subTotal: invoiceAux.subTotal,
+          shippingPrice: invoiceAux.shippingPrice,
+          tax: invoiceAux.tax,
+          total: invoiceAux.total,
+          totalBuy: invoiceAux.totalBuy,
+          itemsInOrder: 0,
+
+          codConNum: invoiceAux.codConNum,
+
+          invNum: invNumero,
+          remNum: remNumero,
+          recNum: recNumero,
+
+          remDat: safeDate(invoiceAux.remDat),
+          movpvDat: safeDate(invoiceAux.movpvDat),
+          dueDat: safeDate(invoiceAux.dueDat),
+          invDat: safeDate(invoiceAux.invDat),
+          recDat: invrecDat,
+
+          desVal: invoiceAux.desVal,
+          notes: invoiceAux.notes,
+          salbuy: invoiceAux.salbuy,
+          ajuste: invoiceAux.ajuste,
+
+          isHaber: (invoiceAux.salbuy === "SALE")
+            ? invoiceAux.isHaber
+            : !invoiceAux.isHaber,
+
+          // relaciones
+          customer: invoiceAux.codCus ? { connect: { id: invoiceAux.codCus } } : undefined,
+          supplier1: invoiceAux.codSup ? { connect: { id: invoiceAux.codSup } } : undefined,
+          comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
+          configuration: invoiceAux.codCon ? { connect: { id: invoiceAux.codCon } } : undefined,
+          configuration2: invoiceAux.codCon2 ? { connect: { id: invoiceAux.codCon2 } } : undefined,
+          user1: invoiceAux.user ? { connect: { id: invoiceAux.user } } : undefined,
+
+          orderItems: {
+            create: orderItems.map(item => ({
+              slug: item.slug,
+              title: item.title,
+              medPro: item.medPro,
+              quantity: item.quantity,
+              image: item.image,
+              price: item.price,
+              size: item.size,
+              porIva: item.porIva,
+              venDat: safeDate(item.venDat),
+              observ: item.observ,
+              terminado: item.terminado,
+              productId: item._id,
+              instrumentoId: item.instrumentoId,
+            }))
           }
-              remNumero = configuracion.numIntRem + 1;
-            };
-        };
-      };
+        },
+        include: { orderItems: true },
+      });
 
-          //////////  numera remito /////////////////
+      return invoice;
+    });
 
-        
-        if (recAux > 0) {
-          invrecNum = recAux;
-          // invrecDat =  invoiceAux.invDat;
-          }else{
-            invrecNum = recAux;
-            // invrecDat =  invoiceAux.recDat;
-          };
-///***
-      const invoice = await this.prisma.order.create({
-          data: {
-            // orderAddress: invoiceAux.orderAddress,
-            paymentMethod: invoiceAux.paymentMethod,
-            subTotal: invoiceAux.subTotal,
-            shippingPrice: invoiceAux.shippingPrice,
-            tax: invoiceAux.tax,
-            total: invoiceAux.total,
-            totalBuy: invoiceAux.totalBuy,
-            itemsInOrder:0,
-            // user: invoiceAux.codUse,
-            // id_client: invoiceAux.codCus,
-            // id_config: invoiceAux.codCon,
-            // user: invoiceAux.user,
-            // id_config2: invoiceAux.codCon2,
-            codConNum: invoiceAux.codConNum,
-            // codCom: invoiceAux.codCom,
-            // supplier: invoiceAux.codSup,
-            //////////  numera remito /////////////////
-            invNum: invNumero,
-            remNum: remNumero,
-            // movpvNum: invoiceAux.movpvNum,
-            //////////  numera remito /////////////////
-            remDat: safeDate(invoiceAux.remDat),
-            movpvDat: safeDate(invoiceAux.movpvDat),
-            dueDat: safeDate(invoiceAux.dueDat),
-            // invNum: invoiceAux.invNum,
-            invDat: safeDate(invoiceAux.invDat),
-            // recNum: invoiceAux.recNum,
-            recNum: recNumero,
-            recDat: safeDate(invrecDat),
-            desVal: invoiceAux.desVal,
-            notes: invoiceAux.notes,
-            salbuy: invoiceAux.salbuy,
-            ajuste: invoiceAux.ajuste,
-//arreglaishaber          // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
-          isHaber: (invoiceAux.salbuy === "SALE") ? invoiceAux.isHaber : !invoiceAux.isHaber,
-            // isHaber: invoiceAux.isHaber,
-          // //////////  Me fijo si es Compra o venta para ver haber o debe /////////////////
+    return {
+      invoice: {
+        ...result,
+        _id: result.id,
+      }
+    };
 
-/////////////
-
-
-
-            // relaciones
-            customer: invoiceAux.codCus ? { connect: { id: invoiceAux.codCus } } : undefined,
-            supplier1: invoiceAux.codSup ? { connect: { id: invoiceAux.codSup } } : undefined,
-            comprobante: invoiceAux.codCom ? { connect: { id: invoiceAux.codCom } } : undefined,
-            configuration: invoiceAux.codCon ? { connect: { id: invoiceAux.codCon } } : undefined,
-            configuration2: invoiceAux.codCon2 ? { connect: { id: invoiceAux.codCon2 } } : undefined,
-            // supplier1: invoiceAux.codSup ? { connect: { id: invoiceAux.codSup } } : undefined,
-            user1: invoiceAux.user ? { connect: { id: invoiceAux.user } } : undefined,
-
-
-            
-            // order items
-            orderItems: {
-              create: orderItems.map(item => ({
-                slug: item.slug,
-                title: item.title,
-                medPro: item.medPro,
-                quantity: item.quantity,
-                image: item.image,
-                price: item.price,
-                size: item.size,
-                porIva: item.porIva,
-                venDat: safeDate(item.venDat),
-                observ: item.observ,
-                terminado: item.terminado,
-                // productId: item.productId,
-                productId: item._id,
-                instrumentoId: item.instrumentoId,
-              }))
-            }
-          },
-          include: { orderItems: true }, // incluye los items en la respuesta
-        });
-
-        // return { invoice };
-      const invoiceWithMongoId = {
-        ...invoice,
-        _id: invoice.id,
-      };
-
-      return { invoice: invoiceWithMongoId };            
-    } catch (error) {
-      this.handleExceptions( error );
-    }
-      
-        ///***
-//////////////inv
-
+  } catch (error) {
+    this.handleExceptions(error);
+  }
 }
 
 async createRem(createInvoiceDto: any) {
   const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
 
-  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-    try {
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
 
+  try {
 
-//////////////
+    const result = await this.prisma.$transaction(async (tx) => {
+
       let remNumero = 0;
+
       if (orderData.remNum > 0) {
         remNumero = orderData.remNum;
       } else {
         const configId = orderData.codCon;
-        // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
-          }
-        );
-        if (configuracion) {
-          configuracion.numIntRem += 1;
-          // await configuracion.save({ session });
-          await this.prisma.configuration.update(
-            {
-              where: { id: configId },
-              data: {
-                numIntRem: { increment: 1 },
-              },
-            }
-          );
-          remNumero = configuracion.numIntRem;
-        } else {
-          throw new Error('Configuración no encontrada');
-        }
-      }
-      orderData.remNum = remNumero;    
-//////////////
 
-
-
-
-            const invoice = await this.prisma.order.create({
+        const configuracion = await tx.configuration.update({
+          where: { id: configId },
           data: {
-      orderAddress: orderData.orderAddress,
-      paymentMethod: orderData.paymentMethod,
-      subTotal: orderData.subTotal,
-      shippingPrice: orderData.shippingPrice,
-      tax: orderData.tax,
-      total: orderData.total,
-      totalBuy: orderData.totalBuy,
-      itemsInOrder:0,
-      // user: orderData.codUse,
-      // id_client: orderData.codCus,
-      // id_config: orderData.codCon,
-      // user: orderData.user,
-      // id_config2: orderData.codCon2,
-      movpvNum: orderData.movpvNum,
-      movpvDat: safeDate(orderData.movpvDat),
-      codConNum: orderData.codConNum,
-      // codCom: orderData.codCom,
-      // supplier: orderData.codSup,
-      //////////  numera remito /////////////////
-      remNum: orderData.remNum,
-      //////////  numera remito /////////////////
-      remDat: safeDate(orderData.remDat),
-      dueDat: safeDate(orderData.dueDat),
-      invNum: orderData.invNum,
-      invDat: safeDate(orderData.invDat),
-      recNum: orderData.recNum,
-      recDat: safeDate(orderData.recDat),
-      desVal: orderData.desVal,
-      notes: orderData.notes,
-      salbuy: orderData.salbuy,
-/////////////
-
-
-
-            // relaciones
-            customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
-            comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
-            configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
-            supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
-            user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
-
-
-            
-            // order items
-            orderItems: {
-              create: orderItems.map(item => ({
-                slug: item.slug,
-                title: item.title,
-                medPro: item.medPro,
-                quantity: item.quantity,
-                image: item.image,
-                price: item.price,
-                size: item.size,
-                porIva: item.porIva,
-                venDat: safeDate(item.venDat),
-                observ: item.observ,
-                terminado: item.terminado,
-                // productId: item.productId,
-                productId: item._id,
-                instrumentoId: item.instrumentoId,
-
-
-
-              }))
-            }
+            numIntRem: { increment: 1 },
           },
-          include: { orderItems: true }, // incluye los items en la respuesta
         });
 
-        // return { invoice };
-      const invoiceWithMongoId = {
-        ...invoice,
-        _id: invoice.id,
-      };
+        // 🔥 Este valor ya viene incrementado de forma segura
+        remNumero = configuracion.numIntRem;
+      }
 
-      return { invoice: invoiceWithMongoId };            
+      orderData.remNum = remNumero;
 
-    } catch (error) {
-      this.handleExceptions( error );
-    }
+      const invoice = await tx.order.create({
+        data: {
+          orderAddress: orderData.orderAddress,
+          paymentMethod: orderData.paymentMethod,
+          subTotal: orderData.subTotal,
+          shippingPrice: orderData.shippingPrice,
+          tax: orderData.tax,
+          total: orderData.total,
+          totalBuy: orderData.totalBuy,
+          itemsInOrder: 0,
 
+          movpvNum: orderData.movpvNum,
+          movpvDat: safeDate(orderData.movpvDat),
+          codConNum: orderData.codConNum,
+
+          remNum: orderData.remNum,
+          remDat: safeDate(orderData.remDat),
+          dueDat: safeDate(orderData.dueDat),
+
+          invNum: orderData.invNum,
+          invDat: safeDate(orderData.invDat),
+          recNum: orderData.recNum,
+          recDat: safeDate(orderData.recDat),
+
+          desVal: orderData.desVal,
+          notes: orderData.notes,
+          salbuy: orderData.salbuy,
+
+          // relaciones
+          customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
+          comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
+          configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
+          supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
+          user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
+
+          orderItems: {
+            create: orderItems.map(item => ({
+              slug: item.slug,
+              title: item.title,
+              medPro: item.medPro,
+              quantity: item.quantity,
+              image: item.image,
+              price: item.price,
+              size: item.size,
+              porIva: item.porIva,
+              venDat: safeDate(item.venDat),
+              observ: item.observ,
+              terminado: item.terminado,
+              productId: item._id,
+              instrumentoId: item.instrumentoId,
+            }))
+          }
+        },
+        include: { orderItems: true },
+      });
+
+      return invoice;
+    });
+
+    return {
+      invoice: {
+        ...result,
+        _id: result.id,
+      }
+    };
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
 }
+
 async createOrd(createInvoiceDto: any) {
   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 
@@ -3466,136 +3904,257 @@ const mailgun = mg({
 }
 
 
-async createMov(createInvoiceDto: any) {
-  const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
+// async createMov(createInvoiceDto: any) {
+//   const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
 
-  const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-    try {
-
-
-//////////////
-      let Numero = 0;
-      if (orderData.movpvNum > 0) {
-        Numero = orderData.movpvNum;
-      } else {
-        const configId = orderData.codCon;
-        // const configuracion = await Configuration.findById(configId).session(session);
-        const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: configId },
-          }
-        );
-        if (configuracion) {
-          configuracion.numIntMov += 1;
-          // await configuracion.save({ session });
-          await this.prisma.configuration.update(
-            {
-              where: { id: configId },
-              data: {
-                numIntMov: { increment: 1 },
-              },
-            }
-          );
-          Numero = configuracion.numIntMov;
-        } else {
-          throw new Error('Configuración no encontrada');
-        }
-      }
-      orderData.movpvNum = Numero;    
-//////////////
+//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
+//     try {
 
 
-
-
-            const invoice = await this.prisma.order.create({
-          data: {
-      orderAddress: orderData.orderAddress,
-      paymentMethod: orderData.paymentMethod,
-      subTotal: orderData.subTotal,
-      shippingPrice: orderData.shippingPrice,
-      tax: orderData.tax,
-      total: orderData.total,
-      totalBuy: orderData.totalBuy,
-            itemsInOrder:0,
-      // user: orderData.codUse,
-      // id_client: orderData.codCus,
-      // id_config: orderData.codCon,
-      // user: orderData.user,
-      // id_config2: orderData.codCon2,
-      codConNum: orderData.codConNum,
-      // codCom: orderData.codCom,
-      // supplier: orderData.codSup,
-      //////////  numera remito /////////////////
-      // remNum: orderData.remNum,
-      movpvNum: orderData.movpvNum,
-      //////////  numera remito /////////////////
-      // remDat: safeDate(orderData.remDat),
-      movpvDat: safeDate(orderData.movpvDat),
-      dueDat: safeDate(orderData.dueDat),
-      invNum: orderData.invNum,
-      invDat: safeDate(orderData.invDat),
-      recNum: orderData.recNum,
-      recDat: safeDate(orderData.recDat),
-      desVal: orderData.desVal,
-      notes: orderData.notes,
-      salbuy: orderData.salbuy,
-/////////////
+// //////////////
+//       let Numero = 0;
+//       if (orderData.movpvNum > 0) {
+//         Numero = orderData.movpvNum;
+//       } else {
+//         const configId = orderData.codCon;
+//         // const configuracion = await Configuration.findById(configId).session(session);
+//         const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: configId },
+//           }
+//         );
+//         if (configuracion) {
+//           configuracion.numIntMov += 1;
+//           // await configuracion.save({ session });
+//           await this.prisma.configuration.update(
+//             {
+//               where: { id: configId },
+//               data: {
+//                 numIntMov: { increment: 1 },
+//               },
+//             }
+//           );
+//           Numero = configuracion.numIntMov;
+//         } else {
+//           throw new Error('Configuración no encontrada');
+//         }
+//       }
+//       orderData.movpvNum = Numero;    
+// //////////////
 
 
 
-            // relaciones
-            customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
-            comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
-            configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
-            configuration2: orderData.codCon2 ? { connect: { id: orderData.codCon2 } } : undefined,
-            // supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
-            user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
+
+//             const invoice = await this.prisma.order.create({
+//           data: {
+//       orderAddress: orderData.orderAddress,
+//       paymentMethod: orderData.paymentMethod,
+//       subTotal: orderData.subTotal,
+//       shippingPrice: orderData.shippingPrice,
+//       tax: orderData.tax,
+//       total: orderData.total,
+//       totalBuy: orderData.totalBuy,
+//             itemsInOrder:0,
+//       // user: orderData.codUse,
+//       // id_client: orderData.codCus,
+//       // id_config: orderData.codCon,
+//       // user: orderData.user,
+//       // id_config2: orderData.codCon2,
+//       codConNum: orderData.codConNum,
+//       // codCom: orderData.codCom,
+//       // supplier: orderData.codSup,
+//       //////////  numera remito /////////////////
+//       // remNum: orderData.remNum,
+//       movpvNum: orderData.movpvNum,
+//       //////////  numera remito /////////////////
+//       // remDat: safeDate(orderData.remDat),
+//       movpvDat: safeDate(orderData.movpvDat),
+//       dueDat: safeDate(orderData.dueDat),
+//       invNum: orderData.invNum,
+//       invDat: safeDate(orderData.invDat),
+//       recNum: orderData.recNum,
+//       recDat: safeDate(orderData.recDat),
+//       desVal: orderData.desVal,
+//       notes: orderData.notes,
+//       salbuy: orderData.salbuy,
+// /////////////
+
+
+
+//             // relaciones
+//             customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
+//             comprobante: orderData.codCom ? { connect: { id: orderData.codCom } } : undefined,
+//             configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
+//             configuration2: orderData.codCon2 ? { connect: { id: orderData.codCon2 } } : undefined,
+//             // supplier1: orderData.codSup ? { connect: { id: orderData.codSup } } : undefined,
+//             user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
 
 
             
-            // order items
-            orderItems: {
-              create: orderItems.map(item => ({
-                slug: item.slug,
-                title: item.title,
-                medPro: item.medPro,
-                quantity: item.quantity,
-                image: item.image,
-                price: item.price,
-                size: item.size,
-                porIva: item.porIva,
-                venDat: safeDate(item.venDat),
-                observ: item.observ,
-                terminado: item.terminado,
-                // productId: item.productId,
-                productId: item._id,
-                instrumentoId: item.instrumentoId,
+//             // order items
+//             orderItems: {
+//               create: orderItems.map(item => ({
+//                 slug: item.slug,
+//                 title: item.title,
+//                 medPro: item.medPro,
+//                 quantity: item.quantity,
+//                 image: item.image,
+//                 price: item.price,
+//                 size: item.size,
+//                 porIva: item.porIva,
+//                 venDat: safeDate(item.venDat),
+//                 observ: item.observ,
+//                 terminado: item.terminado,
+//                 // productId: item.productId,
+//                 productId: item._id,
+//                 instrumentoId: item.instrumentoId,
 
 
 
-              }))
-            }
+//               }))
+//             }
 
 
+//           },
+//           include: { orderItems: true }, // incluye los items en la respuesta
+//         });
+
+//         // return { invoice };
+//       const invoiceWithMongoId = {
+//         ...invoice,
+//         _id: invoice.id,
+//       };
+
+//       return { invoice: invoiceWithMongoId };            
+
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+
+// }
+
+async createMov(createInvoiceDto: any) {
+
+  const { orderItems, orderAddress, ...orderData } = createInvoiceDto;
+
+  const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
+
+  try {
+
+    const result = await this.prisma.$transaction(async (tx) => {
+
+      let Numero = 0;
+
+      // =========================
+      // 🔢 NUMERADOR MOVIMIENTO
+      // =========================
+      if (orderData.movpvNum > 0) {
+        Numero = orderData.movpvNum;
+      } else {
+
+        const config = await tx.configuration.update({
+          where: { id: orderData.codCon },
+          data: {
+            numIntMov: { increment: 1 },
           },
-          include: { orderItems: true }, // incluye los items en la respuesta
         });
 
-        // return { invoice };
-      const invoiceWithMongoId = {
-        ...invoice,
-        _id: invoice.id,
-      };
+        Numero = config.numIntMov;
+      }
 
-      return { invoice: invoiceWithMongoId };            
+      orderData.movpvNum = Numero;
 
-    } catch (error) {
-      this.handleExceptions( error );
-    }
+      // =========================
+      // 🧾 CREAR MOVIMIENTO
+      // =========================
+      const invoice = await tx.order.create({
+        data: {
 
+          orderAddress: orderData.orderAddress,
+          paymentMethod: orderData.paymentMethod,
+          subTotal: orderData.subTotal,
+          shippingPrice: orderData.shippingPrice,
+          tax: orderData.tax,
+          total: orderData.total,
+          totalBuy: orderData.totalBuy,
+          itemsInOrder: 0,
+
+          codConNum: orderData.codConNum,
+
+          movpvNum: orderData.movpvNum,
+          movpvDat: safeDate(orderData.movpvDat),
+
+          dueDat: safeDate(orderData.dueDat),
+
+          invNum: orderData.invNum,
+          invDat: safeDate(orderData.invDat),
+
+          recNum: orderData.recNum,
+          recDat: safeDate(orderData.recDat),
+
+          desVal: orderData.desVal,
+          notes: orderData.notes,
+          salbuy: orderData.salbuy,
+
+          // relaciones
+          customer: orderData.codCus
+            ? { connect: { id: orderData.codCus } }
+            : undefined,
+
+          comprobante: orderData.codCom
+            ? { connect: { id: orderData.codCom } }
+            : undefined,
+
+          configuration: orderData.codCon
+            ? { connect: { id: orderData.codCon } }
+            : undefined,
+
+          configuration2: orderData.codCon2
+            ? { connect: { id: orderData.codCon2 } }
+            : undefined,
+
+          user1: orderData.user
+            ? { connect: { id: orderData.user } }
+            : undefined,
+
+          // items
+          orderItems: {
+            create: orderItems.map(item => ({
+              slug: item.slug,
+              title: item.title,
+              medPro: item.medPro,
+              quantity: item.quantity,
+              image: item.image,
+              price: item.price,
+              size: item.size,
+              porIva: item.porIva,
+              venDat: safeDate(item.venDat),
+              observ: item.observ,
+              terminado: item.terminado,
+              productId: item._id,
+              instrumentoId: item.instrumentoId,
+            }))
+          }
+
+        },
+        include: { orderItems: true },
+      });
+
+      return invoice;
+    });
+
+    return {
+      invoice: {
+        ...result,
+        _id: result.id,
+      }
+    };
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
 }
 
-  
   async searchinvS(query: any) {
   // isAuth,
   // // isAdmin,

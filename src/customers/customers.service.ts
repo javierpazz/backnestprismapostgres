@@ -22,52 +22,93 @@ export class CustomersService {
 
 
 
-  async createsignup(createCustomerDto: any, customer:Customer) {
-    // createCustomerDto.nameCus = createCustomerDto.nameCus.toLocaleLowerCase();
-    const { _id, ...rest } = createCustomerDto;
-    try {
+//   async createsignup(createCustomerDto: any, customer:Customer) {
+//     // createCustomerDto.nameCus = createCustomerDto.nameCus.toLocaleLowerCase();
+//     const { _id, ...rest } = createCustomerDto;
+//     try {
 
-/////numera cliente
-      let cliNumero = 0;
-        const configuracion = await this.prisma.configuration.findUnique(
-          {
-            where: { id: rest.punto },
-          }
-        );
-        if (configuracion) {
-          configuracion.numIntCli += 1;
-          // await configuracion.save({ session });
-          await this.prisma.configuration.update(
-            {
-              where: { id: rest.punto },
-              data: {
-                numIntCli: { increment: 1 },
-              },
-            }
-          );
-          cliNumero = configuracion.numIntCli;
-        } else {
-          throw new Error('Configuración no encontrada');
-        }
-/////numera cliente
+// /////numera cliente
+//       let cliNumero = 0;
+//         const configuracion = await this.prisma.configuration.findUnique(
+//           {
+//             where: { id: rest.punto },
+//           }
+//         );
+//         if (configuracion) {
+//           configuracion.numIntCli += 1;
+//           // await configuracion.save({ session });
+//           await this.prisma.configuration.update(
+//             {
+//               where: { id: rest.punto },
+//               data: {
+//                 numIntCli: { increment: 1 },
+//               },
+//             }
+//           );
+//           cliNumero = configuracion.numIntCli;
+//         } else {
+//           throw new Error('Configuración no encontrada');
+//         }
+// /////numera cliente
 
-      const customer = await 
-      this.prisma.customer.create(
-        {data: {
+//       const customer = await 
+//       this.prisma.customer.create(
+//         {data: {
+//           codCus: String(cliNumero),
+//           nameCus: rest.nameCus,
+//           emailCus: rest.emailCus,
+//         }
+//       }
+//       );
+//       return customer;
+      
+//     } catch (error) {
+//       this.handleExceptions( error );
+//     }
+
+
+//   }
+
+async createsignup(createCustomerDto: any, customer: Customer) {
+
+  const { _id, ...rest } = createCustomerDto;
+
+  try {
+
+    const result = await this.prisma.$transaction(async (tx) => {
+
+      // =========================
+      // 🔢 NUMERADOR CLIENTE
+      // =========================
+      const config = await tx.configuration.update({
+        where: { id: rest.punto },
+        data: {
+          numIntCli: { increment: 1 },
+        },
+      });
+
+      const cliNumero = config.numIntCli;
+
+      // =========================
+      // 👤 CREAR CLIENTE
+      // =========================
+      const newCustomer = await tx.customer.create({
+        data: {
           codCus: String(cliNumero),
           nameCus: rest.nameCus,
           emailCus: rest.emailCus,
-        }
-      }
-      );
-      return customer;
-      
-    } catch (error) {
-      this.handleExceptions( error );
-    }
+        },
+      });
 
+      return newCustomer;
+    });
 
+    return result;
+
+  } catch (error) {
+    this.handleExceptions(error);
   }
+}
 
   async create(createCustomerDto: CreateCustomerDto, customer:Customer) {
     // createCustomerDto.nameCus = createCustomerDto.nameCus.toLocaleLowerCase();
