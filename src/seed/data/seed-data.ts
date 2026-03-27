@@ -67,6 +67,11 @@ interface SeedEncargado {
     name: string;
     email: string;
 }
+interface SeedMaquina {
+    codMaq: string;
+    name: string;
+    serNum: string;
+}
 
 interface SeedSupplier {
     // _id: string;
@@ -141,6 +146,7 @@ interface SeedData {
   instrumentos: SeedInstrumento[];
   customers: SeedCustomer[];
   encargados: SeedEncargado[];
+  maquinas: SeedMaquina[];
   suppliers: SeedSupplier[];
   configurations: SeedConfigurations[];
   users: SeedUser[];
@@ -342,6 +348,18 @@ export const initialData: SeedData = {
         codEnc: '2',
         name: 'ENCARGADO 2',
         email: 'encargado2@email.com',
+        },
+    ],
+  maquinas: [
+        {
+        codMaq: '1',
+        name: 'MAQUINA 1',
+        serNum: 'encargado1@serNum.com',
+      },
+      {
+        codMaq: '2',
+        name: 'MAQUINA 2',
+        serNum: 'encargado2@serNum.com',
         },
     ],
 

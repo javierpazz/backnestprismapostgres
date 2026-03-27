@@ -114,6 +114,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number) 
   priceBuy?: number;
 
   @IsOptional()
@@ -126,6 +127,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsNumber()
+  @Type(() => Number) 
   porIva?: number;
 
   @IsOptional()

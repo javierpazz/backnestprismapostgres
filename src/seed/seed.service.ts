@@ -41,6 +41,7 @@ export class SeedService {
   await this.prisma.parte.deleteMany();
   await this.prisma.valuee.deleteMany();
   await this.prisma.instrumento.deleteMany();
+  await this.prisma.maquina.deleteMany();
   await this.prisma.customer.deleteMany();
   await this.prisma.encargado.deleteMany();
   await this.prisma.supplier.deleteMany();
@@ -51,7 +52,7 @@ export class SeedService {
         console.log('🌱 Running seed...');  
 
 
-        const { categories, products, users, configurations, estados, partes, valuees, instrumentos, customers, encargados, suppliers, } = initialData;
+        const { categories, products, users, configurations, estados, partes, valuees, instrumentos, customers, encargados, maquinas, suppliers, } = initialData;
 
         // const users = initialData.users;
         
@@ -86,6 +87,9 @@ export class SeedService {
           });
           await this.prisma.encargado.createMany({
             data: encargados
+          });
+          await this.prisma.maquina.createMany({
+            data: maquinas
           });
           await this.prisma.customer.createMany({
             data: customers
