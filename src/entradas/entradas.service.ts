@@ -182,7 +182,19 @@ async create(createEntradaDto: any) {
       // =========================
       // 🧾 CREAR ORDER
       // =========================
-      const order = await tx.order.create({
+
+      
+      //verifico si totas las tareas estan terminadas
+          // const allItemsFinished = orderItems?.every(item => item.terminado === true);
+        // const allItemsFinished =
+        //   orderItems?.length > 0 &&
+        //   orderItems.every(item => item.terminado === true);
+        const allItemsFinished =
+          Array.isArray(orderItems) &&
+          orderItems.length > 0 &&
+          orderItems.every(item => item?.terminado === true);      //verifico si totas las tareas estan terminadas
+
+        const order = await tx.order.create({
         data: {
 
           paymentMethod: orderData.paymentMethod,
@@ -203,7 +215,8 @@ async create(createEntradaDto: any) {
           asieNum: orderData.asieNum,
           asieDat: safeDate(orderData.asieDat),
 
-          terminado: orderData.terminado,
+          // terminado: orderData.terminado,
+          terminado: allItemsFinished ?? false,
 
           movpvNum: orderData.movpvNum,
           movpvDat: safeDate(orderData.movpvDat),
@@ -235,6 +248,14 @@ async create(createEntradaDto: any) {
 
           parte: orderData.codPar
             ? { connect: { id: orderData.codPar } }
+            : undefined,
+
+          maquina: orderData.codMaq
+            ? { connect: { id: orderData.codMaq } }
+            : undefined,
+
+          encargado: orderData.codEnc
+            ? { connect: { id: orderData.codEnc } }
             : undefined,
 
           instrumento: orderData.codIns
@@ -296,6 +317,8 @@ const {
   customer,
   instru,
   parte,
+  maquina,
+  encargado,
   product,
   estado,
   registro,
@@ -314,6 +337,8 @@ const {
 
     // --- Otros filtros ---
     const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
     const instruFilter = instru && instru !== 'all' ? { id_instru: String(instru) } : {};
     const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
@@ -398,6 +423,8 @@ const obserFilter: Prisma.OrderWhereInput =
       where: {
         ...fechasFilter,
         ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
         ...instruFilter,
         // ...productFilter,
         ...customerFilter,
@@ -416,6 +443,8 @@ const obserFilter: Prisma.OrderWhereInput =
         configuration: true,  // id_config
         instrumento: true,    // id_instru
         parte: true,          // id_parte si aplica
+        maquina: true,          // id_parte si aplica
+        encargado: true,          // id_parte si aplica
         user1: true,          // usuario si quieres incluirlo
         orderItems: true,
       },      })
@@ -434,6 +463,12 @@ const obserFilter: Prisma.OrderWhereInput =
       : null,
     id_parte: order.parte
       ? { _id: order.parte.id, name: order.parte.name }
+      : null,
+    id_maquin: order.maquina
+      ? { _id: order.maquina.id, name: order.maquina.name }
+      : null,
+    id_encar: order.encargado
+      ? { _id: order.encargado.id, name: order.encargado.name }
       : null,
     user: order.user
       ? { _id: order.user1.id, name: order.user1.name }
@@ -468,6 +503,8 @@ const obserFilter: Prisma.OrderWhereInput =
     customer,
     instru,
     parte,
+    maquina,
+    encargado,
     product,
     estado,
     registro,
@@ -485,6 +522,8 @@ const obserFilter: Prisma.OrderWhereInput =
 
   // --- Filtros por relaciones (dentro de order)
   const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+  const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+  const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
   const instruFilter = instru && instru !== 'all' ? { id_instru: String(instru) } : {};
   const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
   const configuracionFilter =
@@ -578,6 +617,8 @@ const obserFilter: Prisma.OrderWhereInput =
           ...existeIns,
           ...fechasFilter,
           ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
           ...instruFilter,
           ...customerFilter,
           ...configuracionFilter,
@@ -593,6 +634,8 @@ const obserFilter: Prisma.OrderWhereInput =
           orderAddress: true,
           customer: true,
           parte: true,
+          maquina: true,
+          encargado: true,
           instrumento: true,
           configuration: true,
           user1: true,
@@ -642,13 +685,17 @@ _id: item.order?.id,
   // id_instru: item.order?.id_instru ? item.order.id_instru : null,
   id_instru: item.order?.instrumento ?? { name: '' },
   id_parte: item.order?.parte ?? { name: '' },
-  libNum: item.order?.libNum ?? 0,
-  folNum: item.order?.folNum ?? 0,
-  asiNum: item.order?.asiNum ?? 0,
-  asiDat: item.order?.asiDat ?? null,
-  escNum: item.order?.escNum ?? 0,
-  asieNum: item.order?.asieNum ?? 0,
-  asieDat: item.order?.asieDat ?? null,
+  id_maquin: item.order?.maquina ?? { name: '' },
+  id_encar: item.order?.encargado ?? { name: '' },
+
+
+  // libNum: item.order?.libNum ?? 0,
+  // folNum: item.order?.folNum ?? 0,
+  // asiNum: item.order?.asiNum ?? 0,
+  // asiDat: item.order?.asiDat ?? null,
+  // escNum: item.order?.escNum ?? 0,
+  // asieNum: item.order?.asieNum ?? 0,
+  // asieDat: item.order?.asieDat ?? null,
   terminado: item.order?.terminado ?? false,
   // id_config: item.order?.id_config ? item.order.id_config : null,
   id_config: item.order?.configuration ?? { name: '' },
@@ -673,6 +720,8 @@ _id: item.order?.id,
   // Campos calculados / alias de relaciones
   instruName: item.order?.instrumento?.name ?? '',
   parteName: item.order?.parte?.name ?? '',
+  maquinaName: item.order?.maquina?.name ?? '',
+  encargadoName: item.order?.encargado?.name ?? '',
   customName: item.order?.customer?.nameCus ?? '',
   configName: item.order?.configuration?.name ?? '',
   userName: item.order?.user1?.name ?? '',

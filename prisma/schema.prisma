@@ -112,6 +112,7 @@ model Encargado {
   name          String   @unique
   email         String?   
   receipt  Receipt[]   
+  order  Order[]   // 👈 Relación con OrderItem
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -382,14 +383,22 @@ model Order {
   total          Float?
   totalBuy       Float?
   itemsInOrder Int
+
   id_client      String?      // relación con Customer
   customer     Customer?   @relation(fields: [id_client], references: [id], onDelete: Restrict)
+
   id_maquin      String?      // relación con Maquina
   maquina     Maquina?   @relation(fields: [id_maquin], references: [id], onDelete: Restrict)
+  
   supplier      String?      // relación con Customer
   supplier1     Supplier?   @relation(fields: [supplier], references: [id], onDelete: Restrict)
+
   id_parte       String?      // relación con Parte
   parte        Parte?   @relation(fields: [id_parte], references: [id], onDelete: Restrict)
+
+  id_encar       String?      // relación con Encargado
+  encargado        Encargado?   @relation(fields: [id_encar], references: [id], onDelete: Restrict)
+
   id_instru      String?      // relación con Instrumento
   instrumento  Instrumento?   @relation(fields: [id_instru], references: [id], onDelete: Restrict)
 
