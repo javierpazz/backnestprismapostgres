@@ -26,6 +26,7 @@ import { ReceiptModule } from './receipt/receipt.module';
 import { SeedModule } from './seed/seed.module';
 import { FilesModule } from './files/files.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { MaquinasModule } from './maquinas/maquinas.module';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { PrismaModule } from './prisma/prisma.module';
       rootPath: join(__dirname,'..','public'), 
     }),
 
-    ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule, ReceiptModule, SeedModule, FilesModule, PrismaModule],
+    ProductsModule, ConfigurationsModule, AuthModule, CustomersModule, InstrumentosModule, PartesModule, UsersModule, EntradasModule, ProveedoresModule, ValoresModule, EncargadosModule, EstadosordenModule, ComprobanteModule, ProductoFacModule, InvoiceModule, ReceiptModule, SeedModule, FilesModule, PrismaModule, MaquinasModule],
   controllers: [],
   providers: [],
 })

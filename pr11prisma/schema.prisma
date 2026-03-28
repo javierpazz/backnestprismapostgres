@@ -63,6 +63,7 @@ model Customer {
   coniva    String?
   order  Order[]   // 👈 Relación 
   receipt  Receipt[]   
+  maquina  Maquina[]   // 👈 Relación 
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -114,6 +115,23 @@ model Encargado {
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Maquina {
+  id            String    @id @default(uuid())
+  codMaq        String   @unique
+  name          String   @unique
+  serNum        String?   
+
+  codCusId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Customer.id
+  codCus      Customer?  @relation(fields: [codCusId], references: [id], onDelete: Restrict)
+  order  Order[]   // 👈 Relación 
+  
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@unique([codMaq, codCusId])
+
 }
 
 model Comprobante {
@@ -339,8 +357,12 @@ model Order {
   supplier1     Supplier?   @relation(fields: [supplier], references: [id], onDelete: Restrict)
   id_parte       String?      // relación con Parte
   parte        Parte?   @relation(fields: [id_parte], references: [id], onDelete: Restrict)
+
   id_instru      String?      // relación con Instrumento
   instrumento  Instrumento?   @relation(fields: [id_instru], references: [id], onDelete: Restrict)
+
+  id_maquin         String?
+  maquina      Maquina?   @relation(fields: [id_maquin], references: [id], onDelete: Restrict)
 
   id_config       String?
   configuration   Configuration?  @relation("Config1", fields: [id_config], references: [id], onDelete: Restrict)
@@ -349,8 +371,10 @@ model Order {
   configuration2  Configuration?  @relation("Config2", fields: [id_config2], references: [id], onDelete: Restrict)
 
   codConNum      String?
+  
   codCom         String?
   comprobante  Comprobante?   @relation(fields: [codCom], references: [id], onDelete: Restrict)
+  
 
   libNum         Int?
   folNum         Int?
