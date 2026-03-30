@@ -10,6 +10,12 @@ import { ValidRoles } from 'src/auth/interfaces';
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
   
+  @Get('orders/summary/tar')
+  // async dashboard1(@Query() query: any) {
+  @Auth()
+  dashboardTar(@Query() query: any) {
+    return this.invoiceService.dashboardTar(query);
+  }
   @Get('orders/summary/par')
   // async dashboard1(@Query() query: any) {
   @Auth()

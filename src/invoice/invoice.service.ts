@@ -30,6 +30,337 @@ export class InvoiceService {
               private readonly productoFacService: ProductoFacService,
               private prisma: PrismaService) {}
 
+
+//////dashTar
+
+  async dashboardTar(query: any) {
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  parte,
+  maquina,
+  encargado,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { remDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { remDat: { gte: new Date(fech1) } }
+        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
+
+///////tarxmaq
+// 1. Traer datos
+const result = await this.prisma.orderItem.findMany({
+  where: {
+    order: {
+      id_instru: { not: null },
+      id_maquin: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...comprobanteFilter,
+      ...parteFilter,
+    },
+  },
+  select: {
+    price: true,
+    quantity: true,
+    porIva: true,
+    order: {
+      select: {
+        id_maquin: true,
+      },
+    },
+  },
+});
+
+// 2. Agrupar SOLO por máquina
+const grouped = result.reduce((acc, item) => {
+  const idMaquin = item.order?.id_maquin;
+  if (!idMaquin) return acc;
+
+  if (!acc[idMaquin]) {
+    acc[idMaquin] = {
+      id_maquin: idMaquin,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[idMaquin].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[idMaquin].totalCan += 1;
+
+  return acc;
+}, {} as Record<string, {
+  id_maquin: string;
+  total: number;
+  totalCan: number;
+}>);
+
+// 3. Convertir a array
+const allData = Object.values(grouped);
+
+// 4. Ordenar y TOP 10
+const top10 = allData
+  .sort((a, b) => b.total - a.total) // 💰 ranking por total
+  .slice(0, 10);
+
+// 5. (OPCIONAL) traer nombre de máquina
+const maquinasIds = top10.map(m => m.id_maquin);
+
+const maquinas = await this.prisma.maquina.findMany({
+  where: {
+    id: { in: maquinasIds },
+  },
+  select: {
+    id: true,
+    // ajustá este campo según tu modelo
+    name: true
+  },
+});
+
+const mapMaquinas = Object.fromEntries(
+  maquinas.map(m => [m.id, m])
+);
+
+// 6. Resultado final
+const TarxMaq = top10.map(m => ({
+  maquinaId: m.id_maquin,
+  maquina: mapMaquinas[m.id_maquin]?.name || '',
+  total: m.total,
+  totalCan: m.totalCan,
+}));
+
+///////tarxmaq
+
+///////tarxpar
+// 1. Traer datos
+const resultTxP = await this.prisma.orderItem.findMany({
+  where: {
+    order: {
+      id_instru: { not: null },
+      id_parte: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...comprobanteFilter,
+      ...parteFilter,
+    },
+  },
+  select: {
+    price: true,
+    quantity: true,
+    porIva: true,
+    order: {
+      select: {
+        id_parte: true,
+      },
+    },
+  },
+});
+
+// 2. Agrupar SOLO por máquina
+const groupedTxP = resultTxP.reduce((acc, item) => {
+  const idParte = item.order?.id_parte;
+  if (!idParte) return acc;
+
+  if (!acc[idParte]) {
+    acc[idParte] = {
+      id_parte: idParte,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[idParte].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[idParte].totalCan += 1;
+
+  return acc;
+}, {} as Record<string, {
+  id_parte: string;
+  total: number;
+  totalCan: number;
+}>);
+
+// 3. Convertir a array
+const allDataTxP = Object.values(groupedTxP);
+
+// 4. Ordenar y TOP 10
+const top10TxP = allDataTxP
+  .sort((a, b) => b.total - a.total) // 💰 ranking por total
+  .slice(0, 10);
+
+// 5. (OPCIONAL) traer nombre de máquina
+const partesIds = top10TxP.map(m => m.id_parte);
+
+const partes = await this.prisma.parte.findMany({
+  where: {
+    id: { in: partesIds },
+  },
+  select: {
+    id: true,
+    // ajustá este campo según tu modelo
+    name: true
+  },
+});
+
+const mapPartes = Object.fromEntries(
+  partes.map(m => [m.id, m])
+);
+
+// 6. Resultado final
+const TarxPar = top10TxP.map(m => ({
+  parteId: m.id_parte,
+  parte: mapPartes[m.id_parte]?.name || '',
+  total: m.total,
+  totalCan: m.totalCan,
+}));
+
+///////tarxpar
+
+
+
+
+      ///dilval
+
+    const resultdilVal = await this.prisma.orderItem.findMany({
+      where: {
+        order: {
+          id_instru: { not: null },
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...comprobanteFilter,
+          ...parteFilter,
+        },
+      },
+      select: {
+        terminado: true,
+        price: true,
+        quantity: true,
+        porIva: true,
+      },
+    });
+
+    const groupedTar = resultdilVal.reduce((acc, item) => {
+      const key = item.terminado ? 'terminado' : 'pendiente';
+
+      if (!acc[key]) {
+        acc[key] = { total: 0, totalCan: 0 };
+      }
+
+      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
+      acc[key].totalCan += 1;
+
+      return acc;
+    }, {} as Record<string, { total: number; totalCan: number }>);
+
+    const dilVal = Object.entries(groupedTar).map(([key, value]) => ({
+      _id: key,
+      total: value.total,
+      totalCan: value.totalCan,
+    }));
+
+      ///dilval
+
+
+
+///orders
+const ordersData = await this.prisma.order.aggregate({
+  where: {
+            id_instru: {not: null},
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...parteFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: ordersData._count._all,
+    totalSales: ordersData._sum.total || 0,
+  },
+];
+///orders
+
+const Users = await this.prisma.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.prisma.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+      return {
+        TarxMaq,
+        TarxPar,
+          // top10PartesSTVal,
+          // top10PartesTerVal,
+          // top10Maquinas,
+          orders,
+          users,
+          customers,
+          // top10Partes,
+          dilVal,
+      };
+
+
+
+  }
+//////dashTar
+
+
   
 //////dashPar
 
@@ -79,6 +410,7 @@ const {
           where: {
             terminado:false,
             id_instru: {not: null},
+            id_parte: {not: null},
             ...fechasInvFilter,
             ...configuracionFilter,
             ...customerFilter,
