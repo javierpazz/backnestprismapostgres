@@ -569,7 +569,7 @@ export const initialData: SeedData = {
       price: 105120,
       priceBuy: 100000,
       brand:"STUTZ",
-      porIva: 11,
+      porIva: 21,
       sizes: [ 'M' ],
       slug: "Tard_o_Stu_z",
       type: 'shirts',

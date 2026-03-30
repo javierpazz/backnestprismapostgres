@@ -750,6 +750,8 @@ async findOne(id: string) {
       configuration2: true,  // id_config
       instrumento: true,    // id_instru
       parte: true,          // id_parte
+      maquina: true,          // id_parte
+      encargado: true,          // id_parte
       user1: true,          // usuario
       // orderItems: true,
     orderItems: {
@@ -817,6 +819,16 @@ async findOne(id: string) {
       ? { _id: invoice.parte.id,
       codPar: invoice.parte.codPar,
       name: invoice.parte.name }
+      : null,
+    id_maquin: invoice.maquina
+      ? { _id: invoice.maquina.id,
+      codMaq: invoice.maquina.codMaq,
+      name: invoice.maquina.name }
+      : null,
+    id_encar: invoice.encargado
+      ? { _id: invoice.encargado.id,
+      codEnc: invoice.encargado.codEnc,
+      name: invoice.encargado.name }
       : null,
     user: invoice.user1
       ? { _id: invoice.user1.id,
@@ -1037,6 +1049,12 @@ async update(updateEntradaDto: any, id: string) {
       const id_parte = updateEntradaDto.codPar
         ? getId(updateEntradaDto.codPar)
         : null;
+      const id_maquin = updateEntradaDto.codMaq
+        ? getId(updateEntradaDto.codMaq)
+        : null;
+      const id_encar = updateEntradaDto.codEnc
+        ? getId(updateEntradaDto.codEnc)
+        : null;
       const user = getId(updateEntradaDto.user);
 
       // =========================
@@ -1098,6 +1116,12 @@ async update(updateEntradaDto: any, id: string) {
 
           parte: id_parte
             ? { connect: { id: id_parte } }
+            : undefined,
+          maquina: id_maquin
+            ? { connect: { id: id_maquin } }
+            : undefined,
+          encargado: id_encar
+            ? { connect: { id: id_encar } }
             : undefined,
 
           instrumento: id_instru
