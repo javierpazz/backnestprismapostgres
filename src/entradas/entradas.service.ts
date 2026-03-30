@@ -813,6 +813,7 @@ async findOne(id: string) {
     id_instru: invoice.instrumento
       ? { _id: invoice.instrumento.id,
       codIns: invoice.instrumento.codIns,
+      publico: invoice.instrumento.publico,
       name: invoice.instrumento.name }
       : null,
     id_parte: invoice.parte
