@@ -18,6 +18,43 @@ export class InstrumentosService {
   constructor(private prisma: PrismaService) {}
 
 
+  async findAllEco(paginationDto: PaginationDto) {
+
+
+
+  // const where: any = {
+  //   ecoActive : true,
+  // };
+
+  const [instrumentos, totalProducts] = await Promise.all([
+    this.prisma.instrumento.findMany({
+      // where,
+      // include: {
+      //   ProductImage: {
+      //     take: 2,
+      //     select: {
+      //       url: true,
+      //     },
+      //   },
+      // },
+      orderBy: {
+        id: 'asc',
+      },
+    }),
+
+    // this.prisma.product.count({ where }),
+    this.prisma.instrumento.count(),
+  ]);
+
+      return instrumentos.map(({ id, ...rest }) => ({
+        _id: id,
+        ...rest,
+
+
+    }));
+}
+
+
   async create(createInstrumentoDto: CreateInstrumentoDto, instrumento:Instrumento) {
     // createInstrumentoDto.nameCus = createInstrumentoDto.nameCus.toLocaleLowerCase();
     const { _id, ...rest } = createInstrumentoDto;
@@ -54,7 +91,7 @@ export class InstrumentosService {
     _id: ins.id,
     paramItems: ins.paramItems.map((oi) => ({
       ...oi,
-      _id: oi.productId,      // 👈 duplicamos el id
+      _id: oi.instrumentoId,      // 👈 duplicamos el id
     })),
   }));
   }
@@ -65,6 +102,10 @@ export class InstrumentosService {
     if ( id ) {
       instrumento = await this.prisma.instrumento.findUnique({
       where: { id },
+        include: {
+          paramItems: true,
+        },        
+ 
       });
     }
 
@@ -125,7 +166,7 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
               slug: oi.slug,
               size: oi.size,
               terminado: oi.terminado,
-              productId: oi._id,
+              instrumentoId: oi._id,
             })),
           },
         },

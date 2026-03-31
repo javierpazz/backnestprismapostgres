@@ -12,6 +12,15 @@ import { ValidRoles } from 'src/auth/interfaces';
 export class InstrumentosController {
   constructor(private readonly instrumentosService: InstrumentosService) {}
 
+
+
+  @Get('instrumentos/eco')
+  findAllEco(@Query() paginationDto: PaginationDto) {
+    return this.instrumentosService.findAllEco(paginationDto);
+  }
+
+
+
 @Put('tes/admin/instrumentos/det')
 @Auth()
   updateDet(@Body() createParamsDto: any) {
