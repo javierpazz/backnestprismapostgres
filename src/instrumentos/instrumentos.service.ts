@@ -91,7 +91,7 @@ export class InstrumentosService {
     _id: ins.id,
     paramItems: ins.paramItems.map((oi) => ({
       ...oi,
-      _id: oi.instrumentoId,      // 👈 duplicamos el id
+      _id: oi.productId,      // 👈 duplicamos el id
     })),
   }));
   }
@@ -112,8 +112,19 @@ export class InstrumentosService {
     if ( !instrumento ) 
       throw new NotFoundException(`Instrumento with id, name or no "${ id }" not found`);
     
-    (instrumento as any)._id = instrumento.id;
-    return instrumento;
+    // (instrumento as any)._id = instrumento.id;
+    // return instrumento;
+
+  return {
+    ...instrumento,
+    _id: instrumento.id,
+    paramItems: (instrumento as any).paramItems.map((oi) => ({
+      ...oi,
+      _id: oi.productId, // 👈 igual que en findAll
+    })),
+  };
+
+
   }
 
 async update(updateInstrumentoDto: UpdateInstrumentoDto) {
@@ -166,7 +177,7 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
               slug: oi.slug,
               size: oi.size,
               terminado: oi.terminado,
-              instrumentoId: oi._id,
+              productId: oi._id,
             })),
           },
         },
