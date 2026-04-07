@@ -153,6 +153,12 @@ export class InvoiceController {
   searchOrdUS(@Param('_id') id: string) {
     return this.invoiceService.searchOrdUS(id);
   }
+
+  @Get('tes/orders/getservicesbyus/:_id')
+  @Auth()
+  searchSerUS(@Param('_id') id: string) {
+    return this.invoiceService.searchSerUS(id);
+  }
   
   
   @Get('invoices/searchmovS')

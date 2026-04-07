@@ -3,7 +3,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import * as mg from 'mailgun-js';
 
 import { OnModuleInit } from '@nestjs/common';
-import { PrismaClient, Order, Prisma, Configuration, Parte } from '@prisma/client';
+import { PrismaClient, Order, Prisma, Configuration, Parte, Customer } from '@prisma/client';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
@@ -465,6 +465,7 @@ const {
           where: {
             terminado:true,
             id_instru: {not: null},
+            id_parte: {not: null},
             ...fechasInvFilter,
             ...configuracionFilter,
             ...customerFilter,
@@ -520,6 +521,7 @@ const {
       where: {
         order: {
           id_instru: { not: null },
+          id_parte: {not: null},
           ...fechasInvFilter,
           ...configuracionFilter,
           ...customerFilter,
@@ -746,6 +748,7 @@ const TarxMaq = Object.values(groupedTarMaq)
 const ordersData = await this.prisma.order.aggregate({
   where: {
             id_instru: {not: null},
+            id_parte: {not: null},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -852,6 +855,7 @@ const {
           where: {
             terminado:false,
             id_instru: {not: null},
+            id_maquin: {not: null},
             ...fechasInvFilter,
             ...configuracionFilter,
             ...customerFilter,
@@ -906,6 +910,7 @@ const {
           where: {
             terminado:true,
             id_instru: {not: null},
+            id_maquin: {not: null},
             ...fechasInvFilter,
             ...configuracionFilter,
             ...customerFilter,
@@ -961,6 +966,7 @@ const {
       where: {
         order: {
           id_instru: { not: null },
+          id_maquin: {not: null},
           ...fechasInvFilter,
           ...configuracionFilter,
           ...customerFilter,
@@ -1136,6 +1142,7 @@ const TarxMaq = Object.values(groupedTarMaq)
           where: {
             id_instru: {not: null},
             id_parte: { not: null },
+            id_maquin: {not: null},
             ...fechasInvFilter,
             ...configuracionFilter,
             ...customerFilter,
@@ -1187,6 +1194,7 @@ const TarxMaq = Object.values(groupedTarMaq)
 const ordersData = await this.prisma.order.aggregate({
   where: {
             id_instru: {not: null},
+            id_maquin: {not: null},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
@@ -5940,6 +5948,83 @@ const obserFilter: Prisma.OrderWhereInput =
 
   return orders;}
 
+  
+  async searchSerUS(id: string) {
+    
+    /// cambiar filtro por cliente
+
+    let customer: Customer;
+    if ( id ) {
+      customer = await this.prisma.customer.findFirst({
+      where: { emailCus :id },
+      });
+    }
+    if ( !customer ) 
+      throw new NotFoundException(`Customer with email, name or no "${ id }" not found`);
+    
+    
+    // --- Fechas ---
+    // const usuarioFilter = id && id !== 'all' ? { user: String(id) } : {};
+    const customerFilter = customer.id && customer.id !== 'all' ? { id_client: String(customer.id) } : {};
+    
+    
+
+
+
+    const existeIns = {
+      id_instru: {
+        not: null
+      }
+    };
+///////query
+
+    const ordersWork = await this.prisma.order.findMany({
+      where: {
+        ...customerFilter,
+        ...existeIns,
+        // ordYes: 'Y'
+      },
+
+      include: {
+        customer: true,
+        maquina: true,
+        parte: true,
+        user1: true,          // usuario si quieres incluirlo
+        orderItems: true,
+      },      })
+
+  const orders = ordersWork.map((order) => ({
+    _id: order.id,
+    ...order,
+    id_client: order.customer
+      ? { _id: order.customer.id, nameCus: order.customer.nameCus, emailCus: order.customer.emailCus }
+      : null,
+    id_maquin: order.maquina
+      ? { _id: order.maquina.id, name: order.maquina.name }
+      : null,
+    id_parte: order.parte
+      ? { _id: order.parte.id, name: order.parte.name }
+      : null,
+    user: order.user
+      ? { _id: order.user1.id, name: order.user1.name, email: order.user1.email }
+      : null,
+
+    orderItems: order.orderItems.map((item) => ({
+      _id: item.productId,
+      slug: item.slug,
+      title: item.title,
+      quantity: item.quantity,
+      price: item.price,
+      porIva: item.porIva,
+      size: item.size,
+      observ: item.observ,
+      terminado: item.terminado,
+      productId: item.productId,
+    })),
+  }));
+
+  return orders;}
+
   async searchOrdUS(id: string) {
 
     // --- Fechas ---
@@ -6011,7 +6096,9 @@ const obserFilter: Prisma.OrderWhereInput =
   }));
 
   return orders;}
-//////dili
+
+
+  //////dili
 
   async searchmovS(query: any) {
   // isAuth,
