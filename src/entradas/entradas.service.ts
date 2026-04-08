@@ -204,6 +204,11 @@ async create(createEntradaDto: any) {
           total: orderData.total,
           totalBuy: orderData.totalBuy,
 
+          ////agrearemito
+            isPaid: false,
+            staOrd: "NUEVA",
+      ////agrearemito
+          
           itemsInOrder: orderItems?.length || 0,
 
           libNum: orderData.libNum,

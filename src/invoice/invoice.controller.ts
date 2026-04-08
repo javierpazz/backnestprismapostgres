@@ -182,6 +182,12 @@ export class InvoiceController {
       //   return this.invoiceService.findOne(id);
       // }
       
+  @Put('invoices/:Id/applychasta')
+  @Auth()
+  applychasta(@Param('Id') id: string, @Body() updateInvoiceDto: any) {
+    return this.invoiceService.applychasta(updateInvoiceDto, id as any);
+  }
+
   @Put('invoices/:_id/geninvRem')
   @Auth()
   geninvRem(@Param('_id') id: string, @Body() updateInvoiceDto: any) {

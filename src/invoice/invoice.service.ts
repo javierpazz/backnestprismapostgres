@@ -4553,6 +4553,27 @@ const {
 
 // }
 
+async applychasta(updateInvoiceDto: any, id: any) {
+  console.log("updateInvoiceDto")
+  console.log(updateInvoiceDto)
+  console.log("updateInvoiceDto")
+  try {
+      const invoice = await this.prisma.order.update({
+        where: { id: id },
+        data: {
+          staOrd: updateInvoiceDto.staOrd,
+        },
+        include: { orderItems: true },          
+      });
+
+      return invoice;
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
+}
+
+
 async geninvRem(createInvoiceDto: any, id: any) {
 
   const { invoiceAux, receiptAux } = createInvoiceDto;

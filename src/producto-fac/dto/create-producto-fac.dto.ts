@@ -1,6 +1,6 @@
 
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, IsEnum, ValidateNested, IsUUID } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, IsEnum, ValidateNested, IsUUID, IsBoolean } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 import { Supplier } from '@prisma/client';
 
 export enum ProductType {
@@ -37,6 +37,12 @@ export class CreateProductoFacDto {
   @IsString()
   @IsOptional()
   _id?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true) // convierte "true"/true → true, "false"/false → false
+  ecoActive?: boolean;
+
 
   @IsString()
   @IsNotEmpty()
