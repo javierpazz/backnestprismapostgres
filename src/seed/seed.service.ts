@@ -64,8 +64,11 @@ export class SeedService {
 
         // await Promise.all( insertPromises );
 
-          await this.prisma.configuration.createMany({
-            data: configurations
+          await this.prisma.configuration.create({
+            data: configurations[0]
+          });
+          await this.prisma.configuration.create({
+            data: configurations[1]
           });
             const createdConfiguration = await this.prisma.configuration.findMany();
             const CONFIG1 = createdConfiguration[0].id;

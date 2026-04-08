@@ -354,17 +354,12 @@ export const initialData: SeedData = {
         {
         codMaq: '1',
         name: 'MAQUINA 1',
-        serNum: 'klwer798ew67f98yf890',
+        serNum: 'encargado1@serNum.com',
       },
       {
         codMaq: '2',
         name: 'MAQUINA 2',
-        serNum: 'klwer798ew67f98yf890',
-        },
-      {
-        codMaq: '3',
-        name: 'MAQUINA 3',
-        serNum: 'klwer798ew67f98yf890',
+        serNum: 'encargado2@serNum.com',
         },
     ],
 
@@ -406,27 +401,17 @@ export const initialData: SeedData = {
   instrumentos: [
       {
         codIns: '1',
-        name: 'Service Split',
+        name: 'ESCRITURA',
         publico: true,
       },
       {
         codIns: '2',
-        name: 'Instalacion Split',
+        name: 'BOLETO',
         publico: true,
       },
       {
         codIns: '3',
-        name: 'Service Aire Pared',
-        publico: true,
-      },
-      {
-        codIns: '4',
-        name: 'Instalacion Aire Pared',
-        publico: true,
-      },
-      {
-        codIns: '5',
-        name: 'Service Filtros Bombas',
+        name: 'CERTIFICACION',
         publico: true,
           },
     ],
@@ -455,33 +440,20 @@ export const initialData: SeedData = {
         note: 'NUEVA',
         },
       {
-        name: '1.-EN PLANIFICACION',
-        note: '1.-EN PLANIFICACION',
-        },
-
-      {
-        name: '2.-EN PROCESO',
-        note: '2.-EN PROCESO',
+        name: '1.-EN PROCESO',
+        note: '1.-EN PROCESO',
         },
       {
-        name: '3.-AVACE 20%',
-        note: '3.-AVACE 20%',
+        name: '2.-PARA DISTRIBUCION',
+        note: '2.-PARA DISTRIBUCION',
         },
       {
-        name: '4.-AVACE 40%',
-        note: '4.-AVACE 40%',
+        name: '3.-EN DISTRIBUCION',
+        note: '3.-EN DISTRIBUCION',
         },
       {
-        name: '5.-AVACE 60%',
-        note: '5.-AVACE 60%',
-        },
-      {
-        name: '6.-AVACE 80%',
-        note: '6.-AVACE 80%',
-        },
-      {
-        name: '7.-TERMINADO',
-        note: '7.-TERMINADO',
+        name: '4.-ENTREGADA',
+        note: '4.-ENTREGADA',
         },
     ],
 
@@ -490,8 +462,8 @@ export const initialData: SeedData = {
   configurations: [
       {
         codCon: '0001',
-        name: 'FN Servicios',
-        domcomer: 'DIRECCION FN Servicios',
+        name: 'Escribana Maria Pia Stutz',
+        domcomer: 'DIRECCION Maria Pia Stutz',
         cuit: '20-20202020-2',
         coniva: 'RESP. INSCRIPTO',
         ib: '87654321',
@@ -505,8 +477,8 @@ export const initialData: SeedData = {
       },
       {
         codCon: '0002',
-        name: 'FN Servicios 2',
-        domcomer: 'DIRECCION FN Servicios 2',
+        name: 'Escribana Nanni Felisa',
+        domcomer: 'DIRECCION Nanni Felisa',
         cuit: '20-20202020-2',
         coniva: 'RESP. INSCRIPTO',
         ib: '87654321',
@@ -555,7 +527,7 @@ export const initialData: SeedData = {
       codPro : "1",
       codigoPro : "1",
       medPro : "UNIDAD",
-      description: "descripcion Desarmado Equipo",
+      description: "Descripcion Diligencia 1",
       images: [
         'imagenblanca1.jpg',
         'imagenblanca2.jpg',
@@ -566,18 +538,18 @@ export const initialData: SeedData = {
       brand:"MARCA",
       porIva: 21,
       sizes: [ 'M' ],
-      slug: "Desarmado_Equipo",
+      slug: "DILIGENCIA1_??",
       type: 'shirts',
-      category: 'Service',
-      tags: [ 'Tar' ],
-      title:  "Desarmado Equipo",
+      category: 'Tinto',
+      tags: [ 'dil' ],
+      title: "DILIGENCIA1 ???",
       gender: 'men'
     },
     {
       codPro : "2",
       codigoPro : "2",
       medPro : "UNIDAD",
-      description: "descripcion Checkeo Partes Equipo",
+      description: "Descripcion Diligencia 2",
       images: [
         'imagenblanca1.jpg',
         'imagenblanca2.jpg',
@@ -588,11 +560,11 @@ export const initialData: SeedData = {
       brand:"MARCA",
       porIva: 21,
       sizes: [ 'M' ],
-      slug: "Checkeo_Partes_Equipo",
+      slug: "DILIGENCIA2_??",
       type: 'shirts',
-      category: 'Service',
-      tags: [ 'tar' ],
-      title: "Checkeo Partes Equipo",
+      category: 'Tinto',
+      tags: [ 'dil' ],
+      title: "DILIGENCIA2 ???",
       gender: 'men'
     },
 
@@ -600,7 +572,7 @@ export const initialData: SeedData = {
       codPro : "3",
       codigoPro : "3",
       medPro : "UNIDAD",
-      description: "descripcion Limpieza equipo",
+      description: "Descripcion Diligencia 3",
       images: [
         'imagenblanca1.jpg',
         'imagenblanca2.jpg',
@@ -611,11 +583,11 @@ export const initialData: SeedData = {
       brand:"MARCA",
       porIva: 21,
       sizes: [ 'M' ],
-      slug: "Limpieza_equipo",
+      slug: "DILIGENCIA3_??",
       type: 'shirts',
-      category: 'Service',
-      tags: [ 'tar' ],
-      title: "Limpieza equipo",
+      category: 'Tinto',
+      tags: [ 'dil' ],
+      title: "DILIGENCIA3 ???",
       gender: 'men'
     },
 
@@ -623,7 +595,7 @@ export const initialData: SeedData = {
       codPro : "4",
       codigoPro : "4",
       medPro : "UNIDAD",
-      description: "Descripcion Armado y Prueba de equipo",
+      description: "Descripcion Diligencia 4",
       images: [
         'imagenblanca1.jpg',
         'imagenblanca2.jpg',
@@ -634,18 +606,18 @@ export const initialData: SeedData = {
       brand:"MARCA",
       porIva: 21,
       sizes: [ 'M' ],
-      slug: "Armado_y_Prueba_de_equipo",
+      slug: "DILIGENCIA4_??",
       type: 'shirts',
-      category: 'Service',
-      tags: [ 'tar' ],
-      title: "Armado y Prueba de equipo",
+      category: 'Tinto',
+      tags: [ 'dil' ],
+      title: "DILIGENCIA4 ???",
       gender: 'men'
     },
     {
       codPro : "5",
       codigoPro : "5",
       medPro : "UNIDAD",
-      description: "Descripcion Registro tiempo o Km Uso",
+      description: "Descripcion Diligencia 5",
       images: [
         'imagenblanca1.jpg',
         'imagenblanca2.jpg',
@@ -656,11 +628,55 @@ export const initialData: SeedData = {
       brand:"MARCA",
       porIva: 21,
       sizes: [ 'M' ],
-      slug:  "Registro_tiempo_o_Km_Uso",
+      slug: "DILIGENCIA5_??",
       type: 'shirts',
-      category: 'Service',
-      tags: [ 'tar' ],
-      title: " Registro tiempo o Km Uso",
+      category: 'Tinto',
+      tags: [ 'dil' ],
+      title: "DILIGENCIA5 ???",
+      gender: 'men'
+    },
+    {
+      codPro : "6",
+      codigoPro : "6",
+      medPro : "UNIDAD",
+      description: "Descripcion Diligencia 6",
+      images: [
+        'imagenblanca1.jpg',
+        'imagenblanca2.jpg',
+      ],
+      inStock: 100000,
+      price: 1,
+      priceBuy: 1,
+      brand:"MARCA",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "DILIGENCIA6_??",
+      type: 'shirts',
+      category: 'Tinto',
+      tags: [ 'dil' ],
+      title: "DILIGENCIA6 ???",
+      gender: 'men'
+    },
+    {
+      codPro : "7",
+      codigoPro : "7",
+      medPro : "UNIDAD",
+      description: "Descripcion Diligencia 7",
+      images: [
+        'imagenblanca1.jpg',
+        'imagenblanca2.jpg',
+      ],
+      inStock: 100000,
+      price: 1,
+      priceBuy: 1,
+      brand:"MARCA",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "DILIGENCIA7_??",
+      type: 'shirts',
+      category: 'Tinto',
+      tags: [ 'dil' ],
+      title: "DILIGENCIA7 ???",
       gender: 'men'
     },
 
