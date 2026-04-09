@@ -57,7 +57,7 @@ model Customer {
   id        String    @id @default(uuid())
   codCus    String   @unique
   nameCus   String   @unique
-  emailCus  String?
+  emailCus  String?  @unique
   domcomer  String?
   cuit      String?
   coniva    String?
@@ -349,6 +349,7 @@ model OrderItem {
   quantity    Int
   image       String?
   price       Float
+  totalItem   Float?
   size        String?
   porIva      Float
   venDat      DateTime?

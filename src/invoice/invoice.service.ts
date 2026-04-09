@@ -4554,9 +4554,6 @@ const {
 // }
 
 async applychasta(updateInvoiceDto: any, id: any) {
-  console.log("updateInvoiceDto")
-  console.log(updateInvoiceDto)
-  console.log("updateInvoiceDto")
   try {
       const invoice = await this.prisma.order.update({
         where: { id: id },

@@ -47,7 +47,13 @@ export class ConfigurationsService {
   }
 
   async findAll() {
-  const data = await this.prisma.configuration.findMany();
+  // const data = await this.prisma.configuration.findMany();
+  const data = await this.prisma.configuration.findMany({
+    orderBy: {
+      codCon: 'asc', // 👈 ordena 0001, 0002, 0003...
+    },
+  });
+
   return {
     configurations: data.map(item => ({
       ...item,

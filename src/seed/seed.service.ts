@@ -70,7 +70,12 @@ export class SeedService {
           await this.prisma.configuration.create({
             data: configurations[1]
           });
-            const createdConfiguration = await this.prisma.configuration.findMany();
+            // const createdConfiguration = await this.prisma.configuration.findMany();
+            const createdConfiguration = await this.prisma.configuration.findMany({
+              orderBy: {
+                codCon: 'asc', // 👈 ordena 0001, 0002, 0003...
+              },
+            });
             const CONFIG1 = createdConfiguration[0].id;
             const CONFIG2 = createdConfiguration[1].id;
 
