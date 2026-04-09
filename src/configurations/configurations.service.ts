@@ -36,7 +36,13 @@ export class ConfigurationsService {
 
 
   async findAlladm() {
-  const data = await this.prisma.configuration.findMany();
+  // const data = await this.prisma.configuration.findMany();
+  const data = await this.prisma.configuration.findMany({
+    orderBy: {
+      name: 'asc', // 👈 ordena 0001, 0002, 0003...
+    },
+  });
+
   const configuraciones = data.map(item => ({
       ...item,
       _id: item.id.toString(), // agregamos _id

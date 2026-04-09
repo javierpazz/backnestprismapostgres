@@ -464,7 +464,9 @@ const obserFilter: Prisma.OrderWhereInput =
       ? { _id: order.configuration.id, name: order.configuration.name }
       : null,
     id_instru: order.instrumento
-      ? { _id: order.instrumento.id, name: order.instrumento.name }
+      ? { _id: order.instrumento.id, name: order.instrumento.name,
+              publico: order.instrumento.publico,
+       }
       : null,
     id_parte: order.parte
       ? { _id: order.parte.id, name: order.parte.name }
@@ -724,6 +726,7 @@ _id: item.order?.id,
 
   // Campos calculados / alias de relaciones
   instruName: item.order?.instrumento?.name ?? '',
+  instruPublico: item.order?.instrumento?.publico ?? '',
   parteName: item.order?.parte?.name ?? '',
   maquinaName: item.order?.maquina?.name ?? '',
   encargadoName: item.order?.encargado?.name ?? '',

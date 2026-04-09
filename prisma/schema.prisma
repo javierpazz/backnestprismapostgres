@@ -201,7 +201,9 @@ model Instrumento {
   id          String      @id @default(uuid())
   codIns      String
   name        String
+  detalle     String?
   publico     Boolean       @default(true)
+  ecoActive   Boolean?       @default(true)
   paramItems ParamItem[]
   order  Order[]   // 👈 Relación con OrderItem
   createdAt   DateTime    @default(now())

@@ -19,6 +19,11 @@ export class InstrumentosController {
     return this.instrumentosService.findAllEco(paginationDto);
   }
 
+  @Put('tes/admin/instrumentos/ecomActive')
+  @Auth( ValidRoles.admin )
+  updateisActive(@Body() updateInstrumentoDto: UpdateInstrumentoDto) {
+    return this.instrumentosService.updateecoActive(updateInstrumentoDto);
+  }
 
 
 @Put('tes/admin/instrumentos/det')

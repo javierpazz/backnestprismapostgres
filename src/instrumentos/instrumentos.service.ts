@@ -28,7 +28,7 @@ export class InstrumentosService {
 
   const [instrumentos, totalProducts] = await Promise.all([
     this.prisma.instrumento.findMany({
-      // where,
+      where : { ecoActive : true},
       // include: {
       //   ProductImage: {
       //     take: 2,
@@ -53,6 +53,23 @@ export class InstrumentosService {
 
     }));
 }
+
+  async updateecoActive(updateInstrumentoDto: UpdateInstrumentoDto) {
+    const { instrumentoId, ...data } = updateInstrumentoDto;
+    try {
+      const updated = await this.prisma.instrumento.update({
+        where: { id: instrumentoId }, // Prisma usa 'id'
+              data: {
+            ecoActive: updateInstrumentoDto.ecoActive,
+          },
+      });
+  
+      // Devolver _id para compatibilidad con frontend
+      return { _id: updated.id, ...updated };
+    } catch (error) {
+      throw error;
+    }
+  }
 
 
   async create(createInstrumentoDto: CreateInstrumentoDto, instrumento:Instrumento) {
