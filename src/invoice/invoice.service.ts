@@ -153,7 +153,7 @@ const mapMaquinas = Object.fromEntries(
 );
 
 // 6. Resultado final
-const TarxMaq = top10.map(m => ({
+const MaqxTar = top10.map(m => ({
   maquinaId: m.id_maquin,
   maquina: mapMaquinas[m.id_maquin]?.name || '',
   total: m.total,
@@ -343,7 +343,7 @@ const customers = [
   }
   ]
       return {
-        TarxMaq,
+        MaqxTar,
         TarxPar,
           // top10PartesSTVal,
           // top10PartesTerVal,
@@ -362,6 +362,386 @@ const customers = [
 
 
   
+//////dashCli
+
+  async dashboardCli(query: any) {
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  supplier,
+  parte,
+  maquina,
+  encargado,
+  comprobante,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { remDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { remDat: { gte: new Date(fech1) } }
+        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+///filtroparaborrar
+
+
+
+
+/////toptentarxmaq
+// 1. Traer datos
+const resulttarmaq = await this.prisma.orderItem.findMany({
+  where: {
+    order: {
+      id_instru: { not: null },
+      id_maquin: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...comprobanteFilter,
+      ...parteFilter,
+    },
+  },
+  select: {
+    productId: true,
+    price: true,
+    quantity: true,
+    porIva: true,
+  },
+});
+
+// 2. Agrupar por productId
+const groupedTarMaq = resulttarmaq.reduce((acc, item) => {
+  const key = item.productId;
+
+  if (!acc[key]) {
+    acc[key] = {
+      productId: key,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[key].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[key].totalCan += 1;
+
+  return acc;
+}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
+
+// 3. Obtener IDs únicos
+// const productosIds = Object.values(groupedTarMaq).map(p => p.productId);
+const productosIds = [...new Set(
+  Object.values(groupedTarMaq).map(p => String(p.productId))
+)];
+
+// 4. Traer nombres de productos
+const productos = await this.prisma.product.findMany({
+  where: {
+    id: { in: productosIds },
+  },
+  select: {
+    id: true,
+    title: true, // 👈 ajustá si tu campo es distinto
+  },
+});
+
+// 5. Crear mapa id → nombre
+const mapProductos = Object.fromEntries(
+  productos.map(p => [p.id, p.title])
+);
+
+// 6. Resultado final con nombre + ordenado
+const TarxMaq = Object.values(groupedTarMaq)
+  .map(item => ({
+    productId: item.productId,
+    producto: mapProductos[item.productId] || 'Sin nombre',
+    total: item.total,
+    totalCan: item.totalCan,
+  }))
+  .sort((a, b) => b.total - a.total); // 👈 orden por total
+
+/////toptentarxmaq
+
+
+/////toptentarxpar
+// 1. Traer datos
+const resulttarpar = await this.prisma.orderItem.findMany({
+  where: {
+    order: {
+      id_instru: { not: null },
+      id_parte: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...comprobanteFilter,
+      ...parteFilter,
+    },
+  },
+  select: {
+    productId: true,
+    price: true,
+    quantity: true,
+    porIva: true,
+  },
+});
+
+// 2. Agrupar por productId
+const groupedTarPar = resulttarpar.reduce((acc, item) => {
+  const key = item.productId;
+
+  if (!acc[key]) {
+    acc[key] = {
+      productId: key,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[key].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[key].totalCan += 1;
+
+  return acc;
+}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
+
+// 3. Obtener IDs únicos
+// const productosIds = Object.values(groupedTarPar).map(p => p.productId);
+const productosIdsPar = [...new Set(
+  Object.values(groupedTarPar).map(p => String(p.productId))
+)];
+
+// 4. Traer nombres de productos
+const productosPar = await this.prisma.product.findMany({
+  where: {
+    id: { in: productosIdsPar },
+  },
+  select: {
+    id: true,
+    title: true, // 👈 ajustá si tu campo es distinto
+  },
+});
+
+// 5. Crear mapa id → nombre
+const mapProductosPar = Object.fromEntries(
+  productosPar.map(p => [p.id, p.title])
+);
+
+// 6. Resultado final con nombre + ordenado
+const TarxPar = Object.values(groupedTarPar)
+  .map(item => ({
+    productId: item.productId,
+    producto: mapProductos[item.productId] || 'Sin nombre',
+    total: item.total,
+    totalCan: item.totalCan,
+  }))
+  .sort((a, b) => b.total - a.total); // 👈 orden por total
+
+/////toptentarxpar
+
+
+
+///instrumentostop10
+const topInstrumentosTra = await this.prisma.order.groupBy({
+  by: ['id_instru'],
+  where: {
+    id_instru: { not: null },
+    id_maquin: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+    ...fechasInvFilter,
+    ...configuracionFilter,
+    ...customerFilter,
+    ...usuarioFilter,
+    ...comprobanteFilter,
+    ...parteFilter,
+    ...maquinaFilter,
+    ...encargadoFilter,
+  },
+  _sum: {
+    total: true,
+  },
+  _count: {
+    id_instru: true,
+  },
+  orderBy: {
+    _sum: {
+      total: 'desc',
+    },
+  },
+  take: 10,
+});
+
+// 👉 traer nombres de instrumentos
+const instrumentosTopTra = await this.prisma.instrumento.findMany({
+  where: {
+    id: { in: topInstrumentosTra.map(c => c.id_instru!) },
+  },
+  select: {
+    id: true,
+    name: true,
+  },
+});
+
+// 👉 map id → nombre
+const mapInstrumentosTra = Object.fromEntries(
+  instrumentosTopTra.map(i => [i.id, i.name])
+);
+
+// 👉 resultado final
+const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
+  instrumentoId: c.id_instru,
+  instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
+  totalSales: c._sum.total ?? 0,
+  totalOrders: c._count.id_instru ?? 0,
+}));
+
+///instrumentostop10
+
+      ///instrumentostop10
+      const topInstrumentosTraPar = await this.prisma.order.groupBy({
+        by: ['id_instru'],
+        where: {
+          id_instru: { not: null },
+          id_parte: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...comprobanteFilter,
+          ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
+        },
+        _sum: {
+          total: true,
+        },
+        _count: {
+          id_instru: true,
+        },
+        orderBy: {
+          _sum: {
+            total: 'desc',
+          },
+        },
+        take: 10,
+      });
+
+      // 👉 traer nombres de instrumentos
+      const instrumentosTopTraPar = await this.prisma.instrumento.findMany({
+        where: {
+          id: { in: topInstrumentosTraPar.map(c => c.id_instru!) },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      // 👉 map id → nombre
+      const mapInstrumentosTraPar = Object.fromEntries(
+        instrumentosTopTraPar.map(i => [i.id, i.name])
+      );
+
+      // 👉 resultado final
+      const top10InstrumentosxPar = topInstrumentosTraPar.map(c => ({
+        instrumentoId: c.id_instru,
+        instrumento: mapInstrumentosTraPar[c.id_instru!] || 'Sin nombre',
+        totalSales: c._sum.total ?? 0,
+        totalOrders: c._count.id_instru ?? 0,
+      }));
+
+      ///instrumentostop10
+
+
+///orders
+const ordersData = await this.prisma.order.aggregate({
+  where: {
+            id_instru: {not: null},
+            id_parte: {not: null},
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...comprobanteFilter,
+        ...parteFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: ordersData._count._all,
+    totalSales: ordersData._sum.total || 0,
+  },
+];
+///orders
+
+const Users = await this.prisma.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.prisma.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+      return {
+          // top10PartesSTVal,
+          // top10PartesTerVal,
+          // top10Maquinas,
+          top10InstrumentosxMaq,
+          top10InstrumentosxPar,
+          orders,
+          // users,
+          // customers,
+          // top10Partes,
+          // dilVal,
+          TarxPar,
+          TarxMaq,
+      };
+
+
+
+  }
+//////dashCli
+
+
 //////dashPar
 
   async dashboardPar(query: any) {
@@ -450,8 +830,8 @@ const {
         );
 
         const top10PartesSTVal = topMaquinas.map(c => ({
-          maquinaId: c.id_parte,
-          maquina: mapMaquinas[c.id_parte!],
+          parteId: c.id_parte,
+          parte: mapMaquinas[c.id_parte!],
           totalSales: c._sum.total || 0,
           totalOrders: c._count.id_parte || 0
         }));
@@ -505,8 +885,8 @@ const {
         );
 
         const top10PartesTerVal = topMaquinasTer.map(c => ({
-          maquinaId: c.id_parte,
-          maquina: mapMaquinasTer[c.id_parte!],
+          parteId: c.id_parte,
+          parte: mapMaquinasTer[c.id_parte!],
           totalSales: c._sum.total || 0,
           totalOrders: c._count.id_parte || 0
         }));
@@ -559,7 +939,7 @@ const {
 
       ///dilval
 
-/////toptentarxmaq
+/////toptentarxpar
 // 1. Traer datos
 const resulttarmaq = await this.prisma.orderItem.findMany({
   where: {
@@ -627,7 +1007,7 @@ const mapProductos = Object.fromEntries(
 );
 
 // 6. Resultado final con nombre + ordenado
-const TarxMaq = Object.values(groupedTarMaq)
+const TarxPar = Object.values(groupedTarMaq)
   .map(item => ({
     productId: item.productId,
     producto: mapProductos[item.productId] || 'Sin nombre',
@@ -636,7 +1016,7 @@ const TarxMaq = Object.values(groupedTarMaq)
   }))
   .sort((a, b) => b.total - a.total); // 👈 orden por total
 
-/////toptentarxmaq
+/////toptentarxpar
 
 
     ///maquinastop10
@@ -679,18 +1059,76 @@ const TarxMaq = Object.values(groupedTarMaq)
           }
         });
 
-        const mapMaquinasTra = Object.fromEntries(
+        const mapPartesTra = Object.fromEntries(
           maquinasTopTra.map(c => [c.id, c.name])
         );
 
-        const top10Maquinas = topMaquinasTra.map(c => ({
-          maquinaId: c.id_parte,
-          maquina: mapMaquinasTra[c.id_parte!],
+        const top10PartesxOrd = topMaquinasTra.map(c => ({
+          parteId: c.id_parte,
+          parte: mapPartesTra[c.id_parte!],
           totalSales: c._sum.total || 0,
           totalOrders: c._count.id_parte || 0
         }));
 
         ///maquinastop10
+
+      ///instrumentostop10
+      const topInstrumentosTra = await this.prisma.order.groupBy({
+        by: ['id_instru'],
+        where: {
+          id_instru: { not: null },
+          id_parte: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...comprobanteFilter,
+          ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
+        },
+        _sum: {
+          total: true,
+        },
+        _count: {
+          id_instru: true,
+        },
+        orderBy: {
+          _sum: {
+            total: 'desc',
+          },
+        },
+        take: 10,
+      });
+
+      // 👉 traer nombres de instrumentos
+      const instrumentosTopTra = await this.prisma.instrumento.findMany({
+        where: {
+          id: { in: topInstrumentosTra.map(c => c.id_instru!) },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      // 👉 map id → nombre
+      const mapInstrumentosTra = Object.fromEntries(
+        instrumentosTopTra.map(i => [i.id, i.name])
+      );
+
+      // 👉 resultado final
+      const top10InstrumentosxPar = topInstrumentosTra.map(c => ({
+        instrumentoId: c.id_instru,
+        instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
+        totalSales: c._sum.total ?? 0,
+        totalOrders: c._count.id_instru ?? 0,
+      }));
+
+      ///instrumentostop10
+
+
+
     ///partetop10
         const topPartes = await this.prisma.order.groupBy({
           by: ['id_parte'],
@@ -790,13 +1228,14 @@ const customers = [
       return {
           top10PartesSTVal,
           top10PartesTerVal,
-          top10Maquinas,
+          top10PartesxOrd,
+          top10InstrumentosxPar,
           orders,
           users,
           customers,
           top10Partes,
           dilVal,
-          TarxMaq,
+          TarxPar,
       };
 
 
@@ -1128,7 +1567,7 @@ const TarxMaq = Object.values(groupedTarMaq)
           maquinasTopTra.map(c => [c.id, c.name])
         );
 
-        const top10Maquinas = topMaquinasTra.map(c => ({
+        const top10MaquinasxOrd = topMaquinasTra.map(c => ({
           maquinaId: c.id_maquin,
           maquina: mapMaquinasTra[c.id_maquin!],
           totalSales: c._sum.total || 0,
@@ -1136,6 +1575,61 @@ const TarxMaq = Object.values(groupedTarMaq)
         }));
 
         ///maquinastop10
+///instrumentostop10
+const topInstrumentosTra = await this.prisma.order.groupBy({
+  by: ['id_instru'],
+  where: {
+    id_instru: { not: null },
+    id_maquin: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+    ...fechasInvFilter,
+    ...configuracionFilter,
+    ...customerFilter,
+    ...usuarioFilter,
+    ...comprobanteFilter,
+    ...parteFilter,
+    ...maquinaFilter,
+    ...encargadoFilter,
+  },
+  _sum: {
+    total: true,
+  },
+  _count: {
+    id_instru: true,
+  },
+  orderBy: {
+    _sum: {
+      total: 'desc',
+    },
+  },
+  take: 10,
+});
+
+// 👉 traer nombres de instrumentos
+const instrumentosTopTra = await this.prisma.instrumento.findMany({
+  where: {
+    id: { in: topInstrumentosTra.map(c => c.id_instru!) },
+  },
+  select: {
+    id: true,
+    name: true,
+  },
+});
+
+// 👉 map id → nombre
+const mapInstrumentosTra = Object.fromEntries(
+  instrumentosTopTra.map(i => [i.id, i.name])
+);
+
+// 👉 resultado final
+const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
+  instrumentoId: c.id_instru,
+  instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
+  totalSales: c._sum.total ?? 0,
+  totalOrders: c._count.id_instru ?? 0,
+}));
+
+///instrumentostop10
+
     ///partetop10
         const topPartes = await this.prisma.order.groupBy({
           by: ['id_parte'],
@@ -1236,7 +1730,8 @@ const customers = [
       return {
           top10MaquinasSTVal,
           top10MaquinasTerVal,
-          top10Maquinas,
+          top10MaquinasxOrd,
+          top10InstrumentosxMaq,
           orders,
           users,
           customers,

@@ -16,6 +16,12 @@ export class InvoiceController {
   dashboardTar(@Query() query: any) {
     return this.invoiceService.dashboardTar(query);
   }
+  @Get('orders/summary/cli')
+  // async dashboard1(@Query() query: any) {
+  @Auth()
+  dashboardCli(@Query() query: any) {
+    return this.invoiceService.dashboardCli(query);
+  }
   @Get('orders/summary/par')
   // async dashboard1(@Query() query: any) {
   @Auth()
