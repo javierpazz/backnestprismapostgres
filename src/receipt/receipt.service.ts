@@ -642,6 +642,7 @@ const {
   configuracion,
   usuario,
   encargado,
+  valor,
   obser,
 } = query;
 
@@ -660,6 +661,18 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const valorReceiptItemFilter =
+      valor && valor !== 'all'
+        ? {
+            receiptItems: {
+              some: {
+                receiptId: String(valor),
+              },
+            },
+          }
+        : {};
+
+
 
     // // --- Observaciones (LIKE en Postgres) ---
     // const obserFilter =
@@ -706,6 +719,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
         ...encargadoFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...valorReceiptItemFilter,
         ...obserFilter,
         // ...existeIns,
         salbuy: 'SALE', cajNum: {gt : 0}
@@ -756,6 +770,7 @@ const {
   configuracion,
   usuario,
   encargado,
+  valor,
   obser,
 } = query;
 
@@ -774,6 +789,17 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+    const valorReceiptItemFilter =
+      valor && valor !== 'all'
+        ? {
+            receiptItems: {
+              some: {
+                receiptId: String(valor),
+              },
+            },
+          }
+        : {};
 
     // // --- Observaciones (LIKE en Postgres) ---
     // const obserFilter =
@@ -820,6 +846,7 @@ const obserFilter: Prisma.ReceiptWhereInput =
         ...encargadoFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...valorReceiptItemFilter,
         ...obserFilter,
         // ...existeIns,
         salbuy: 'BUY', cajNum: {gt : 0}
@@ -871,6 +898,8 @@ const {
   configuracion,
   usuario,
   customer,
+  valor,
+  encargado,
   obser,
 } = query;
 
@@ -889,6 +918,18 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const valorReceiptItemFilter =
+      valor && valor !== 'all'
+        ? {
+            receiptItems: {
+              some: {
+                receiptId: String(valor),
+              },
+            },
+          }
+        : {};
+
 
     // // --- Observaciones (LIKE en Postgres) ---
     // const obserFilter =
@@ -935,6 +976,8 @@ const obserFilter: Prisma.ReceiptWhereInput =
         ...customerFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...encargadoFilter,
+        ...valorReceiptItemFilter,
         ...obserFilter,
         // ...existeIns,
         salbuy: 'SALE', recNum: {gt : 0}
@@ -986,6 +1029,8 @@ const {
   configuracion,
   usuario,
   supplier,
+  valor,
+  encargado,
   obser,
 } = query;
 
@@ -1004,6 +1049,17 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const valorReceiptItemFilter =
+      valor && valor !== 'all'
+        ? {
+            receiptItems: {
+              some: {
+                receiptId: String(valor),
+              },
+            },
+          }
+        : {};
 
     // // --- Observaciones (LIKE en Postgres) ---
     // const obserFilter =
@@ -1049,6 +1105,8 @@ const obserFilter: Prisma.ReceiptWhereInput =
         ...fechasFilter,
         ...supplierFilter,
         ...configuracionFilter,
+        ...encargadoFilter,
+        ...valorReceiptItemFilter,
         ...usuarioFilter,
         ...obserFilter,
         // ...existeIns,

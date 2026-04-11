@@ -6086,7 +6086,8 @@ const {
   comprobante,
   usuario,
   customer,
-  product,
+  producto,
+  encargado,
   obser,
 } = query;
 
@@ -6101,7 +6102,7 @@ const {
         : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
+    // const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
     const comprobanteFilter =
       comprobante && comprobante !== 'all'
@@ -6113,16 +6114,19 @@ const {
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
 
-    // // --- Observaciones (LIKE en Postgres) ---
-    // const obserFilter =
-    //   obser && obser !== 'all'
-    //     ? {
-    //         OR: [
-    //           { notes: { contains: obser, mode: 'insensitive' } },
-    //           { orderItems: { some: { observ: { contains: obser, mode: 'insensitive' } } } },
-    //         ],
-    //       }
-    //     : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+
+
 
 const obserFilter: Prisma.OrderWhereInput =
   obser && obser !== 'all'
@@ -6155,12 +6159,15 @@ const obserFilter: Prisma.OrderWhereInput =
     const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
-        ...productFilter,
+        // ...productFilter,
         ...customerFilter,
         ...comprobanteFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
         ...obserFilter,
+
         // ...existeIns,
         salbuy: 'SALE', invNum: {gt : 0}
       },
@@ -6169,6 +6176,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
       include: {
         customer: true,       // id_client
+        encargado: true,       // id_client
         comprobante: true, 
         configuration: true,  // id_config
         user1: true,          // usuario si quieres incluirlo
@@ -6220,7 +6228,8 @@ const {
   comprobante,
   usuario,
   supplier,
-  product,
+  producto,
+  encargado,
   obser,
 } = query;
 
@@ -6235,7 +6244,6 @@ const {
         : { invDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const comprobanteFilter =
       comprobante && comprobante !== 'all'
@@ -6246,17 +6254,18 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
 
-    // // --- Observaciones (LIKE en Postgres) ---
-    // const obserFilter =
-    //   obser && obser !== 'all'
-    //     ? {
-    //         OR: [
-    //           { notes: { contains: obser, mode: 'insensitive' } },
-    //           { orderItems: { some: { observ: { contains: obser, mode: 'insensitive' } } } },
-    //         ],
-    //       }
-    //     : {};
 
 const obserFilter: Prisma.OrderWhereInput =
   obser && obser !== 'all'
@@ -6289,11 +6298,12 @@ const obserFilter: Prisma.OrderWhereInput =
     const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
-        ...productFilter,
         ...supplierFilter,
         ...comprobanteFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
         ...obserFilter,
         ...existeIns,
         salbuy: 'BUY', invNum: {gt : 0}
@@ -6303,6 +6313,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
       include: {
         supplier1: true,       // id_client
+        encargado: true,       // id_client
         comprobante: true, 
         configuration: true,  // id_config
         user1: true,          // usuario si quieres incluirlo
@@ -6354,7 +6365,8 @@ const {
   configuracion,
   usuario,
   customer,
-  product,
+  producto,
+  encargado,
   obser,
 } = query;
 
@@ -6369,22 +6381,23 @@ const {
         : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
 
-    // // --- Observaciones (LIKE en Postgres) ---
-    // const obserFilter =
-    //   obser && obser !== 'all'
-    //     ? {
-    //         OR: [
-    //           { notes: { contains: obser, mode: 'insensitive' } },
-    //           { orderItems: { some: { observ: { contains: obser, mode: 'insensitive' } } } },
-    //         ],
-    //       }
-    //     : {};
+
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
 
 const obserFilter: Prisma.OrderWhereInput =
   obser && obser !== 'all'
@@ -6417,10 +6430,11 @@ const obserFilter: Prisma.OrderWhereInput =
     const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
-        ...productFilter,
         ...customerFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
         ...obserFilter,
         ...existeIns,
         salbuy: 'SALE', remNum: {gt : 0}
@@ -6430,6 +6444,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
       include: {
         customer: true,       // id_client
+        encargado: true,       // id_client
         comprobante: true,       // id_client
         configuration: true,  // id_config
         user1: true,          // usuario si quieres incluirlo
@@ -6758,7 +6773,7 @@ const {
   fech2,
   configuracion,
   usuario,
-  product,
+  producto,
   obser,
 } = query;
 
@@ -6773,10 +6788,21 @@ const {
         : { movpvDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+
+
 
     // // --- Observaciones (LIKE en Postgres) ---
     // const obserFilter =
@@ -6818,9 +6844,9 @@ const obserFilter: Prisma.OrderWhereInput =
     const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
-        ...productFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...productoOrderItemFilter,
         ...obserFilter,
         ...existeIns,
         salbuy: 'SALE', movpvNum: {gt : 0}
@@ -6881,7 +6907,9 @@ const {
   configuracion,
   usuario,
   supplier,
-  product,
+  producto,
+  encargado,
+
   obser,
 } = query;
 
@@ -6896,11 +6924,23 @@ const {
         : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const supplierFilter = supplier && supplier !== 'all' ? { supplier: String(supplier) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
 
     // // --- Observaciones (LIKE en Postgres) ---
     // const obserFilter =
@@ -6943,10 +6983,11 @@ const obserFilter: Prisma.OrderWhereInput =
     const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
-        ...productFilter,
         ...supplierFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
         ...obserFilter,
         ...existeIns,
         salbuy: 'BUY', remNum: {gt : 0}
@@ -6956,6 +6997,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
       include: {
         supplier1: true,      
+        encargado: true,      
         comprobante: true,      
         configuration: true,  // id_config
         user1: true,          // usuario si quieres incluirlo
@@ -7006,7 +7048,7 @@ const {
   fech2,
   configuracion,
   usuario,
-  product,
+  producto,
   obser,
 } = query;
 
@@ -7021,10 +7063,19 @@ const {
         : { movpvDat: { gte: new Date(fech1), lte: new Date(fech2) } };
 
     // --- Otros filtros ---
-    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
 
     // // --- Observaciones (LIKE en Postgres) ---
     // const obserFilter =
@@ -7066,9 +7117,9 @@ const obserFilter: Prisma.OrderWhereInput =
     const orders = await this.prisma.order.findMany({
       where: {
         ...fechasFilter,
-        ...productFilter,
         ...configuracionFilter,
         ...usuarioFilter,
+        ...productoOrderItemFilter,
         ...obserFilter,
         ...existeIns,
         salbuy: 'BUY', movpvNum: {gt : 0}
