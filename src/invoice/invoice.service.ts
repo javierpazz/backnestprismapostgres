@@ -47,7 +47,7 @@ const {
   parte,
   maquina,
   encargado,
-  comprobante,
+  instru,
 } = query;
 
     // --- Fechas ---
@@ -64,7 +64,7 @@ const {
     const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
     const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
@@ -83,7 +83,7 @@ const result = await this.prisma.orderItem.findMany({
       ...configuracionFilter,
       ...customerFilter,
       ...usuarioFilter,
-      ...comprobanteFilter,
+      ...instruFilter,
       ...parteFilter,
     },
   },
@@ -173,7 +173,7 @@ const resultTxP = await this.prisma.orderItem.findMany({
       ...configuracionFilter,
       ...customerFilter,
       ...usuarioFilter,
-      ...comprobanteFilter,
+      ...instruFilter,
       ...parteFilter,
     },
   },
@@ -265,7 +265,7 @@ const TarxPar = top10TxP.map(m => ({
           ...configuracionFilter,
           ...customerFilter,
           ...usuarioFilter,
-          ...comprobanteFilter,
+          ...instruFilter,
           ...parteFilter,
         },
       },
@@ -308,7 +308,7 @@ const ordersData = await this.prisma.order.aggregate({
         ...configuracionFilter,
         ...customerFilter,
         ...usuarioFilter,
-        ...comprobanteFilter,
+        ...instruFilter,
         ...parteFilter,
   },
   _count: {
@@ -374,35 +374,53 @@ const {
   configuracion,
   usuario,
   customer,
-  supplier,
+  producto,
   parte,
   maquina,
   encargado,
-  comprobante,
+  instru,
 } = query;
 
+
+    // let userCli: Customer;
+    // if ( usuario ) {
+    //   userCli = await this.prisma.customer.findUnique({
+    //   where: { usuario },
+    //   });
+    // }
+    // if ( !userCli ) 
+    //   throw new NotFoundException(`Usuario with email, name or no "${ usuario }" not found`);
+    
+    
+    
+    
+    
+    
     // --- Fechas ---
     const fechasInvFilter =
-      !fech1 && !fech2
-        ? {}
-        : !fech1 && fech2
-        ? { remDat: { lte: new Date(fech2) } }
-        : fech1 && !fech2
-        ? { remDat: { gte: new Date(fech1) } }
-        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
-
+    !fech1 && !fech2
+    ? {}
+    : !fech1 && fech2
+    ? { remDat: { lte: new Date(fech2) } }
+    : fech1 && !fech2
+    ? { remDat: { gte: new Date(fech1) } }
+    : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    
     // --- Otros filtros ---
     const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
     const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
     const configuracionFilter =
-      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
 
-///filtroparaborrar
-
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    
+    ///filtroparaborrar
+    
 
 
 
@@ -410,6 +428,7 @@ const {
 // 1. Traer datos
 const resulttarmaq = await this.prisma.orderItem.findMany({
   where: {
+    ...productoFilter,
     order: {
       id_instru: { not: null },
       id_maquin: { not: null },
@@ -417,7 +436,7 @@ const resulttarmaq = await this.prisma.orderItem.findMany({
       ...configuracionFilter,
       ...customerFilter,
       ...usuarioFilter,
-      ...comprobanteFilter,
+      ...instruFilter,
       ...parteFilter,
     },
   },
@@ -490,6 +509,7 @@ const TarxMaq = Object.values(groupedTarMaq)
 // 1. Traer datos
 const resulttarpar = await this.prisma.orderItem.findMany({
   where: {
+    ...productoFilter,
     order: {
       id_instru: { not: null },
       id_parte: { not: null },
@@ -497,7 +517,7 @@ const resulttarpar = await this.prisma.orderItem.findMany({
       ...configuracionFilter,
       ...customerFilter,
       ...usuarioFilter,
-      ...comprobanteFilter,
+      ...instruFilter,
       ...parteFilter,
     },
   },
@@ -577,7 +597,7 @@ const topInstrumentosTra = await this.prisma.order.groupBy({
     ...configuracionFilter,
     ...customerFilter,
     ...usuarioFilter,
-    ...comprobanteFilter,
+    ...instruFilter,
     ...parteFilter,
     ...maquinaFilter,
     ...encargadoFilter,
@@ -632,7 +652,7 @@ const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
           ...configuracionFilter,
           ...customerFilter,
           ...usuarioFilter,
-          ...comprobanteFilter,
+          ...instruFilter,
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
@@ -681,13 +701,17 @@ const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
 ///orders
 const ordersData = await this.prisma.order.aggregate({
   where: {
-            id_instru: {not: null},
-            id_parte: {not: null},
+        OR: [
+          { id_maquin: {not: null} },
+          { id_parte: {not: null} },
+        ],
+
+        id_instru: {not: null},
         ...fechasInvFilter,
         ...configuracionFilter,
         ...customerFilter,
         ...usuarioFilter,
-        ...comprobanteFilter,
+        ...instruFilter,
         ...parteFilter,
   },
   _count: {
@@ -758,7 +782,7 @@ const {
   parte,
   maquina,
   encargado,
-  comprobante,
+  instru,
 } = query;
 
     // --- Fechas ---
@@ -775,7 +799,7 @@ const {
     const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
     const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
@@ -795,7 +819,7 @@ const {
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
@@ -850,7 +874,7 @@ const {
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
@@ -906,7 +930,7 @@ const {
           ...configuracionFilter,
           ...customerFilter,
           ...usuarioFilter,
-          ...comprobanteFilter,
+          ...instruFilter,
           ...parteFilter,
         },
       },
@@ -950,7 +974,7 @@ const resulttarmaq = await this.prisma.orderItem.findMany({
       ...configuracionFilter,
       ...customerFilter,
       ...usuarioFilter,
-      ...comprobanteFilter,
+      ...instruFilter,
       ...parteFilter,
     },
   },
@@ -1029,7 +1053,7 @@ const TarxPar = Object.values(groupedTarMaq)
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
@@ -1082,7 +1106,7 @@ const TarxPar = Object.values(groupedTarMaq)
           ...configuracionFilter,
           ...customerFilter,
           ...usuarioFilter,
-          ...comprobanteFilter,
+          ...instruFilter,
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
@@ -1140,7 +1164,7 @@ const TarxPar = Object.values(groupedTarMaq)
             ...customerFilter,
             ...parteFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
 
           },
@@ -1191,7 +1215,7 @@ const ordersData = await this.prisma.order.aggregate({
         ...configuracionFilter,
         ...customerFilter,
         ...usuarioFilter,
-        ...comprobanteFilter,
+        ...instruFilter,
         ...parteFilter,
   },
   _count: {
@@ -1262,7 +1286,7 @@ const {
   parte,
   maquina,
   encargado,
-  comprobante,
+  instru,
 } = query;
 
     // --- Fechas ---
@@ -1279,7 +1303,7 @@ const {
     const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
     const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
@@ -1299,7 +1323,7 @@ const {
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
@@ -1354,7 +1378,7 @@ const {
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
@@ -1410,7 +1434,7 @@ const {
           ...configuracionFilter,
           ...customerFilter,
           ...usuarioFilter,
-          ...comprobanteFilter,
+          ...instruFilter,
           ...parteFilter,
         },
       },
@@ -1454,7 +1478,7 @@ const resulttarmaq = await this.prisma.orderItem.findMany({
       ...configuracionFilter,
       ...customerFilter,
       ...usuarioFilter,
-      ...comprobanteFilter,
+      ...instruFilter,
       ...parteFilter,
     },
   },
@@ -1533,7 +1557,7 @@ const TarxMaq = Object.values(groupedTarMaq)
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
@@ -1585,7 +1609,7 @@ const topInstrumentosTra = await this.prisma.order.groupBy({
     ...configuracionFilter,
     ...customerFilter,
     ...usuarioFilter,
-    ...comprobanteFilter,
+    ...instruFilter,
     ...parteFilter,
     ...maquinaFilter,
     ...encargadoFilter,
@@ -1642,7 +1666,7 @@ const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
             ...customerFilter,
             ...parteFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
 
           },
@@ -1693,7 +1717,7 @@ const ordersData = await this.prisma.order.aggregate({
         ...configuracionFilter,
         ...customerFilter,
         ...usuarioFilter,
-        ...comprobanteFilter,
+        ...instruFilter,
         ...parteFilter,
   },
   _count: {
@@ -1762,7 +1786,7 @@ const {
   parte,
   maquina,
   encargado,
-  comprobante,
+  instru,
 } = query;
 
     // --- Fechas ---
@@ -1779,7 +1803,7 @@ const {
     const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
     const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
     const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const comprobanteFilter = comprobante && comprobante !== 'all' ? {codCom: String(comprobante)} : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
@@ -1798,7 +1822,7 @@ const {
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
@@ -1879,7 +1903,7 @@ const {
           ...configuracionFilter,
           ...customerFilter,
           ...usuarioFilter,
-          ...comprobanteFilter,
+          ...instruFilter,
           ...parteFilter,
         },
       },
@@ -1921,7 +1945,7 @@ const {
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
         },
         _sum: {
@@ -1948,7 +1972,7 @@ const {
                 ...configuracionFilter,
                 ...customerFilter,
                 ...usuarioFilter,
-                ...comprobanteFilter,
+                ...instruFilter,
                 ...parteFilter,
               },
               include: {
@@ -1995,7 +2019,7 @@ const {
             ...configuracionFilter,
             ...customerFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
 
           },
@@ -2046,7 +2070,7 @@ const {
             ...customerFilter,
             ...parteFilter,
             ...usuarioFilter,
-            ...comprobanteFilter,
+            ...instruFilter,
             ...parteFilter,
 
           },
@@ -2109,7 +2133,7 @@ const ordersData = await this.prisma.order.aggregate({
         ...configuracionFilter,
         ...customerFilter,
         ...usuarioFilter,
-        ...comprobanteFilter,
+        ...instruFilter,
         ...parteFilter,
   },
   _count: {
@@ -6465,6 +6489,7 @@ const obserFilter: Prisma.OrderWhereInput =
   async searchSerUS(id: string) {
     
     /// cambiar filtro por cliente
+    // aqui hago trampa por que estoy enviando el email ya desde el front
 
     let customer: Customer;
     if ( id ) {
