@@ -324,7 +324,7 @@ const {
   parte,
   maquina,
   encargado,
-  product,
+  producto,
   estado,
   registro,
   obser,
@@ -345,23 +345,23 @@ const {
     const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
     const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
     const instruFilter = instru && instru !== 'all' ? { id_instru: String(instru) } : {};
-    const productFilter = product && product !== 'all' ? { id_product: String(product) } : {};
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
 
-    // // --- Observaciones (LIKE en Postgres) ---
-    // const obserFilter =
-    //   obser && obser !== 'all'
-    //     ? {
-    //         OR: [
-    //           { notes: { contains: obser, mode: 'insensitive' } },
-    //           { orderItems: { some: { observ: { contains: obser, mode: 'insensitive' } } } },
-    //         ],
-    //       }
-    //     : {};
+    const productoFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
 
+    
 const obserFilter: Prisma.OrderWhereInput =
   obser && obser !== 'all'
     ? {
@@ -431,7 +431,6 @@ const obserFilter: Prisma.OrderWhereInput =
         ...maquinaFilter,
         ...encargadoFilter,
         ...instruFilter,
-        // ...productFilter,
         ...customerFilter,
         ...configuracionFilter,
         ...usuarioFilter,
@@ -439,6 +438,8 @@ const obserFilter: Prisma.OrderWhereInput =
         ...estadoFilter,
         ...registroFilter,
         ...existeIns,
+        // filtro en orderItem
+        ...productoFilter,
       },
         orderBy: sortOrder,
 
@@ -512,7 +513,7 @@ const obserFilter: Prisma.OrderWhereInput =
     parte,
     maquina,
     encargado,
-    product,
+    producto,
     estado,
     registro,
     obser,
@@ -539,7 +540,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
   // --- Filtro por producto (en el mismo OrderItem)
   const productFilter =
-    product && product !== 'all' ? { productId: String(product) } : {};
+    producto && producto !== 'all' ? { productId: String(producto) } : {};
 
   // --- Filtro por observaciones ---
   const obserFilter: Prisma.OrderItemWhereInput =

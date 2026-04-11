@@ -43,7 +43,7 @@ const {
   configuracion,
   usuario,
   customer,
-  supplier,
+  producto,
   parte,
   maquina,
   encargado,
@@ -69,6 +69,7 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
 
 ///filtroparaborrar
 
@@ -76,6 +77,7 @@ const {
 // 1. Traer datos
 const result = await this.prisma.orderItem.findMany({
   where: {
+    ...productoFilter,
     order: {
       id_instru: { not: null },
       id_maquin: { not: null },
@@ -166,6 +168,7 @@ const MaqxTar = top10.map(m => ({
 // 1. Traer datos
 const resultTxP = await this.prisma.orderItem.findMany({
   where: {
+    ...productoFilter,
     order: {
       id_instru: { not: null },
       id_parte: { not: null },
@@ -259,6 +262,7 @@ const TarxPar = top10TxP.map(m => ({
 
     const resultdilVal = await this.prisma.orderItem.findMany({
       where: {
+    ...productoFilter,
         order: {
           id_instru: { not: null },
           ...fechasInvFilter,
@@ -418,7 +422,17 @@ const {
     const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
 
     const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
-    
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+            
     ///filtroparaborrar
     
 
@@ -438,6 +452,8 @@ const resulttarmaq = await this.prisma.orderItem.findMany({
       ...usuarioFilter,
       ...instruFilter,
       ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
     },
   },
   select: {
@@ -519,6 +535,8 @@ const resulttarpar = await this.prisma.orderItem.findMany({
       ...usuarioFilter,
       ...instruFilter,
       ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
     },
   },
   select: {
@@ -601,6 +619,7 @@ const topInstrumentosTra = await this.prisma.order.groupBy({
     ...parteFilter,
     ...maquinaFilter,
     ...encargadoFilter,
+    ...productoOrderItemFilter,
   },
   _sum: {
     total: true,
@@ -656,6 +675,7 @@ const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
+          ...productoOrderItemFilter,
         },
         _sum: {
           total: true,
@@ -713,6 +733,9 @@ const ordersData = await this.prisma.order.aggregate({
         ...usuarioFilter,
         ...instruFilter,
         ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
   },
   _count: {
     _all: true,
@@ -778,7 +801,7 @@ const {
   configuracion,
   usuario,
   customer,
-  supplier,
+  producto,
   parte,
   maquina,
   encargado,
@@ -804,6 +827,17 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
 
 ///filtroparaborrar
 
@@ -823,6 +857,7 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...productoOrderItemFilter,
             
           },
           _sum: {
@@ -878,6 +913,7 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...productoOrderItemFilter,
             
           },
           _sum: {
@@ -923,6 +959,7 @@ const {
 
     const resultdilVal = await this.prisma.orderItem.findMany({
       where: {
+          ...productoFilter,
         order: {
           id_instru: { not: null },
           id_parte: {not: null},
@@ -932,6 +969,8 @@ const {
           ...usuarioFilter,
           ...instruFilter,
           ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
         },
       },
       select: {
@@ -967,6 +1006,7 @@ const {
 // 1. Traer datos
 const resulttarmaq = await this.prisma.orderItem.findMany({
   where: {
+    ...productoFilter,
     order: {
       id_instru: { not: null },
       id_parte: { not: null },
@@ -976,6 +1016,8 @@ const resulttarmaq = await this.prisma.orderItem.findMany({
       ...usuarioFilter,
       ...instruFilter,
       ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
     },
   },
   select: {
@@ -1057,6 +1099,7 @@ const TarxPar = Object.values(groupedTarMaq)
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...productoOrderItemFilter,
 
           },
           _sum: {
@@ -1110,6 +1153,7 @@ const TarxPar = Object.values(groupedTarMaq)
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
+          ...productoOrderItemFilter,
         },
         _sum: {
           total: true,
@@ -1166,6 +1210,8 @@ const TarxPar = Object.values(groupedTarMaq)
             ...usuarioFilter,
             ...instruFilter,
             ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
 
           },
           _sum: {
@@ -1217,6 +1263,9 @@ const ordersData = await this.prisma.order.aggregate({
         ...usuarioFilter,
         ...instruFilter,
         ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
   },
   _count: {
     _all: true,
@@ -1282,7 +1331,7 @@ const {
   configuracion,
   usuario,
   customer,
-  supplier,
+  producto,
   parte,
   maquina,
   encargado,
@@ -1308,6 +1357,17 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
 
 ///filtroparaborrar
 
@@ -1327,6 +1387,7 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...productoOrderItemFilter,
             
           },
           _sum: {
@@ -1382,6 +1443,7 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...productoOrderItemFilter,
             
           },
           _sum: {
@@ -1427,6 +1489,7 @@ const {
 
     const resultdilVal = await this.prisma.orderItem.findMany({
       where: {
+          ...productoFilter,
         order: {
           id_instru: { not: null },
           id_maquin: {not: null},
@@ -1436,6 +1499,8 @@ const {
           ...usuarioFilter,
           ...instruFilter,
           ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
         },
       },
       select: {
@@ -1471,6 +1536,7 @@ const {
 // 1. Traer datos
 const resulttarmaq = await this.prisma.orderItem.findMany({
   where: {
+        ...productoFilter,
     order: {
       id_instru: { not: null },
       id_maquin: { not: null },
@@ -1480,6 +1546,8 @@ const resulttarmaq = await this.prisma.orderItem.findMany({
       ...usuarioFilter,
       ...instruFilter,
       ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
     },
   },
   select: {
@@ -1561,6 +1629,7 @@ const TarxMaq = Object.values(groupedTarMaq)
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...productoOrderItemFilter,
 
           },
           _sum: {
@@ -1613,6 +1682,7 @@ const topInstrumentosTra = await this.prisma.order.groupBy({
     ...parteFilter,
     ...maquinaFilter,
     ...encargadoFilter,
+    ...productoOrderItemFilter,
   },
   _sum: {
     total: true,
@@ -1667,7 +1737,9 @@ const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
             ...parteFilter,
             ...usuarioFilter,
             ...instruFilter,
-            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
 
           },
           _sum: {
@@ -1719,6 +1791,9 @@ const ordersData = await this.prisma.order.aggregate({
         ...usuarioFilter,
         ...instruFilter,
         ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
   },
   _count: {
     _all: true,
@@ -1782,7 +1857,7 @@ const {
   configuracion,
   usuario,
   customer,
-  supplier,
+  producto,
   parte,
   maquina,
   encargado,
@@ -1809,6 +1884,19 @@ const {
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
 
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            orderItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+    
+
 ///filtroparaborrar
 
 
@@ -1826,7 +1914,7 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
-            
+            ...productoOrderItemFilter,
           },
           _sum: {
             total: true
@@ -1897,6 +1985,7 @@ const {
 
     const resultdilVal = await this.prisma.orderItem.findMany({
       where: {
+          ...productoFilter,
         order: {
           id_instru: { not: null },
           ...fechasInvFilter,
@@ -1905,7 +1994,8 @@ const {
           ...usuarioFilter,
           ...instruFilter,
           ...parteFilter,
-        },
+          ...maquinaFilter,
+          ...encargadoFilter,        },
       },
       select: {
         terminado: true,
@@ -1947,6 +2037,9 @@ const {
             ...usuarioFilter,
             ...instruFilter,
             ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
         },
         _sum: {
           total: true,
@@ -1974,6 +2067,9 @@ const {
                 ...usuarioFilter,
                 ...instruFilter,
                 ...parteFilter,
+                ...maquinaFilter,
+                ...encargadoFilter,
+                ...productoOrderItemFilter,
               },
               include: {
                 instrumento: {
@@ -2021,6 +2117,9 @@ const {
             ...usuarioFilter,
             ...instruFilter,
             ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
 
           },
           _sum: {
@@ -2071,7 +2170,9 @@ const {
             ...parteFilter,
             ...usuarioFilter,
             ...instruFilter,
-            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
 
           },
           _sum: {
@@ -2135,6 +2236,9 @@ const ordersData = await this.prisma.order.aggregate({
         ...usuarioFilter,
         ...instruFilter,
         ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
   },
   _count: {
     _all: true,
@@ -2199,6 +2303,7 @@ const {
   usuario,
   customer,
   supplier,
+  producto,
   parte,
   encargado,
   comprobante,
@@ -2232,6 +2337,7 @@ const {
     const configuracionFilter =
       configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
     const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
 
 ///filtroparaborrar
 
@@ -2240,6 +2346,7 @@ const {
     ///Productos10Buy
             const itemsProBuy = await this.prisma.orderItem.findMany({
           where: {
+              ...productoFilter,
             order: {
               salbuy: 'BUY',
               invNum: { gt: 0 },
@@ -2291,6 +2398,7 @@ const {
     ///Productos10
             const itemsPro = await this.prisma.orderItem.findMany({
           where: {
+            ...productoFilter,
             order: {
               salbuy: 'SALE',
               invNum: { gt: 0 },
@@ -2342,6 +2450,7 @@ const {
     ///Categorias10Buy
             const itemsBuy = await this.prisma.orderItem.findMany({
               where: {
+                ...productoFilter,
                 order: {
                   salbuy: 'BUY',
                   invNum: { gt: 0 },
@@ -2386,6 +2495,7 @@ const {
     ///Categorias10
             const items = await this.prisma.orderItem.findMany({
               where: {
+                ...productoFilter,
                 order: {
                   salbuy: 'SALE',
                   invNum: { gt: 0 },
@@ -7006,110 +7116,108 @@ const obserFilter: Prisma.OrderWhereInput =
   }));
 
   return { invoices };}
-//////dili
+
+  //////dili
+
+//   async findAlldil(query: any) {
+
+// // Traemos todos los OrderItems con sus Order relacionados
+// const orderItemsWithOrder = await this.prisma.orderItem.findMany({
+//   include: {
+//     order: {
+//       include: {
+//         orderAddress: true,
+//         customer: true,
+//         parte: true,
+//         instrumento: true,
+//         configuration: true,
+//         user1: true,
+//       },
+//     },
+//   },
+// });
+
+// // Mapeamos cada OrderItem a un objeto tipo invoice
+// const invoices = orderItemsWithOrder.map(item => ({
+//   _id: item.id, // ID del item
+//   orderItems: {
+//     _id: item.id,
+//     slug: item.slug,
+//     title: item.title,
+//     medPro: item.medPro,
+//     quantity: item.quantity,
+//     image: item.image,
+//     price: item.price,
+//     size: item.size,
+//     porIva: item.porIva,
+//     venDat: item.venDat,
+//     observ: item.observ,
+//     terminado: item.terminado,
+//   },
+//   orderAddress: item.order?.orderAddress?.[0] ?? {
+//     firstName: '',
+//     lastName: '',
+//     address: '',
+//     address2: '',
+//     city: '',
+//     zip: '',
+//     country: '',
+//     phone: ''
+//   },
+//   paymentMethod: item.order?.paymentMethod ?? '',
+//   subTotal: item.order?.subTotal ?? 0,
+//   shippingPrice: item.order?.shippingPrice ?? 0,
+//   tax: item.order?.tax ?? 0,
+//   total: item.order?.total ?? 0,
+//   totalBuy: item.order?.totalBuy ?? 0,
+//   // id_client: item.order?.id_client ? item.order.id_client : null,
+//   id_client: item.order?.customer ?? { nameCus: '' },
+//   // id_instru: item.order?.id_instru ? item.order.id_instru : null,
+//   id_instru: item.order?.instrumento ?? { name: '' },
+//   id_parte: item.order?.parte ?? { name: '' },
+//   libNum: item.order?.libNum ?? 0,
+//   folNum: item.order?.folNum ?? 0,
+//   asiNum: item.order?.asiNum ?? 0,
+//   asiDat: item.order?.asiDat ?? null,
+//   escNum: item.order?.escNum ?? 0,
+//   asieNum: item.order?.asieNum ?? 0,
+//   asieDat: item.order?.asieDat ?? null,
+//   terminado: item.order?.terminado ?? false,
+//   // id_config: item.order?.id_config ? item.order.id_config : null,
+//   id_config: item.order?.configuration ?? { name: '' },
+//   codConNum: item.order?.codConNum ?? '',
+//   // user: item.order?.user ? item.order.user : null,
+//   user: item.order?.user1 ?? { name: '' },
+//   isPaid: item.order?.isPaid ?? false,
+//   isDelivered: item.order?.isDelivered ?? false,
+//   remNum: item.order?.remNum ?? 0,
+//   remDat: item.order?.remDat ?? null,
+//   dueDat: item.order?.dueDat ?? null,
+//   invNum: item.order?.invNum ?? 0,
+//   invDat: item.order?.invDat ?? null,
+//   recNum: item.order?.recNum ?? 0,
+//   recDat: item.order?.recDat ?? null,
+//   desVal: item.order?.desVal ?? '',
+//   notes: item.order?.notes ?? '',
+//   salbuy: item.order?.salbuy ?? '',
+//   createdAt: item.order?.createdAt ?? new Date(),
+//   updatedAt: item.order?.updatedAt ?? new Date(),
+
+//   // Campos calculados / alias de relaciones
+//   instruName: item.order?.instrumento?.name ?? '',
+//   parteName: item.order?.parte?.name ?? '',
+//   customName: item.order?.customer?.nameCus ?? '',
+//   configName: item.order?.configuration?.name ?? '',
+//   userName: item.order?.user1?.name ?? '',
+//   valor: (item.price * (1 + item.porIva / 100)).toFixed(2),
+//   totalOrder: item.order?.total?.toFixed(2) ?? '0.00',
+//   __v: 0,
+// }));
 
 
+//   return { invoices };
 
-
-  async findAlldil(query: any) {
-
-// Traemos todos los OrderItems con sus Order relacionados
-const orderItemsWithOrder = await this.prisma.orderItem.findMany({
-  include: {
-    order: {
-      include: {
-        orderAddress: true,
-        customer: true,
-        parte: true,
-        instrumento: true,
-        configuration: true,
-        user1: true,
-      },
-    },
-  },
-});
-
-// Mapeamos cada OrderItem a un objeto tipo invoice
-const invoices = orderItemsWithOrder.map(item => ({
-  _id: item.id, // ID del item
-  orderItems: {
-    _id: item.id,
-    slug: item.slug,
-    title: item.title,
-    medPro: item.medPro,
-    quantity: item.quantity,
-    image: item.image,
-    price: item.price,
-    size: item.size,
-    porIva: item.porIva,
-    venDat: item.venDat,
-    observ: item.observ,
-    terminado: item.terminado,
-  },
-  orderAddress: item.order?.orderAddress?.[0] ?? {
-    firstName: '',
-    lastName: '',
-    address: '',
-    address2: '',
-    city: '',
-    zip: '',
-    country: '',
-    phone: ''
-  },
-  paymentMethod: item.order?.paymentMethod ?? '',
-  subTotal: item.order?.subTotal ?? 0,
-  shippingPrice: item.order?.shippingPrice ?? 0,
-  tax: item.order?.tax ?? 0,
-  total: item.order?.total ?? 0,
-  totalBuy: item.order?.totalBuy ?? 0,
-  // id_client: item.order?.id_client ? item.order.id_client : null,
-  id_client: item.order?.customer ?? { nameCus: '' },
-  // id_instru: item.order?.id_instru ? item.order.id_instru : null,
-  id_instru: item.order?.instrumento ?? { name: '' },
-  id_parte: item.order?.parte ?? { name: '' },
-  libNum: item.order?.libNum ?? 0,
-  folNum: item.order?.folNum ?? 0,
-  asiNum: item.order?.asiNum ?? 0,
-  asiDat: item.order?.asiDat ?? null,
-  escNum: item.order?.escNum ?? 0,
-  asieNum: item.order?.asieNum ?? 0,
-  asieDat: item.order?.asieDat ?? null,
-  terminado: item.order?.terminado ?? false,
-  // id_config: item.order?.id_config ? item.order.id_config : null,
-  id_config: item.order?.configuration ?? { name: '' },
-  codConNum: item.order?.codConNum ?? '',
-  // user: item.order?.user ? item.order.user : null,
-  user: item.order?.user1 ?? { name: '' },
-  isPaid: item.order?.isPaid ?? false,
-  isDelivered: item.order?.isDelivered ?? false,
-  remNum: item.order?.remNum ?? 0,
-  remDat: item.order?.remDat ?? null,
-  dueDat: item.order?.dueDat ?? null,
-  invNum: item.order?.invNum ?? 0,
-  invDat: item.order?.invDat ?? null,
-  recNum: item.order?.recNum ?? 0,
-  recDat: item.order?.recDat ?? null,
-  desVal: item.order?.desVal ?? '',
-  notes: item.order?.notes ?? '',
-  salbuy: item.order?.salbuy ?? '',
-  createdAt: item.order?.createdAt ?? new Date(),
-  updatedAt: item.order?.updatedAt ?? new Date(),
-
-  // Campos calculados / alias de relaciones
-  instruName: item.order?.instrumento?.name ?? '',
-  parteName: item.order?.parte?.name ?? '',
-  customName: item.order?.customer?.nameCus ?? '',
-  configName: item.order?.configuration?.name ?? '',
-  userName: item.order?.user1?.name ?? '',
-  valor: (item.price * (1 + item.porIva / 100)).toFixed(2),
-  totalOrder: item.order?.total?.toFixed(2) ?? '0.00',
-  __v: 0,
-}));
-
-
-  return { invoices };
-
-}
+// }
 //////dili
 
 
