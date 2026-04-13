@@ -104,6 +104,7 @@ interface SeedProduct {
   category: string;
   type: ValidTypes;
   gender: 'men' | 'women' | 'kid' | 'unisex';
+  ecoActive: boolean;
 }
 
 
@@ -543,6 +544,7 @@ export const initialData: SeedData = {
       category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA1 ???",
+      ecoActive: false,
       gender: 'men'
     },
     {
@@ -565,6 +567,7 @@ export const initialData: SeedData = {
       category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA2 ???",
+      ecoActive: false,
       gender: 'men'
     },
 
@@ -588,6 +591,7 @@ export const initialData: SeedData = {
       category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA3 ???",
+      ecoActive: false,
       gender: 'men'
     },
 
@@ -611,6 +615,7 @@ export const initialData: SeedData = {
       category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA4 ???",
+      ecoActive: false,
       gender: 'men'
     },
     {
@@ -633,6 +638,7 @@ export const initialData: SeedData = {
       category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA5 ???",
+      ecoActive: false,
       gender: 'men'
     },
     {
@@ -655,6 +661,7 @@ export const initialData: SeedData = {
       category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA6 ???",
+      ecoActive: false,
       gender: 'men'
     },
     {
@@ -677,6 +684,7 @@ export const initialData: SeedData = {
       category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA7 ???",
+      ecoActive: false,
       gender: 'men'
     },
 
