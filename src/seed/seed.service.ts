@@ -21,6 +21,8 @@ export class SeedService {
           
     try {
 /////borrado
+  await this.prisma.serviceItem.deleteMany();
+  await this.prisma.service.deleteMany();
   await this.prisma.orderAddress.deleteMany();
   await this.prisma.orderItem.deleteMany();
   await this.prisma.order.deleteMany();

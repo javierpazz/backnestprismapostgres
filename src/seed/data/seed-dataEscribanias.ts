@@ -540,7 +540,7 @@ export const initialData: SeedData = {
       sizes: [ 'M' ],
       slug: "DILIGENCIA1_??",
       type: 'shirts',
-      category: 'Tinto',
+      category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA1 ???",
       gender: 'men'
@@ -562,7 +562,7 @@ export const initialData: SeedData = {
       sizes: [ 'M' ],
       slug: "DILIGENCIA2_??",
       type: 'shirts',
-      category: 'Tinto',
+      category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA2 ???",
       gender: 'men'
@@ -585,7 +585,7 @@ export const initialData: SeedData = {
       sizes: [ 'M' ],
       slug: "DILIGENCIA3_??",
       type: 'shirts',
-      category: 'Tinto',
+      category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA3 ???",
       gender: 'men'
@@ -608,7 +608,7 @@ export const initialData: SeedData = {
       sizes: [ 'M' ],
       slug: "DILIGENCIA4_??",
       type: 'shirts',
-      category: 'Tinto',
+      category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA4 ???",
       gender: 'men'
@@ -630,7 +630,7 @@ export const initialData: SeedData = {
       sizes: [ 'M' ],
       slug: "DILIGENCIA5_??",
       type: 'shirts',
-      category: 'Tinto',
+      category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA5 ???",
       gender: 'men'
@@ -652,7 +652,7 @@ export const initialData: SeedData = {
       sizes: [ 'M' ],
       slug: "DILIGENCIA6_??",
       type: 'shirts',
-      category: 'Tinto',
+      category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA6 ???",
       gender: 'men'
@@ -674,7 +674,7 @@ export const initialData: SeedData = {
       sizes: [ 'M' ],
       slug: "DILIGENCIA7_??",
       type: 'shirts',
-      category: 'Tinto',
+      category: '',
       tags: [ 'dil' ],
       title: "DILIGENCIA7 ???",
       gender: 'men'

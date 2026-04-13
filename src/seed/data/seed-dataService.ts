@@ -104,6 +104,8 @@ interface SeedProduct {
   category: string;
   type: ValidTypes;
   gender: 'men' | 'women' | 'kid' | 'unisex';
+  ecoActive: boolean;
+
 }
 
 
@@ -571,6 +573,7 @@ export const initialData: SeedData = {
       category: 'Service',
       tags: [ 'Tar' ],
       title:  "Desarmado Equipo",
+      ecoActive: false,
       gender: 'men'
     },
     {
@@ -593,6 +596,7 @@ export const initialData: SeedData = {
       category: 'Service',
       tags: [ 'tar' ],
       title: "Checkeo Partes Equipo",
+      ecoActive: false,
       gender: 'men'
     },
 
@@ -616,7 +620,8 @@ export const initialData: SeedData = {
       category: 'Service',
       tags: [ 'tar' ],
       title: "Limpieza equipo",
-      gender: 'men'
+      ecoActive: false,
+      gender: 'men',
     },
 
     {
@@ -639,6 +644,7 @@ export const initialData: SeedData = {
       category: 'Service',
       tags: [ 'tar' ],
       title: "Armado y Prueba de equipo",
+      ecoActive: false,
       gender: 'men'
     },
     {
@@ -661,8 +667,235 @@ export const initialData: SeedData = {
       category: 'Service',
       tags: [ 'tar' ],
       title: " Registro tiempo o Km Uso",
+      ecoActive: false,
       gender: 'men'
     },
+
+
+    {
+      codPro : "100001",
+      codigoPro : "100001",
+      medPro : "UNIDAD",
+      description: "Los filtros desechables están diseñados para polvo ambiente, pintura y pelusa. Se pueden utilizar en hoteles, oficinas, hospitales, laboratorios, entre otros ya que este tipo tiene una gran capacidad de retención de polvo. Saturado retiene hasta 2.100 grms/m2 en 1” de grueso y 3.000 grms/m2 en 2” de grueso.",
+      images: [
+        'fp1.jpg',
+        'fp2.jpg',
+        'fp3.jpg',
+      ],
+      inStock: 100000,
+      price: 15000,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Filtro_Plano_de_Carton",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Filtro Plano de Carton",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+    {
+      codPro : "100002",
+      codigoPro : "100002",
+      medPro : "UNIDAD",
+      description: "Mayor eficiencia que los filtros desechables Son económicos Son fáciles de instalar Pueden ser de diferentes tamaños Excelente opción para personas alérgicas.",
+      images: [
+        'fpr1.jpg',
+        'fpr2.jpg',
+        'fpr3.jpg',
+        'fpr4.jpg',
+      ],
+      inStock: 100000,
+      price: 17250,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Filtro_de_placa_rígida",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Filtro de placa rígida",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+    {
+      codPro : "100003",
+      codigoPro : "100003",
+      medPro : "UNIDAD",
+      description: "Utilizados para separar solidos de un fluido gaseoso. Estos filtros ayudan a mitigar la presencia de contaminantes atmosféricos. Se utilizan sobre todo en instalaciones industriales como una alternativa a los precipitadores electrostáticos. Constan de diversas mangas tejidas dispuestas sobre cestas metálicas. El polvo se acumula en su parte externa. El material del tejido debe adaptarse al uso deseado y las condiciones existentes como la temperatura o la presencia de compuestos corrosivos. El tamaño de los poros limita el tamaño mínimo de las partículas retenidas.",
+      images: [
+        'fmanga1.jpg',
+        'fmanga2.jpg',
+      ],
+      inStock: 100000,
+      price: 45000,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Filtro_manga",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Filtro manga",
+      ecoActive: true,
+      gender: 'men'
+    },
+    {
+      codPro : "100004",
+      codigoPro : "100004",
+      medPro : "UNIDAD",
+      description: "La mayoría de los filtros HEPA están hechos de una mezcla de fibras de vidrio entrelazadas. Las partículas se capturan en una de cuatro formas: impacto directo, intercepción, difusión o tamizado. Impacto directo: Las partículas grandes viajan en línea recta, chocan y quedan atrapadas. Intercepción: Las partículas chocan con las fibras y permanecen unidas a las fibras. Difusión: A medida que viajan partículas más pequeñas, chocan con la fibra y son capturadas. Tamizado: Se produce cuando la partícula es demasiado grande para caber entre los espacios de la fibra.",
+      images: [
+        'fh1.jpg',
+        'fh2.jpg',
+        'fh2.jpg',
+      ],
+      inStock: 100000,
+      price: 56000,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Filtro_HEPA",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Filtro HEPA",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+    {
+      codPro : "100005",
+      codigoPro : "100005",
+      medPro : "METROS",
+      description: "Elementos utilizables como Pre-Barrera(antes de otro filtro) o barrera de filtración para los sistemas de tramitación del aire en la ventilación general. Este medio de filtracion combina alto diámetro de apriete del polvo con gota de presión baja y es, debido a una larga vida, extremadamente rentable en el consumo de energía. Disponible en las eficacias G2, G3, G4 y F.",
+      images: [
+        'fpre1.jpg',
+        'fpre2.jpg',
+      ],
+      inStock: 100000,
+      price: 3500,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Pre_Barrera(antes_de_otro_filtro)",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Pre-Barrera(antes de otro filtro)",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+
+    {
+      codPro : "100006",
+      codigoPro : "100006",
+      medPro : "UNIDAD",
+      description: "Filtros fabricados con celulosa importada con alto rango de eficiencia y resistencia a la tracción, para todo tipo de máquinas y compresores. Fabricados en tela punzonada con respaldo de malla de acero inoxidable para circuitos externos de hornos Aero glade, para la industria alimenticia. Estos cartuchos están fabricados en diferentes materiales según los requerimientos del cliente.",
+      images: [
+        'car1.jpg',
+        'car2.jpg',
+      ],
+      inStock: 100000,
+      price: 0,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Cartuchos_para_aire_y_aceite",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Cartuchos para aire y aceite",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+
+    {
+      codPro : "100007",
+      codigoPro : "100007",
+      medPro : "UNIDAD",
+      description: "Agua libre de exceso de minerales como el magnesio o el calcio que aportan mal gusto. Elimina la presencia de bacterias que producen problemas gastrointestinales y afectan en mayor medida a los niños y a las personas mayores que habitan en el hogar. Menor presencia de compuestos orgánicos en el agua como son los hidrocarburos, así como insecticidas y pesticidas que pueden verterse en el agua de zonas rurales y de intensa actividad agrícola. Cuidado del medio ambiente al tener que usar menos jabones y otros productos en electrodomésticos que cuando se utiliza un agua más dura. Y es que éstos suelen estar llenos de sustancias químicas que producen un impacto negativo en el planeta.",
+      images: [
+        'abla1.jpg',
+        'abla2.jpg',
+      ],
+      inStock: 100000,
+      price: 0,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Ablandador_de_Agua",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Ablandador de Agua",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+    {
+      codPro : "100008",
+      codigoPro : "100008",
+      medPro : "UNIDAD",
+      description: "La osmosis es el proceso mediante el cual dos soluciones con diferente concentración son separadas a través de una membrana semipermeable. El equipo de Ósmosis Inversa es capaz de eliminar el 98% de las sales disueltas en el agua. Como resultado de este proceso obtenemos un agua de altísima calidad y perfecta para su consumo.",
+      images: [
+        'osmo1.jpg',
+        'osmo2.jpg',
+      ],
+      inStock: 100000,
+      price: 0,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Equipo_de_ósmosis_inversa",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Equipo de ósmosis inversa",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+    {
+      codPro : "100009",
+      codigoPro : "100009",
+      medPro : "UNIDAD",
+      description: "Disponer de un dispenser de agua a red en tu oficina o empresa es una muy buena solución para facilitar y garantizar una correcta hidratación de los trabajadores. A continuación resumimos los puntos claves que hacen de esta fuente de agua una alternativa cada vez más popular entre todo tipo de empresas y particulares.",
+      images: [
+        'dispenser1.jpg',
+        'dispenser2.jpg',
+      ],
+      inStock: 100000,
+      price: 0,
+      priceBuy: 1,
+      brand:"FN",
+      porIva: 21,
+      sizes: [ 'M' ],
+      slug: "Dispenser_de_agua_de_red:",
+      type: 'shirts',
+      category: 'Filtros',
+      tags: [ 'tar' ],
+      title: "Dispenser de agua de red:",
+      ecoActive: true,
+      gender: 'men'
+    },
+
+
+
+
 
   ]
 };
