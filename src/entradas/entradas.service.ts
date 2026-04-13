@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { OnModuleInit } from '@nestjs/common';
-import { PrismaClient, Order, Prisma, Configuration, Product } from '@prisma/client';
+import { PrismaClient, Order, Prisma, Configuration, Product, Customer } from '@prisma/client';
 import { CreateEntradaDto } from './dto/create-entrada.dto';
 import { UpdateEntradaDto } from './dto/update-entrada.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
@@ -33,7 +33,7 @@ export class EntradasService {
 
 
 // async create(createEntradaDto: any) {
-//   const { orderItems, orderAddress, ...orderData } = createEntradaDto;
+//   const { serviceItems, orderAddress, ...serviceData } = createEntradaDto;
 
 //   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
 //     try {
@@ -41,10 +41,10 @@ export class EntradasService {
 
 // //////////////
 //       let remNumero;
-//       if (orderData.remNum > 0) {
-//         remNumero = orderData.remNum;
+//       if (serviceData.remNum > 0) {
+//         remNumero = serviceData.remNum;
 //       } else {
-//         const configId = orderData.codCon;
+//         const configId = serviceData.codCon;
 //         // const configuracion = await Configuration.findById(configId).session(session);
 //         const configuracion = await this.prisma.configuration.findUnique(
 //           {
@@ -67,58 +67,58 @@ export class EntradasService {
 //           throw new Error('Configuración no encontrada');
 //         }
 //       }
-//       orderData.remNum = remNumero;    
+//       serviceData.remNum = remNumero;    
 // //////////////
 
 
 
 
-//             const invoice = await this.prisma.order.create({
+//             const invoice = await this.prisma.service.create({
 //           data: {
-//             paymentMethod: orderData.paymentMethod,
-//             subTotal: orderData.subTotal,
-//             shippingPrice: orderData.shippingPrice,
-//             tax: orderData.tax,
-//             total: orderData.total,
-//             totalBuy: orderData.totalBuy,
+//             paymentMethod: serviceData.paymentMethod,
+//             subTotal: serviceData.subTotal,
+//             shippingPrice: serviceData.shippingPrice,
+//             tax: serviceData.tax,
+//             total: serviceData.total,
+//             totalBuy: serviceData.totalBuy,
 //             itemsInOrder:0,
-//             libNum: orderData.libNum,
-//             folNum: orderData.folNum,
-//             asiNum: orderData.asiNum,
-//             asiDat: safeDate(orderData.asiDat),
-//             escNum: orderData.escNum,
-//             asieNum: orderData.asieNum,
-//             asieDat: safeDate(orderData.asieDat),
-//             terminado: orderData.terminado,
-//             movpvNum: orderData.movpvNum,
-//             movpvDat: safeDate(orderData.movpvDat),
-//             codConNum: orderData.codConNum,
-//             // codCom: orderData.codCom,
-//             // supplier: orderData.supplier,
-//             remNum: orderData.remNum,
+//             libNum: serviceData.libNum,
+//             folNum: serviceData.folNum,
+//             asiNum: serviceData.asiNum,
+//             asiDat: safeDate(serviceData.asiDat),
+//             escNum: serviceData.escNum,
+//             asieNum: serviceData.asieNum,
+//             asieDat: safeDate(serviceData.asieDat),
+//             terminado: serviceData.terminado,
+//             movpvNum: serviceData.movpvNum,
+//             movpvDat: safeDate(serviceData.movpvDat),
+//             codConNum: serviceData.codConNum,
+//             // codCom: serviceData.codCom,
+//             // supplier: serviceData.supplier,
+//             remNum: serviceData.remNum,
 //             // remNum: 1234,
-//             remDat: safeDate(orderData.remDat),
-//             dueDat: safeDate(orderData.dueDat),
-//             invNum: orderData.invNum,
-//             invDat: safeDate(orderData.invDat),
-//             recNum: orderData.recNum,
-//             recDat: safeDate(orderData.recDat),
-//             desVal: orderData.desVal,
-//             notes: orderData.notes,
-//             salbuy: orderData.salbuy,
+//             remDat: safeDate(serviceData.remDat),
+//             dueDat: safeDate(serviceData.dueDat),
+//             invNum: serviceData.invNum,
+//             invDat: safeDate(serviceData.invDat),
+//             recNum: serviceData.recNum,
+//             recDat: safeDate(serviceData.recDat),
+//             desVal: serviceData.desVal,
+//             notes: serviceData.notes,
+//             salbuy: serviceData.salbuy,
 
 //             // relaciones
-//             customer: orderData.codCus ? { connect: { id: orderData.codCus } } : undefined,
-//             parte: orderData.codPar ? { connect: { id: orderData.codPar } } : undefined,
-//             instrumento: orderData.codIns ? { connect: { id: orderData.codIns } } : undefined,
-//             configuration: orderData.codCon ? { connect: { id: orderData.codCon } } : undefined,
-//             user1: orderData.user ? { connect: { id: orderData.user } } : undefined,
+//             customer: serviceData.codCus ? { connect: { id: serviceData.codCus } } : undefined,
+//             parte: serviceData.codPar ? { connect: { id: serviceData.codPar } } : undefined,
+//             instrumento: serviceData.codIns ? { connect: { id: serviceData.codIns } } : undefined,
+//             configuration: serviceData.codCon ? { connect: { id: serviceData.codCon } } : undefined,
+//             user1: serviceData.user ? { connect: { id: serviceData.user } } : undefined,
 
 
             
-//             // order items
-//             orderItems: {
-//               create: orderItems.map(item => ({
+//             // service items
+//             serviceItems: {
+//               create: serviceItems.map(item => ({
 //                 slug: item.slug,
 //                 title: item.title,
 //                 medPro: item.medPro,
@@ -139,7 +139,7 @@ export class EntradasService {
 //               }))
 //             }
 //           },
-//           include: { orderItems: true }, // incluye los items en la respuesta
+//           include: { serviceItems: true }, // incluye los items en la respuesta
 //         });
 
 //         return { invoice };
@@ -150,9 +150,2353 @@ export class EntradasService {
 
 // }
 
+async searchSerUS(id: string) {
+    
+    /// cambiar filtro por cliente
+    // aqui hago trampa por que estoy enviando el email ya desde el front
+
+    let customer: Customer;
+    if ( id ) {
+      customer = await this.prisma.customer.findFirst({
+      where: { emailCus :id },
+      });
+    }
+    if ( !customer ) 
+      throw new NotFoundException(`Customer with email, name or no "${ id }" not found`);
+    
+    
+    // --- Fechas ---
+    // const usuarioFilter = id && id !== 'all' ? { user: String(id) } : {};
+    const customerFilter = customer.id && customer.id !== 'all' ? { id_client: String(customer.id) } : {};
+    
+    
+
+
+
+    const existeIns = {
+      id_instru: {
+        not: null
+      }
+    };
+///////query
+
+    const servicesWork = await this.prisma.service.findMany({
+      where: {
+        ...customerFilter,
+        ...existeIns,
+        // ordYes: 'Y'
+      },
+
+      include: {
+        customer: true,
+        maquina: true,
+        parte: true,
+        user1: true,          // usuario si quieres incluirlo
+        serviceItems: true,
+      },      })
+
+  const orders = servicesWork.map((order) => ({
+    _id: order.id,
+    ...order,
+    id_client: order.customer
+      ? { _id: order.customer.id, nameCus: order.customer.nameCus, emailCus: order.customer.emailCus }
+      : null,
+    id_maquin: order.maquina
+      ? { _id: order.maquina.id, name: order.maquina.name }
+      : null,
+    id_parte: order.parte
+      ? { _id: order.parte.id, name: order.parte.name }
+      : null,
+    user: order.user
+      ? { _id: order.user1.id, name: order.user1.name, email: order.user1.email }
+      : null,
+
+    serviceItems: order.serviceItems.map((item) => ({
+      _id: item.productId,
+      slug: item.slug,
+      title: item.title,
+      quantity: item.quantity,
+      price: item.price,
+      porIva: item.porIva,
+      size: item.size,
+      observ: item.observ,
+      terminado: item.terminado,
+      productId: item.productId,
+    })),
+  }));
+
+  return orders;}
+
+
+
+
+//////dashTar
+
+  async dashboardTar(query: any) {
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  producto,
+  parte,
+  maquina,
+  encargado,
+  instru,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { remDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { remDat: { gte: new Date(fech1) } }
+        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+
+///filtroparaborrar
+
+///////tarxmaq
+// 1. Traer datos
+const result = await this.prisma.serviceItem.findMany({
+  where: {
+    ...productoFilter,
+    service: {
+      id_instru: { not: null },
+      id_maquin: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...instruFilter,
+      ...parteFilter,
+    },
+  },
+  select: {
+    price: true,
+    quantity: true,
+    porIva: true,
+    service: {
+      select: {
+        id_maquin: true,
+      },
+    },
+  },
+});
+
+// 2. Agrupar SOLO por máquina
+const grouped = result.reduce((acc, item) => {
+  const idMaquin = item.service?.id_maquin;
+  if (!idMaquin) return acc;
+
+  if (!acc[idMaquin]) {
+    acc[idMaquin] = {
+      id_maquin: idMaquin,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[idMaquin].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[idMaquin].totalCan += 1;
+
+  return acc;
+}, {} as Record<string, {
+  id_maquin: string;
+  total: number;
+  totalCan: number;
+}>);
+
+// 3. Convertir a array
+const allData = Object.values(grouped);
+
+// 4. Ordenar y TOP 10
+const top10 = allData
+  .sort((a, b) => b.total - a.total) // 💰 ranking por total
+  .slice(0, 10);
+
+// 5. (OPCIONAL) traer nombre de máquina
+const maquinasIds = top10.map(m => m.id_maquin);
+
+const maquinas = await this.prisma.maquina.findMany({
+  where: {
+    id: { in: maquinasIds },
+  },
+  select: {
+    id: true,
+    // ajustá este campo según tu modelo
+    name: true
+  },
+});
+
+const mapMaquinas = Object.fromEntries(
+  maquinas.map(m => [m.id, m])
+);
+
+// 6. Resultado final
+const MaqxTar = top10.map(m => ({
+  maquinaId: m.id_maquin,
+  maquina: mapMaquinas[m.id_maquin]?.name || '',
+  total: m.total,
+  totalCan: m.totalCan,
+}));
+
+///////tarxmaq
+
+///////tarxpar
+// 1. Traer datos
+const resultTxP = await this.prisma.serviceItem.findMany({
+  where: {
+    ...productoFilter,
+    service: {
+      id_instru: { not: null },
+      id_parte: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...instruFilter,
+      ...parteFilter,
+    },
+  },
+  select: {
+    price: true,
+    quantity: true,
+    porIva: true,
+    service: {
+      select: {
+        id_parte: true,
+      },
+    },
+  },
+});
+
+// 2. Agrupar SOLO por máquina
+const groupedTxP = resultTxP.reduce((acc, item) => {
+  const idParte = item.service?.id_parte;
+  if (!idParte) return acc;
+
+  if (!acc[idParte]) {
+    acc[idParte] = {
+      id_parte: idParte,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[idParte].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[idParte].totalCan += 1;
+
+  return acc;
+}, {} as Record<string, {
+  id_parte: string;
+  total: number;
+  totalCan: number;
+}>);
+
+// 3. Convertir a array
+const allDataTxP = Object.values(groupedTxP);
+
+// 4. Ordenar y TOP 10
+const top10TxP = allDataTxP
+  .sort((a, b) => b.total - a.total) // 💰 ranking por total
+  .slice(0, 10);
+
+// 5. (OPCIONAL) traer nombre de máquina
+const partesIds = top10TxP.map(m => m.id_parte);
+
+const partes = await this.prisma.parte.findMany({
+  where: {
+    id: { in: partesIds },
+  },
+  select: {
+    id: true,
+    // ajustá este campo según tu modelo
+    name: true
+  },
+});
+
+const mapPartes = Object.fromEntries(
+  partes.map(m => [m.id, m])
+);
+
+// 6. Resultado final
+const TarxPar = top10TxP.map(m => ({
+  parteId: m.id_parte,
+  parte: mapPartes[m.id_parte]?.name || '',
+  total: m.total,
+  totalCan: m.totalCan,
+}));
+
+///////tarxpar
+
+
+
+
+      ///dilval
+
+    const resultdilVal = await this.prisma.serviceItem.findMany({
+      where: {
+    ...productoFilter,
+        service: {
+          id_instru: { not: null },
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...instruFilter,
+          ...parteFilter,
+        },
+      },
+      select: {
+        terminado: true,
+        price: true,
+        quantity: true,
+        porIva: true,
+      },
+    });
+
+    const groupedTar = resultdilVal.reduce((acc, item) => {
+      const key = item.terminado ? 'terminado' : 'pendiente';
+
+      if (!acc[key]) {
+        acc[key] = { total: 0, totalCan: 0 };
+      }
+
+      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
+      acc[key].totalCan += 1;
+
+      return acc;
+    }, {} as Record<string, { total: number; totalCan: number }>);
+
+    const dilVal = Object.entries(groupedTar).map(([key, value]) => ({
+      _id: key,
+      total: value.total,
+      totalCan: value.totalCan,
+    }));
+
+      ///dilval
+
+
+
+///orders
+const servicesData = await this.prisma.service.aggregate({
+  where: {
+            id_instru: {not: null},
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...instruFilter,
+        ...parteFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: servicesData._count._all,
+    totalSales: servicesData._sum.total || 0,
+  },
+];
+///orders
+
+const Users = await this.prisma.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.prisma.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+      return {
+        MaqxTar,
+        TarxPar,
+          // top10PartesSTVal,
+          // top10PartesTerVal,
+          // top10Maquinas,
+          orders,
+          users,
+          customers,
+          // top10Partes,
+          dilVal,
+      };
+
+
+
+  }
+//////dashTar
+
+
+  
+//////dashCli
+
+  async dashboardCli(query: any) {
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  producto,
+  parte,
+  maquina,
+  encargado,
+  instru,
+} = query;
+
+
+    // let userCli: Customer;
+    // if ( usuario ) {
+    //   userCli = await this.prisma.customer.findUnique({
+    //   where: { usuario },
+    //   });
+    // }
+    // if ( !userCli ) 
+    //   throw new NotFoundException(`Usuario with email, name or no "${ usuario }" not found`);
+    
+    
+    
+    
+    
+    
+    // --- Fechas ---
+    const fechasInvFilter =
+    !fech1 && !fech2
+    ? {}
+    : !fech1 && fech2
+    ? { remDat: { lte: new Date(fech2) } }
+    : fech1 && !fech2
+    ? { remDat: { gte: new Date(fech1) } }
+    : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    
+    // --- Otros filtros ---
+    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
+    const configuracionFilter =
+    configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            serviceItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+            
+    ///filtroparaborrar
+    
+
+
+
+/////toptentarxmaq
+// 1. Traer datos
+const resulttarmaq = await this.prisma.serviceItem.findMany({
+  where: {
+    ...productoFilter,
+    service: {
+      id_instru: { not: null },
+      id_maquin: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...instruFilter,
+      ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
+    },
+  },
+  select: {
+    productId: true,
+    price: true,
+    quantity: true,
+    porIva: true,
+  },
+});
+
+// 2. Agrupar por productId
+const groupedTarMaq = resulttarmaq.reduce((acc, item) => {
+  const key = item.productId;
+
+  if (!acc[key]) {
+    acc[key] = {
+      productId: key,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[key].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[key].totalCan += 1;
+
+  return acc;
+}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
+
+// 3. Obtener IDs únicos
+// const productosIds = Object.values(groupedTarMaq).map(p => p.productId);
+const productosIds = [...new Set(
+  Object.values(groupedTarMaq).map(p => String(p.productId))
+)];
+
+// 4. Traer nombres de productos
+const productos = await this.prisma.product.findMany({
+  where: {
+    id: { in: productosIds },
+  },
+  select: {
+    id: true,
+    title: true, // 👈 ajustá si tu campo es distinto
+  },
+});
+
+// 5. Crear mapa id → nombre
+const mapProductos = Object.fromEntries(
+  productos.map(p => [p.id, p.title])
+);
+
+// 6. Resultado final con nombre + ordenado
+const TarxMaq = Object.values(groupedTarMaq)
+  .map(item => ({
+    productId: item.productId,
+    producto: mapProductos[item.productId] || 'Sin nombre',
+    total: item.total,
+    totalCan: item.totalCan,
+  }))
+  .sort((a, b) => b.total - a.total); // 👈 orden por total
+
+/////toptentarxmaq
+
+
+/////toptentarxpar
+// 1. Traer datos
+const resulttarpar = await this.prisma.serviceItem.findMany({
+  where: {
+    ...productoFilter,
+    service: {
+      id_instru: { not: null },
+      id_parte: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...instruFilter,
+      ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
+    },
+  },
+  select: {
+    productId: true,
+    price: true,
+    quantity: true,
+    porIva: true,
+  },
+});
+
+// 2. Agrupar por productId
+const groupedTarPar = resulttarpar.reduce((acc, item) => {
+  const key = item.productId;
+
+  if (!acc[key]) {
+    acc[key] = {
+      productId: key,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[key].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[key].totalCan += 1;
+
+  return acc;
+}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
+
+// 3. Obtener IDs únicos
+// const productosIds = Object.values(groupedTarPar).map(p => p.productId);
+const productosIdsPar = [...new Set(
+  Object.values(groupedTarPar).map(p => String(p.productId))
+)];
+
+// 4. Traer nombres de productos
+const productosPar = await this.prisma.product.findMany({
+  where: {
+    id: { in: productosIdsPar },
+  },
+  select: {
+    id: true,
+    title: true, // 👈 ajustá si tu campo es distinto
+  },
+});
+
+// 5. Crear mapa id → nombre
+const mapProductosPar = Object.fromEntries(
+  productosPar.map(p => [p.id, p.title])
+);
+
+// 6. Resultado final con nombre + ordenado
+const TarxPar = Object.values(groupedTarPar)
+  .map(item => ({
+    productId: item.productId,
+    producto: mapProductos[item.productId] || 'Sin nombre',
+    total: item.total,
+    totalCan: item.totalCan,
+  }))
+  .sort((a, b) => b.total - a.total); // 👈 orden por total
+
+/////toptentarxpar
+
+
+
+///instrumentostop10
+const topInstrumentosTra = await this.prisma.service.groupBy({
+  by: ['id_instru'],
+  where: {
+    id_instru: { not: null },
+    id_maquin: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+    ...fechasInvFilter,
+    ...configuracionFilter,
+    ...customerFilter,
+    ...usuarioFilter,
+    ...instruFilter,
+    ...parteFilter,
+    ...maquinaFilter,
+    ...encargadoFilter,
+    ...productoOrderItemFilter,
+  },
+  _sum: {
+    total: true,
+  },
+  _count: {
+    id_instru: true,
+  },
+  orderBy: {
+    _sum: {
+      total: 'desc',
+    },
+  },
+  take: 10,
+});
+
+// 👉 traer nombres de instrumentos
+const instrumentosTopTra = await this.prisma.instrumento.findMany({
+  where: {
+    id: { in: topInstrumentosTra.map(c => c.id_instru!) },
+  },
+  select: {
+    id: true,
+    name: true,
+  },
+});
+
+// 👉 map id → nombre
+const mapInstrumentosTra = Object.fromEntries(
+  instrumentosTopTra.map(i => [i.id, i.name])
+);
+
+// 👉 resultado final
+const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
+  instrumentoId: c.id_instru,
+  instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
+  totalSales: c._sum.total ?? 0,
+  totalOrders: c._count.id_instru ?? 0,
+}));
+
+///instrumentostop10
+
+      ///instrumentostop10
+      const topInstrumentosTraPar = await this.prisma.service.groupBy({
+        by: ['id_instru'],
+        where: {
+          id_instru: { not: null },
+          id_parte: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...instruFilter,
+          ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
+          ...productoOrderItemFilter,
+        },
+        _sum: {
+          total: true,
+        },
+        _count: {
+          id_instru: true,
+        },
+        orderBy: {
+          _sum: {
+            total: 'desc',
+          },
+        },
+        take: 10,
+      });
+
+      // 👉 traer nombres de instrumentos
+      const instrumentosTopTraPar = await this.prisma.instrumento.findMany({
+        where: {
+          id: { in: topInstrumentosTraPar.map(c => c.id_instru!) },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      // 👉 map id → nombre
+      const mapInstrumentosTraPar = Object.fromEntries(
+        instrumentosTopTraPar.map(i => [i.id, i.name])
+      );
+
+      // 👉 resultado final
+      const top10InstrumentosxPar = topInstrumentosTraPar.map(c => ({
+        instrumentoId: c.id_instru,
+        instrumento: mapInstrumentosTraPar[c.id_instru!] || 'Sin nombre',
+        totalSales: c._sum.total ?? 0,
+        totalOrders: c._count.id_instru ?? 0,
+      }));
+
+      ///instrumentostop10
+
+
+///orders
+const servicesData = await this.prisma.service.aggregate({
+  where: {
+        OR: [
+          { id_maquin: {not: null} },
+          { id_parte: {not: null} },
+        ],
+
+        id_instru: {not: null},
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...instruFilter,
+        ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: servicesData._count._all,
+    totalSales: servicesData._sum.total || 0,
+  },
+];
+///orders
+
+const Users = await this.prisma.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.prisma.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+      return {
+          // top10PartesSTVal,
+          // top10PartesTerVal,
+          // top10Maquinas,
+          top10InstrumentosxMaq,
+          top10InstrumentosxPar,
+          orders,
+          // users,
+          // customers,
+          // top10Partes,
+          // dilVal,
+          TarxPar,
+          TarxMaq,
+      };
+
+
+
+  }
+//////dashCli
+
+
+//////dashPar
+
+  async dashboardPar(query: any) {
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  producto,
+  parte,
+  maquina,
+  encargado,
+  instru,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { remDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { remDat: { gte: new Date(fech1) } }
+        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            serviceItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+
+///filtroparaborrar
+
+
+        ///Maquinastop10STer
+        const topMaquinas = await this.prisma.service.groupBy({
+          by: ['id_parte'],
+          where: {
+            terminado:false,
+            id_instru: {not: null},
+            id_parte: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+            
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_parte: true   // 👈 cantidad de registros por usuario
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const maquinasTop = await this.prisma.parte.findMany({
+          where: {
+            id: { in: topMaquinas.map(c => c.id_parte!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapMaquinas = Object.fromEntries(
+          maquinasTop.map(c => [c.id, c.name])
+        );
+
+        const top10PartesSTVal = topMaquinas.map(c => ({
+          parteId: c.id_parte,
+          parte: mapMaquinas[c.id_parte!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_parte || 0
+        }));
+
+
+        ///Maquinastop10STer
+
+        ///Maquinastop10Ter
+        const topMaquinasTer = await this.prisma.service.groupBy({
+          by: ['id_parte'],
+          where: {
+            terminado:true,
+            id_instru: {not: null},
+            id_parte: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+            
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_parte: true   // 👈 cantidad de registros por usuario
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const maquinasTopTer = await this.prisma.parte.findMany({
+          where: {
+            id: { in: topMaquinasTer.map(c => c.id_parte!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapMaquinasTer = Object.fromEntries(
+          maquinasTopTer.map(c => [c.id, c.name])
+        );
+
+        const top10PartesTerVal = topMaquinasTer.map(c => ({
+          parteId: c.id_parte,
+          parte: mapMaquinasTer[c.id_parte!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_parte || 0
+        }));
+
+
+        ///Maquinastop10Ter
+
+
+      ///dilval
+
+    const resultdilVal = await this.prisma.serviceItem.findMany({
+      where: {
+          ...productoFilter,
+        service: {
+          id_instru: { not: null },
+          id_parte: {not: null},
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...instruFilter,
+          ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
+        },
+      },
+      select: {
+        terminado: true,
+        price: true,
+        quantity: true,
+        porIva: true,
+      },
+    });
+
+    const grouped = resultdilVal.reduce((acc, item) => {
+      const key = item.terminado ? 'terminado' : 'pendiente';
+
+      if (!acc[key]) {
+        acc[key] = { total: 0, totalCan: 0 };
+      }
+
+      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
+      acc[key].totalCan += 1;
+
+      return acc;
+    }, {} as Record<string, { total: number; totalCan: number }>);
+
+    const dilVal = Object.entries(grouped).map(([key, value]) => ({
+      _id: key,
+      total: value.total,
+      totalCan: value.totalCan,
+    }));
+
+      ///dilval
+
+/////toptentarxpar
+// 1. Traer datos
+const resulttarmaq = await this.prisma.serviceItem.findMany({
+  where: {
+    ...productoFilter,
+    service: {
+      id_instru: { not: null },
+      id_parte: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...instruFilter,
+      ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
+    },
+  },
+  select: {
+    productId: true,
+    price: true,
+    quantity: true,
+    porIva: true,
+  },
+});
+
+// 2. Agrupar por productId
+const groupedTarMaq = resulttarmaq.reduce((acc, item) => {
+  const key = item.productId;
+
+  if (!acc[key]) {
+    acc[key] = {
+      productId: key,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[key].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[key].totalCan += 1;
+
+  return acc;
+}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
+
+// 3. Obtener IDs únicos
+// const productosIds = Object.values(groupedTarMaq).map(p => p.productId);
+const productosIds = [...new Set(
+  Object.values(groupedTarMaq).map(p => String(p.productId))
+)];
+
+// 4. Traer nombres de productos
+const productos = await this.prisma.product.findMany({
+  where: {
+    id: { in: productosIds },
+  },
+  select: {
+    id: true,
+    title: true, // 👈 ajustá si tu campo es distinto
+  },
+});
+
+// 5. Crear mapa id → nombre
+const mapProductos = Object.fromEntries(
+  productos.map(p => [p.id, p.title])
+);
+
+// 6. Resultado final con nombre + ordenado
+const TarxPar = Object.values(groupedTarMaq)
+  .map(item => ({
+    productId: item.productId,
+    producto: mapProductos[item.productId] || 'Sin nombre',
+    total: item.total,
+    totalCan: item.totalCan,
+  }))
+  .sort((a, b) => b.total - a.total); // 👈 orden por total
+
+/////toptentarxpar
+
+
+    ///maquinastop10
+    const topMaquinasTra = await this.prisma.service.groupBy({
+          by: ['id_parte'],
+          where: {
+            id_instru: {not: null},
+            id_parte: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_parte: true 
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const maquinasTopTra = await this.prisma.parte.findMany({
+          where: {
+            id: { in: topMaquinasTra.map(c => c.id_parte!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapPartesTra = Object.fromEntries(
+          maquinasTopTra.map(c => [c.id, c.name])
+        );
+
+        const top10PartesxOrd = topMaquinasTra.map(c => ({
+          parteId: c.id_parte,
+          parte: mapPartesTra[c.id_parte!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_parte || 0
+        }));
+
+        ///maquinastop10
+
+      ///instrumentostop10
+      const topInstrumentosTra = await this.prisma.service.groupBy({
+        by: ['id_instru'],
+        where: {
+          id_instru: { not: null },
+          id_parte: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...instruFilter,
+          ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
+          ...productoOrderItemFilter,
+        },
+        _sum: {
+          total: true,
+        },
+        _count: {
+          id_instru: true,
+        },
+        orderBy: {
+          _sum: {
+            total: 'desc',
+          },
+        },
+        take: 10,
+      });
+
+      // 👉 traer nombres de instrumentos
+      const instrumentosTopTra = await this.prisma.instrumento.findMany({
+        where: {
+          id: { in: topInstrumentosTra.map(c => c.id_instru!) },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+
+      // 👉 map id → nombre
+      const mapInstrumentosTra = Object.fromEntries(
+        instrumentosTopTra.map(i => [i.id, i.name])
+      );
+
+      // 👉 resultado final
+      const top10InstrumentosxPar = topInstrumentosTra.map(c => ({
+        instrumentoId: c.id_instru,
+        instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
+        totalSales: c._sum.total ?? 0,
+        totalOrders: c._count.id_instru ?? 0,
+      }));
+
+      ///instrumentostop10
+
+
+
+    ///partetop10
+        const topPartes = await this.prisma.service.groupBy({
+          by: ['id_parte'],
+          where: {
+            id_instru: {not: null},
+            id_parte: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...parteFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_parte: true   // 👈 esto cuenta las órdenes
+          },   
+
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const partesTop = await this.prisma.parte.findMany({
+          where: {
+            id: { in: topPartes.map(c => c.id_parte!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapPartes = Object.fromEntries(
+          partesTop.map(c => [c.id, c.name])
+        );
+
+        const top10Partes = topPartes.map(c => ({
+          parteId: c.id_parte,
+          parte: mapPartes[c.id_parte!],
+          totalSales: c._sum.total || 0
+        }));
+
+        ///partetop10
+
+
+///orders
+const servicesData = await this.prisma.service.aggregate({
+  where: {
+            id_instru: {not: null},
+            id_parte: {not: null},
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...instruFilter,
+        ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: servicesData._count._all,
+    totalSales: servicesData._sum.total || 0,
+  },
+];
+///orders
+
+const Users = await this.prisma.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.prisma.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+      return {
+          top10PartesSTVal,
+          top10PartesTerVal,
+          top10PartesxOrd,
+          top10InstrumentosxPar,
+          orders,
+          users,
+          customers,
+          top10Partes,
+          dilVal,
+          TarxPar,
+      };
+
+
+
+  }
+//////dashPar
+
+
+
+
+//////dashMaq
+
+  async dashboardMaq(query: any) {
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  producto,
+  parte,
+  maquina,
+  encargado,
+  instru,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { remDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { remDat: { gte: new Date(fech1) } }
+        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            serviceItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+
+///filtroparaborrar
+
+
+        ///Maquinastop10STer
+        const topMaquinas = await this.prisma.service.groupBy({
+          by: ['id_maquin'],
+          where: {
+            terminado:false,
+            id_instru: {not: null},
+            id_maquin: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+            
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_maquin: true   // 👈 cantidad de registros por usuario
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const maquinasTop = await this.prisma.maquina.findMany({
+          where: {
+            id: { in: topMaquinas.map(c => c.id_maquin!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapMaquinas = Object.fromEntries(
+          maquinasTop.map(c => [c.id, c.name])
+        );
+
+        const top10MaquinasSTVal = topMaquinas.map(c => ({
+          maquinaId: c.id_maquin,
+          maquina: mapMaquinas[c.id_maquin!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_maquin || 0
+        }));
+
+
+        ///Maquinastop10STer
+
+        ///Maquinastop10Ter
+        const topMaquinasTer = await this.prisma.service.groupBy({
+          by: ['id_maquin'],
+          where: {
+            terminado:true,
+            id_instru: {not: null},
+            id_maquin: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+            
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_maquin: true   // 👈 cantidad de registros por usuario
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const maquinasTopTer = await this.prisma.maquina.findMany({
+          where: {
+            id: { in: topMaquinasTer.map(c => c.id_maquin!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapMaquinasTer = Object.fromEntries(
+          maquinasTopTer.map(c => [c.id, c.name])
+        );
+
+        const top10MaquinasTerVal = topMaquinasTer.map(c => ({
+          maquinaId: c.id_maquin,
+          maquina: mapMaquinasTer[c.id_maquin!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_maquin || 0
+        }));
+
+
+        ///Maquinastop10Ter
+
+
+      ///dilval
+
+    const resultdilVal = await this.prisma.serviceItem.findMany({
+      where: {
+          ...productoFilter,
+        service: {
+          id_instru: { not: null },
+          id_maquin: {not: null},
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...instruFilter,
+          ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,
+        },
+      },
+      select: {
+        terminado: true,
+        price: true,
+        quantity: true,
+        porIva: true,
+      },
+    });
+
+    const grouped = resultdilVal.reduce((acc, item) => {
+      const key = item.terminado ? 'terminado' : 'pendiente';
+
+      if (!acc[key]) {
+        acc[key] = { total: 0, totalCan: 0 };
+      }
+
+      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
+      acc[key].totalCan += 1;
+
+      return acc;
+    }, {} as Record<string, { total: number; totalCan: number }>);
+
+    const dilVal = Object.entries(grouped).map(([key, value]) => ({
+      _id: key,
+      total: value.total,
+      totalCan: value.totalCan,
+    }));
+
+      ///dilval
+
+/////toptentarxmaq
+// 1. Traer datos
+const resulttarmaq = await this.prisma.serviceItem.findMany({
+  where: {
+        ...productoFilter,
+    service: {
+      id_instru: { not: null },
+      id_maquin: { not: null },
+      ...fechasInvFilter,
+      ...configuracionFilter,
+      ...customerFilter,
+      ...usuarioFilter,
+      ...instruFilter,
+      ...parteFilter,
+      ...maquinaFilter,
+      ...encargadoFilter,
+    },
+  },
+  select: {
+    productId: true,
+    price: true,
+    quantity: true,
+    porIva: true,
+  },
+});
+
+// 2. Agrupar por productId
+const groupedTarMaq = resulttarmaq.reduce((acc, item) => {
+  const key = item.productId;
+
+  if (!acc[key]) {
+    acc[key] = {
+      productId: key,
+      total: 0,
+      totalCan: 0,
+    };
+  }
+
+  acc[key].total +=
+    (item.price || 0) *
+    (item.quantity || 0) *
+    (1 + (item.porIva || 0) / 100);
+
+  acc[key].totalCan += 1;
+
+  return acc;
+}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
+
+// 3. Obtener IDs únicos
+// const productosIds = Object.values(groupedTarMaq).map(p => p.productId);
+const productosIds = [...new Set(
+  Object.values(groupedTarMaq).map(p => String(p.productId))
+)];
+
+// 4. Traer nombres de productos
+const productos = await this.prisma.product.findMany({
+  where: {
+    id: { in: productosIds },
+  },
+  select: {
+    id: true,
+    title: true, // 👈 ajustá si tu campo es distinto
+  },
+});
+
+// 5. Crear mapa id → nombre
+const mapProductos = Object.fromEntries(
+  productos.map(p => [p.id, p.title])
+);
+
+// 6. Resultado final con nombre + ordenado
+const TarxMaq = Object.values(groupedTarMaq)
+  .map(item => ({
+    productId: item.productId,
+    producto: mapProductos[item.productId] || 'Sin nombre',
+    total: item.total,
+    totalCan: item.totalCan,
+  }))
+  .sort((a, b) => b.total - a.total); // 👈 orden por total
+
+/////toptentarxmaq
+
+
+    ///maquinastop10
+    const topMaquinasTra = await this.prisma.service.groupBy({
+          by: ['id_maquin'],
+          where: {
+            id_instru: {not: null},
+            id_maquin: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_maquin: true 
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const maquinasTopTra = await this.prisma.maquina.findMany({
+          where: {
+            id: { in: topMaquinasTra.map(c => c.id_maquin!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapMaquinasTra = Object.fromEntries(
+          maquinasTopTra.map(c => [c.id, c.name])
+        );
+
+        const top10MaquinasxOrd = topMaquinasTra.map(c => ({
+          maquinaId: c.id_maquin,
+          maquina: mapMaquinasTra[c.id_maquin!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_maquin || 0
+        }));
+
+        ///maquinastop10
+///instrumentostop10
+const topInstrumentosTra = await this.prisma.service.groupBy({
+  by: ['id_instru'],
+  where: {
+    id_instru: { not: null },
+    id_maquin: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
+    ...fechasInvFilter,
+    ...configuracionFilter,
+    ...customerFilter,
+    ...usuarioFilter,
+    ...instruFilter,
+    ...parteFilter,
+    ...maquinaFilter,
+    ...encargadoFilter,
+    ...productoOrderItemFilter,
+  },
+  _sum: {
+    total: true,
+  },
+  _count: {
+    id_instru: true,
+  },
+  orderBy: {
+    _sum: {
+      total: 'desc',
+    },
+  },
+  take: 10,
+});
+
+// 👉 traer nombres de instrumentos
+const instrumentosTopTra = await this.prisma.instrumento.findMany({
+  where: {
+    id: { in: topInstrumentosTra.map(c => c.id_instru!) },
+  },
+  select: {
+    id: true,
+    name: true,
+  },
+});
+
+// 👉 map id → nombre
+const mapInstrumentosTra = Object.fromEntries(
+  instrumentosTopTra.map(i => [i.id, i.name])
+);
+
+// 👉 resultado final
+const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
+  instrumentoId: c.id_instru,
+  instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
+  totalSales: c._sum.total ?? 0,
+  totalOrders: c._count.id_instru ?? 0,
+}));
+
+///instrumentostop10
+
+    ///partetop10
+        const topPartes = await this.prisma.service.groupBy({
+          by: ['id_parte'],
+          where: {
+            id_instru: {not: null},
+            id_parte: { not: null },
+            id_maquin: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...parteFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_parte: true   // 👈 esto cuenta las órdenes
+          },   
+
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const partesTop = await this.prisma.parte.findMany({
+          where: {
+            id: { in: topPartes.map(c => c.id_parte!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapPartes = Object.fromEntries(
+          partesTop.map(c => [c.id, c.name])
+        );
+
+        const top10Partes = topPartes.map(c => ({
+          parteId: c.id_parte,
+          parte: mapPartes[c.id_parte!],
+          totalSales: c._sum.total || 0
+        }));
+
+        ///partetop10
+
+
+///orders
+const servicesData = await this.prisma.service.aggregate({
+  where: {
+            id_instru: {not: null},
+            id_maquin: {not: null},
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...instruFilter,
+        ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: servicesData._count._all,
+    totalSales: servicesData._sum.total || 0,
+  },
+];
+///orders
+
+const Users = await this.prisma.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.prisma.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+      return {
+          top10MaquinasSTVal,
+          top10MaquinasTerVal,
+          top10MaquinasxOrd,
+          top10InstrumentosxMaq,
+          orders,
+          users,
+          customers,
+          top10Partes,
+          dilVal,
+          TarxMaq,
+      };
+
+
+
+  }
+//////dashMaq
+
+
+
+
+
+//////dash1esc
+
+  async dashboardEsc(query: any) {
+
+
+///filtroparaborrar
+const {
+  fech1,
+  fech2,
+  configuracion,
+  usuario,
+  customer,
+  producto,
+  parte,
+  maquina,
+  encargado,
+  instru,
+} = query;
+
+    // --- Fechas ---
+    const fechasInvFilter =
+      !fech1 && !fech2
+        ? {}
+        : !fech1 && fech2
+        ? { remDat: { lte: new Date(fech2) } }
+        : fech1 && !fech2
+        ? { remDat: { gte: new Date(fech1) } }
+        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+
+    // --- Otros filtros ---
+    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
+    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
+    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
+    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
+    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
+    const configuracionFilter =
+      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
+    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+
+    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
+    const productoOrderItemFilter =
+      producto && producto !== 'all'
+        ? {
+            serviceItems: {
+              some: {
+                productId: String(producto),
+              },
+            },
+          }
+        : {};
+    
+
+///filtroparaborrar
+
+
+        ///Userstop10
+    const topUsers = await this.prisma.service.groupBy({
+          by: ['user'],
+          where: {
+            terminado:false,
+            id_instru: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            user: true   // 👈 cantidad de registros por usuario
+          },
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const usersTop = await this.prisma.user.findMany({
+          where: {
+            id: { in: topUsers.map(c => c.user!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapUsers = Object.fromEntries(
+          usersTop.map(c => [c.id, c.name])
+        );
+
+        const top10UsersSTVal = topUsers.map(c => ({
+          userId: c.user,
+          user: mapUsers[c.user!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.user
+        }));
+
+        ///Userstop10
+
+
+    ///dilval
+      // const resultdilVal = await this.prisma.serviceItem.groupBy({
+      //   by: ['terminado'],
+      //   where: {
+      //     order: {
+      //       id_instru: {not: null},
+      //       ...fechasInvFilter,
+      //       ...configuracionFilter,
+      //       ...customerFilter,
+      //       ...usuarioFilter,
+      //       ...comprobanteFilter,
+      //       ...parteFilter,
+
+      //     },
+      //   },
+      //   _sum: {
+      //     price: true,
+      //   },
+      //   _count: {
+      //     terminado: true,
+      //   },
+
+      // });    
+      // const dilVal = resultdilVal.map(r => ({
+      //   _id: r.terminado ? 'terminado' : 'pendiente',
+      //   total: r._sum.price || 0,
+      //   totalCan: r._count.terminado || 0,
+      // }));
+
+    const resultdilVal = await this.prisma.serviceItem.findMany({
+      where: {
+          ...productoFilter,
+        service: {
+          id_instru: { not: null },
+          ...fechasInvFilter,
+          ...configuracionFilter,
+          ...customerFilter,
+          ...usuarioFilter,
+          ...instruFilter,
+          ...parteFilter,
+          ...maquinaFilter,
+          ...encargadoFilter,        },
+      },
+      select: {
+        terminado: true,
+        price: true,
+        quantity: true,
+        porIva: true,
+      },
+    });
+
+    const grouped = resultdilVal.reduce((acc, item) => {
+      const key = item.terminado ? 'terminado' : 'pendiente';
+
+      if (!acc[key]) {
+        acc[key] = { total: 0, totalCan: 0 };
+      }
+
+      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
+      acc[key].totalCan += 1;
+
+      return acc;
+    }, {} as Record<string, { total: number; totalCan: number }>);
+
+    const dilVal = Object.entries(grouped).map(([key, value]) => ({
+      _id: key,
+      total: value.total,
+      totalCan: value.totalCan,
+    }));
+
+      ///dilval
+
+    ///intterVal
+      const resultinsVal = await this.prisma.service.groupBy({
+        by: ['terminado'],
+        where: {
+            id_instru: {not: null},
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+        },
+        _sum: {
+          total: true,
+        },
+        _count: {
+          id: true,
+        },
+
+      });
+      const insterVal = resultinsVal.map(r => ({
+        _id: r.terminado ? 'terminado' : 'pendiente',
+        total: r._sum.total || 0,
+        count: r._count.id,
+      }));
+    // ///intterVal
+
+    ///intpubpriVal
+
+            const servicesPubPriVal = await this.prisma.service.findMany({
+              where: {
+                id_instru: {not: null},
+                ...fechasInvFilter,
+                ...configuracionFilter,
+                ...customerFilter,
+                ...usuarioFilter,
+                ...instruFilter,
+                ...parteFilter,
+                ...maquinaFilter,
+                ...encargadoFilter,
+                ...productoOrderItemFilter,
+              },
+              include: {
+                instrumento: {
+                  select: {
+                    publico: true
+                  }
+                }
+              }
+            });
+
+            const resultVal = {
+              publico: 0,
+              privado: 0,
+              countPublico: 0,   // 👈 contador
+              countPrivado: 0    // 👈 contador
+            };
+
+            for (const service of servicesPubPriVal) {
+
+              if (service.instrumento?.publico) {
+                resultVal.publico += service.total ?? 0;
+                resultVal.countPublico += 1;   // 👈 suma cantidad
+              } else {
+                resultVal.privado += service.total ?? 0;
+                resultVal.countPrivado += 1;   // 👈 suma cantidad
+              }
+
+            }
+
+            const PubPriVal = [
+              { type: 'Publico', total: resultVal.publico, totalcont: resultVal.countPublico },
+              { type: 'Privado', total: resultVal.privado, totalcont: resultVal.countPrivado },
+                ]
+          
+    ///intpubpriVal
+    ///clientestop10
+    const topCustomers = await this.prisma.service.groupBy({
+          by: ['id_client'],
+          where: {
+            id_instru: {not: null},
+            id_client: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...parteFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_client: true   // 👈 esto cuenta las órdenes
+          },   
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const customersTop = await this.prisma.customer.findMany({
+          where: {
+            id: { in: topCustomers.map(c => c.id_client!) },
+          },
+          select: {
+            id: true,
+            nameCus: true
+          }
+        });
+
+        const mapCustomers = Object.fromEntries(
+          customersTop.map(c => [c.id, c.nameCus])
+        );
+
+        const top10Clients = topCustomers.map(c => ({
+          customerId: c.id_client,
+          customer: mapCustomers[c.id_client!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_client || 0
+        }));
+
+        ///clientestop10
+    ///partetop10
+        const topPartes = await this.prisma.service.groupBy({
+          by: ['id_parte'],
+          where: {
+            id_instru: {not: null},
+            id_parte: { not: null },
+            ...fechasInvFilter,
+            ...configuracionFilter,
+            ...customerFilter,
+            ...parteFilter,
+            ...usuarioFilter,
+            ...instruFilter,
+            ...maquinaFilter,
+            ...encargadoFilter,
+            ...productoOrderItemFilter,
+
+          },
+          _sum: {
+            total: true
+          },
+          _count: {
+            id_parte: true   // 👈 esto cuenta las órdenes
+          },          
+          orderBy: {
+            _sum: {
+              total: 'desc'
+            }
+          },
+          take: 10
+        });
+
+        const partesTop = await this.prisma.parte.findMany({
+          where: {
+            id: { in: topPartes.map(c => c.id_parte!) },
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        });
+
+        const mapPartes = Object.fromEntries(
+          partesTop.map(c => [c.id, c.name])
+        );
+
+        const top10Partes = topPartes.map(c => ({
+          parteId: c.id_parte,
+          parte: mapPartes[c.id_parte!],
+          totalSales: c._sum.total || 0,
+          totalOrders: c._count.id_parte || 0
+        }));
+
+        ///partetop10
+
+    ///categorias    
+      const categories = await this.prisma.product.groupBy({
+        by: ['category'],
+        _count: {
+          category: true,
+        },
+      });
+
+      const productCategories = categories.map((item) => ({
+        _id: item.category,
+        count: item._count.category,
+      }));
+///categorias    
+
+///services
+const servicesData = await this.prisma.service.aggregate({
+  where: {
+            id_instru: {not: null},
+        ...fechasInvFilter,
+        ...configuracionFilter,
+        ...customerFilter,
+        ...usuarioFilter,
+        ...instruFilter,
+        ...parteFilter,
+        ...maquinaFilter,
+        ...encargadoFilter,
+        ...productoOrderItemFilter,
+  },
+  _count: {
+    _all: true,
+  },
+  _sum: {
+    total: true,
+  },
+});
+
+const orders = [
+  {
+    _id: null,
+    numOrders: servicesData._count._all,
+    totalSales: servicesData._sum.total || 0,
+  },
+];
+///services
+
+const Users = await this.prisma.user.count();
+const users = [
+  {
+    _id: null,
+    numUsers: Users
+  }
+  ]
+const Customers = await this.prisma.customer.count();
+const customers = [
+  {
+    _id: null,
+    numCustomers: Customers
+  }
+  ]
+      return {
+          productCategories,
+          orders,
+          users,
+          customers,
+          top10Clients,
+          top10Partes,
+          PubPriVal,
+          dilVal,
+          insterVal,
+          top10UsersSTVal
+      };
+
+
+
+  }
+//////dash1Esc
+
+
+
 async create(createEntradaDto: any) {
 
-  const { orderItems, orderAddress, ...orderData } = createEntradaDto;
+  // const { serviceItems, orderAddress, ...serviceData } = createEntradaDto;
+  const { serviceItems, ...serviceData } = createEntradaDto;
 
   const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
 
@@ -165,12 +2509,12 @@ async create(createEntradaDto: any) {
       // =========================
       // 🔢 NUMERADOR REMITO
       // =========================
-      if (orderData.remNum > 0) {
-        remNumero = orderData.remNum;
+      if (serviceData.remNum > 0) {
+        remNumero = serviceData.remNum;
       } else {
 
         const config = await tx.configuration.update({
-          where: { id: orderData.codCon },
+          where: { id: serviceData.codCon },
           data: {
             numIntRem: { increment: 1 },
           },
@@ -185,101 +2529,101 @@ async create(createEntradaDto: any) {
 
       
       //verifico si totas las tareas estan terminadas
-          // const allItemsFinished = orderItems?.every(item => item.terminado === true);
+          // const allItemsFinished = serviceItems?.every(item => item.terminado === true);
         // const allItemsFinished =
-        //   orderItems?.length > 0 &&
-        //   orderItems.every(item => item.terminado === true);
+        //   serviceItems?.length > 0 &&
+        //   serviceItems.every(item => item.terminado === true);
         const allItemsFinished =
-          Array.isArray(orderItems) &&
-          orderItems.length > 0 &&
-          orderItems.every(item => item?.terminado === true);      //verifico si totas las tareas estan terminadas
+          Array.isArray(serviceItems) &&
+          serviceItems.length > 0 &&
+          serviceItems.every(item => item?.terminado === true);      //verifico si totas las tareas estan terminadas
 
-        const order = await tx.order.create({
+        const service = await tx.service.create({
         data: {
 
-          paymentMethod: orderData.paymentMethod,
-          subTotal: orderData.subTotal,
-          shippingPrice: orderData.shippingPrice,
-          tax: orderData.tax,
-          total: orderData.total,
-          totalBuy: orderData.totalBuy,
+          paymentMethod: serviceData.paymentMethod,
+          subTotal: serviceData.subTotal,
+          shippingPrice: serviceData.shippingPrice,
+          tax: serviceData.tax,
+          total: serviceData.total,
+          totalBuy: serviceData.totalBuy,
 
           ////agrearemito
             isPaid: false,
             staOrd: "NUEVA",
       ////agrearemito
           
-          itemsInOrder: orderItems?.length || 0,
+          itemsInOrder: serviceItems?.length || 0,
 
-          libNum: orderData.libNum,
-          folNum: orderData.folNum,
-          asiNum: orderData.asiNum,
-          asiDat: safeDate(orderData.asiDat),
+          libNum: serviceData.libNum,
+          folNum: serviceData.folNum,
+          asiNum: serviceData.asiNum,
+          asiDat: safeDate(serviceData.asiDat),
 
-          escNum: orderData.escNum,
-          asieNum: orderData.asieNum,
-          asieDat: safeDate(orderData.asieDat),
+          escNum: serviceData.escNum,
+          asieNum: serviceData.asieNum,
+          asieDat: safeDate(serviceData.asieDat),
 
-          // terminado: orderData.terminado,
+          // terminado: serviceData.terminado,
           terminado: allItemsFinished ?? false,
 
-          movpvNum: orderData.movpvNum,
-          movpvDat: safeDate(orderData.movpvDat),
+          movpvNum: serviceData.movpvNum,
+          movpvDat: safeDate(serviceData.movpvDat),
 
-          codConNum: orderData.codConNum,
+          codConNum: serviceData.codConNum,
 
           // 🔢 remito seguro
           remNum: remNumero,
-          remDat: safeDate(orderData.remDat),
+          remDat: safeDate(serviceData.remDat),
 
-          dueDat: safeDate(orderData.dueDat),
+          dueDat: safeDate(serviceData.dueDat),
 
-          invNum: orderData.invNum,
-          invDat: safeDate(orderData.invDat),
+          invNum: serviceData.invNum,
+          invDat: safeDate(serviceData.invDat),
 
-          recNum: orderData.recNum,
-          recDat: safeDate(orderData.recDat),
+          recNum: serviceData.recNum,
+          recDat: safeDate(serviceData.recDat),
 
-          desVal: orderData.desVal,
-          notes: orderData.notes,
-          salbuy: orderData.salbuy,
+          desVal: serviceData.desVal,
+          notes: serviceData.notes,
+          salbuy: serviceData.salbuy,
 
           // =========================
           // 🔗 RELACIONES
           // =========================
-          customer: orderData.codCus
-            ? { connect: { id: orderData.codCus } }
+          customer: serviceData.codCus
+            ? { connect: { id: serviceData.codCus } }
             : undefined,
 
-          parte: orderData.codPar
-            ? { connect: { id: orderData.codPar } }
+          parte: serviceData.codPar
+            ? { connect: { id: serviceData.codPar } }
             : undefined,
 
-          maquina: orderData.codMaq
-            ? { connect: { id: orderData.codMaq } }
+          maquina: serviceData.codMaq
+            ? { connect: { id: serviceData.codMaq } }
             : undefined,
 
-          encargado: orderData.codEnc
-            ? { connect: { id: orderData.codEnc } }
+          encargado: serviceData.codEnc
+            ? { connect: { id: serviceData.codEnc } }
             : undefined,
 
-          instrumento: orderData.codIns
-            ? { connect: { id: orderData.codIns } }
+          instrumento: serviceData.codIns
+            ? { connect: { id: serviceData.codIns } }
             : undefined,
 
-          configuration: orderData.codCon
-            ? { connect: { id: orderData.codCon } }
+          configuration: serviceData.codCon
+            ? { connect: { id: serviceData.codCon } }
             : undefined,
 
-          user1: orderData.user
-            ? { connect: { id: orderData.user } }
+          user1: serviceData.user
+            ? { connect: { id: serviceData.user } }
             : undefined,
 
           // =========================
           // 📦 ITEMS
           // =========================
-          orderItems: {
-            create: orderItems.map(item => ({
+          serviceItems: {
+            create: serviceItems.map(item => ({
               slug: item.slug,
               title: item.title,
               medPro: item.medPro,
@@ -296,10 +2640,10 @@ async create(createEntradaDto: any) {
           }
 
         },
-        include: { orderItems: true },
+        include: { serviceItems: true },
       });
 
-      return order;
+      return service;
     });
 
     return { invoice: result };
@@ -353,7 +2697,7 @@ const {
     const productoFilter =
       producto && producto !== 'all'
         ? {
-            orderItems: {
+            serviceItems: {
               some: {
                 productId: String(producto),
               },
@@ -362,13 +2706,13 @@ const {
         : {};
 
     
-const obserFilter: Prisma.OrderWhereInput =
+const obserFilter: Prisma.ServiceWhereInput =
   obser && obser !== 'all'
     ? {
         OR: [
           { notes: { contains: obser, mode: 'insensitive' } },
           {
-            orderItems: {
+            serviceItems: {
               some: { observ: { contains: obser, mode: 'insensitive' } },
             },
           },
@@ -415,7 +2759,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 
     // --- Orden ---
-    // const sortOrder = order === 'newest' ? { createdAt: 'desc' } : { createdAt: 'asc' };
+    // const sortOrder = service === 'newest' ? { createdAt: 'desc' } : { createdAt: 'asc' };
 
     const sortOrder = order === 'newest'
       ? { remDat: 'desc' as const }
@@ -424,7 +2768,7 @@ const obserFilter: Prisma.OrderWhereInput =
 
 ///////query
 
-    const orders = await this.prisma.order.findMany({
+    const services = await this.prisma.service.findMany({
       where: {
         ...fechasFilter,
         ...parteFilter,
@@ -438,7 +2782,7 @@ const obserFilter: Prisma.OrderWhereInput =
         ...estadoFilter,
         ...registroFilter,
         ...existeIns,
-        // filtro en orderItem
+        // filtro en serviceItem
         ...productoFilter,
       },
         orderBy: sortOrder,
@@ -452,37 +2796,37 @@ const obserFilter: Prisma.OrderWhereInput =
         maquina: true,          // id_parte si aplica
         encargado: true,          // id_parte si aplica
         user1: true,          // usuario si quieres incluirlo
-        orderItems: true,
+        serviceItems: true,
       },      })
 
-  const invoices = orders.map((order) => ({
-    _id: order.id,
-    ...order,
-    id_client: order.customer
-      ? { _id: order.customer.id, nameCus: order.customer.nameCus }
+  const entradas = services.map((service) => ({
+    _id: service.id,
+    ...service,
+    id_client: service.customer
+      ? { _id: service.customer.id, nameCus: service.customer.nameCus }
       : null,
-    id_config: order.configuration
-      ? { _id: order.configuration.id, name: order.configuration.name }
+    id_config: service.configuration
+      ? { _id: service.configuration.id, name: service.configuration.name }
       : null,
-    id_instru: order.instrumento
-      ? { _id: order.instrumento.id, name: order.instrumento.name,
-              publico: order.instrumento.publico,
+    id_instru: service.instrumento
+      ? { _id: service.instrumento.id, name: service.instrumento.name,
+              publico: service.instrumento.publico,
        }
       : null,
-    id_parte: order.parte
-      ? { _id: order.parte.id, name: order.parte.name }
+    id_parte: service.parte
+      ? { _id: service.parte.id, name: service.parte.name }
       : null,
-    id_maquin: order.maquina
-      ? { _id: order.maquina.id, name: order.maquina.name }
+    id_maquin: service.maquina
+      ? { _id: service.maquina.id, name: service.maquina.name }
       : null,
-    id_encar: order.encargado
-      ? { _id: order.encargado.id, name: order.encargado.name }
+    id_encar: service.encargado
+      ? { _id: service.encargado.id, name: service.encargado.name }
       : null,
-    user: order.user
-      ? { _id: order.user1.id, name: order.user1.name }
+    user: service.user
+      ? { _id: service.user1.id, name: service.user1.name }
       : null,
 
-    orderItems: order.orderItems.map((item) => ({
+    serviceItems: service.serviceItems.map((item) => ({
       _id: item.productId,
       slug: item.slug,
       title: item.title,
@@ -497,7 +2841,7 @@ const obserFilter: Prisma.OrderWhereInput =
     })),
   }));
 
-  return { invoices };}
+  return { entradas };}
 //////dili
 
 
@@ -538,18 +2882,18 @@ const obserFilter: Prisma.OrderWhereInput =
     configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
   const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
 
-  // --- Filtro por producto (en el mismo OrderItem)
+  // --- Filtro por producto (en el mismo ServiceItem)
   const productFilter =
     producto && producto !== 'all' ? { productId: String(producto) } : {};
 
   // --- Filtro por observaciones ---
-  const obserFilter: Prisma.OrderItemWhereInput =
+  const obserFilter: Prisma.ServiceItemWhereInput =
     obser && obser !== 'all'
       ? {
           OR: [
             { observ: { contains: obser, mode: 'insensitive' } },
             {
-              order: {
+              service: {
                 notes: { contains: obser, mode: 'insensitive' },
               },
             },
@@ -608,17 +2952,17 @@ const obserFilter: Prisma.OrderWhereInput =
   // --- Ordenamiento ---
   const sortOrder =
     order === 'newest'
-      ? { order: { remDat: 'desc' as const } }
-      : { order: { remDat: 'asc' as const } };
+      ? { service: { remDat: 'desc' as const } }
+      : { service: { remDat: 'asc' as const } };
 
   // --- Query final ---
-  const orderItemsWithOrder = await this.prisma.orderItem.findMany({
+  const serviceItemsWithOrder = await this.prisma.serviceItem.findMany({
 
     where: {
       ...productFilter,
       ...obserFilter,
       ...estadoFilter,
-      order: {
+      service: {
         is: {
           // id_instru: { not: null }, // ✅ el filtro se mantiene
           ...registroFilter,
@@ -637,9 +2981,9 @@ const obserFilter: Prisma.OrderWhereInput =
 
     orderBy: sortOrder,
     include: {
-      order: {
+      service: {
         include: {
-          orderAddress: true,
+          // orderAddress: true,
           customer: true,
           parte: true,
           maquina: true,
@@ -652,13 +2996,13 @@ const obserFilter: Prisma.OrderWhereInput =
       product: true,
     },
   });
-// Traemos todos los OrderItems con sus Order relacionados
+// Traemos todos los ServiceItems con sus Order relacionados
 
-// Mapeamos cada OrderItem a un objeto tipo invoice
-const invoices = orderItemsWithOrder.map(item => ({
+// Mapeamos cada ServiceItem a un objeto tipo invoice
+const entradas = serviceItemsWithOrder.map(item => ({
   // _id: item.id, // ID del item
-_id: item.order?.id,
-  orderItems: {
+_id: item.service?.id,
+  serviceItems: {
     _id: item.id,
     slug: item.slug,
     title: item.title,
@@ -672,84 +3016,86 @@ _id: item.order?.id,
     observ: item.observ,
     terminado: item.terminado,
   },
-  orderAddress: item.order?.orderAddress?.[0] ?? {
-    firstName: '',
-    lastName: '',
-    address: '',
-    address2: '',
-    city: '',
-    zip: '',
-    country: '',
-    phone: ''
-  },
-  paymentMethod: item.order?.paymentMethod ?? '',
-  subTotal: item.order?.subTotal ?? 0,
-  shippingPrice: item.order?.shippingPrice ?? 0,
-  tax: item.order?.tax ?? 0,
-  total: item.order?.total ?? 0,
-  totalBuy: item.order?.totalBuy ?? 0,
-  // id_client: item.order?.id_client ? item.order.id_client : null,
-  id_client: item.order?.customer ?? { nameCus: '' },
-  // id_instru: item.order?.id_instru ? item.order.id_instru : null,
-  id_instru: item.order?.instrumento ?? { name: '' },
-  id_parte: item.order?.parte ?? { name: '' },
-  id_maquin: item.order?.maquina ?? { name: '' },
-  id_encar: item.order?.encargado ?? { name: '' },
+  // orderAddress: item.service?.serviceAddress?.[0] ?? {
+  //   firstName: '',
+  //   lastName: '',
+  //   address: '',
+  //   address2: '',
+  //   city: '',
+  //   zip: '',
+  //   country: '',
+  //   phone: ''
+  // },
+  paymentMethod: item.service?.paymentMethod ?? '',
+  subTotal: item.service?.subTotal ?? 0,
+  shippingPrice: item.service?.shippingPrice ?? 0,
+  tax: item.service?.tax ?? 0,
+  total: item.service?.total ?? 0,
+  totalBuy: item.service?.totalBuy ?? 0,
+  // id_client: item.service?.id_client ? item.service.id_client : null,
+  id_client: item.service?.customer ?? { nameCus: '' },
+  // id_instru: item.service?.id_instru ? item.service.id_instru : null,
+  id_instru: item.service?.instrumento ?? { name: '' },
+  id_parte: item.service?.parte ?? { name: '' },
+  id_maquin: item.service?.maquina ?? { name: '' },
+  id_encar: item.service?.encargado ?? { name: '' },
 
 
-  // libNum: item.order?.libNum ?? 0,
-  // folNum: item.order?.folNum ?? 0,
-  // asiNum: item.order?.asiNum ?? 0,
-  // asiDat: item.order?.asiDat ?? null,
-  // escNum: item.order?.escNum ?? 0,
-  // asieNum: item.order?.asieNum ?? 0,
-  // asieDat: item.order?.asieDat ?? null,
-  terminado: item.order?.terminado ?? false,
-  // id_config: item.order?.id_config ? item.order.id_config : null,
-  id_config: item.order?.configuration ?? { name: '' },
-  codConNum: item.order?.codConNum ?? '',
-  // user: item.order?.user ? item.order.user : null,
-  user: item.order?.user1 ?? { name: '' },
-  isPaid: item.order?.isPaid ?? false,
-  isDelivered: item.order?.isDelivered ?? false,
-  remNum: item.order?.remNum ?? 0,
-  remDat: item.order?.remDat ?? null,
-  dueDat: item.order?.dueDat ?? null,
-  invNum: item.order?.invNum ?? 0,
-  invDat: item.order?.invDat ?? null,
-  recNum: item.order?.recNum ?? 0,
-  recDat: item.order?.recDat ?? null,
-  desVal: item.order?.desVal ?? '',
-  notes: item.order?.notes ?? '',
-  salbuy: item.order?.salbuy ?? '',
-  createdAt: item.order?.createdAt ?? new Date(),
-  updatedAt: item.order?.updatedAt ?? new Date(),
+  // libNum: item.service?.libNum ?? 0,
+  // folNum: item.service?.folNum ?? 0,
+  // asiNum: item.service?.asiNum ?? 0,
+  // asiDat: item.service?.asiDat ?? null,
+  // escNum: item.service?.escNum ?? 0,
+  // asieNum: item.service?.asieNum ?? 0,
+  // asieDat: item.service?.asieDat ?? null,
+  terminado: item.service?.terminado ?? false,
+  // id_config: item.service?.id_config ? item.service.id_config : null,
+  id_config: item.service?.configuration ?? { name: '' },
+  codConNum: item.service?.codConNum ?? '',
+  // user: item.service?.user ? item.service.user : null,
+  user: item.service?.user1 ?? { name: '' },
+  isPaid: item.service?.isPaid ?? false,
+  isDelivered: item.service?.isDelivered ?? false,
+  remNum: item.service?.remNum ?? 0,
+  remDat: item.service?.remDat ?? null,
+  dueDat: item.service?.dueDat ?? null,
+  invNum: item.service?.invNum ?? 0,
+  invDat: item.service?.invDat ?? null,
+  recNum: item.service?.recNum ?? 0,
+  recDat: item.service?.recDat ?? null,
+  desVal: item.service?.desVal ?? '',
+  notes: item.service?.notes ?? '',
+  salbuy: item.service?.salbuy ?? '',
+  createdAt: item.service?.createdAt ?? new Date(),
+  updatedAt: item.service?.updatedAt ?? new Date(),
 
   // Campos calculados / alias de relaciones
-  instruName: item.order?.instrumento?.name ?? '',
-  instruPublico: item.order?.instrumento?.publico ?? '',
-  parteName: item.order?.parte?.name ?? '',
-  maquinaName: item.order?.maquina?.name ?? '',
-  encargadoName: item.order?.encargado?.name ?? '',
-  customName: item.order?.customer?.nameCus ?? '',
-  configName: item.order?.configuration?.name ?? '',
-  userName: item.order?.user1?.name ?? '',
+  instruName: item.service?.instrumento?.name ?? '',
+  instruPublico: item.service?.instrumento?.publico ?? '',
+  parteName: item.service?.parte?.name ?? '',
+  maquinaName: item.service?.maquina?.name ?? '',
+  encargadoName: item.service?.encargado?.name ?? '',
+  customName: item.service?.customer?.nameCus ?? '',
+  configName: item.service?.configuration?.name ?? '',
+  userName: item.service?.user1?.name ?? '',
   valor: (item.price * (1 + item.porIva / 100)).toFixed(2),
-  totalOrder: item.order?.total?.toFixed(2) ?? '0.00',
+  totalOrder: item.service?.total?.toFixed(2) ?? '0.00',
   __v: 0,
 }));
 
 
-  return { invoices };
+  return { entradas };
 
 }
 //////dili
 
 
-async findOne(id: string) {
+
+////OneService
+async findOneSer(id: string) {
   if (!id) throw new NotFoundException(`Entrada with id "${id}" not found`);
 
-  const invoice = await this.prisma.order.findUnique({
+  const invoice = await this.prisma.service.findUnique({
     where: { id },
     include: {
       customer: true,       // id_client
@@ -762,8 +3108,8 @@ async findOne(id: string) {
       maquina: true,          // id_parte
       encargado: true,          // id_parte
       user1: true,          // usuario
-      // orderItems: true,
-    orderItems: {
+      // serviceItems: true,
+    serviceItems: {
       include: {
         product: {
           include: {
@@ -772,7 +3118,7 @@ async findOne(id: string) {
         },
       },
     },
-      orderAddress: true,
+      // orderAddress: true,
     },
   });
 
@@ -845,20 +3191,20 @@ async findOne(id: string) {
       name: invoice.user1.name }
     : null,
 
-    orderAddress: invoice.ordYes==="Y"
+    // orderAddress: invoice.ordYes==="Y"
 
-    ?  {
-          firstName: invoice.orderAddress[0].firstName,
-          lastName: invoice.orderAddress[0].lastName,
-          address: invoice.orderAddress[0].address,
-          address2: invoice.orderAddress[0].address2,
-          city: invoice.orderAddress[0].city,
-          zip: invoice.orderAddress[0].postalCode,
-          country: invoice.orderAddress[0].countryId,
-          phone: invoice.orderAddress[0].phone,
-    }: null,
+    // ?  {
+    //       firstName: invoice.serviceAddress[0].firstName,
+    //       lastName: invoice.serviceAddress[0].lastName,
+    //       address: invoice.serviceAddress[0].address,
+    //       address2: invoice.serviceAddress[0].address2,
+    //       city: invoice.serviceAddress[0].city,
+    //       zip: invoice.serviceAddress[0].postalCode,
+    //       country: invoice.serviceAddress[0].countryId,
+    //       phone: invoice.serviceAddress[0].phone,
+    // }: null,
 
-    orderItems: invoice.orderItems.map(item => ({
+    serviceItems: invoice.serviceItems.map(item => ({
       _id: item.productId,
       slug: item.slug,
       title: item.title,
@@ -877,156 +3223,12 @@ async findOne(id: string) {
     })),
   };
 
-  // console.log(invoice.orderItems);
+  // console.log(invoice.serviceItems);
 
   return formattedInvoice;
 }
+////OneService
 
-
-
-  // async update(updateEntradaDto: any, id : string) {
-  
-
-
-  //   const invoice = await this.prisma.order.findUnique({
-  //   where: { id },
-  //   include: {
-  //     customer: true,       // id_client
-  //     configuration: true,  // id_config
-  //     instrumento: true,    // id_instru
-  //     parte: true,          // id_parte
-  //     user1: true,          // usuario
-  //     orderItems: true,
-  //   },
-  // });
-  // if (!invoice) throw new NotFoundException(`Entrada with id "${id}" not found`);
-  
-  // // Mapear el resultado al formato deseado
-  // const formattedInvoice = {
-  //   _id: invoice.id,
-  //   ...invoice,
-
-  //   id_client: typeof updateEntradaDto.codCus === 'object'
-  //   ? updateEntradaDto.codCus._id
-  //   : updateEntradaDto.codCus,
-  //   id_config: typeof updateEntradaDto.codCon === 'object'
-  //   ? updateEntradaDto.codCon._id
-  //   : updateEntradaDto.codCon,
-  //   id_instru: typeof updateEntradaDto.codIns === 'object'
-  //   ? updateEntradaDto.codIns._id
-  //   : updateEntradaDto.codIns,
-  //   // id_parte: typeof updateEntradaDto.codPar === 'object'
-  //   // ? updateEntradaDto.codPar._id
-  //   // : updateEntradaDto.codPar,
-  //   id_parte: !updateEntradaDto.codPar
-  //     ? null
-  //     : typeof updateEntradaDto.codPar === 'object'
-  //       ? updateEntradaDto.codPar._id
-  //       : updateEntradaDto.codPar,
-  //   user: typeof updateEntradaDto.user === 'object'
-  //   ? updateEntradaDto.user._id
-  //   : updateEntradaDto.user,
-
-
-  //   // orderItems: updateEntradaDto.orderItems.map(item => ({
-  //   //   slug: item.slug,
-  //   //   title: item.title,
-  //   //   medPro: item.medPro,
-  //   //   quantity: item.quantity,
-  //   //   price: item.price,
-  //   //   porIva: item.porIva,
-  //   //   venDat: item.venDat,
-  //   //   size: item.size,
-  //   //   observ: item.observ,
-  //   //   terminado: item.terminado,
-  //   //   productId: item.productId,
-  //   // })),
-  // };
-
-  // // console.log(formattedInvoice)
-
-  //   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-
-
-
-  //   try {
-  //           // console.log(formattedInvoice.orderItems)
-  //           // console.log('ID del order:', id);
-  //           // console.log('IDs de productos:', formattedInvoice.orderItems.map(i => i.productId));
-
-  //     await this.prisma.order.update(
-  //           ({
-  //         where: { id: id }, // Prisma usa 'id'
-  //       data: {
-  //         paymentMethod: updateEntradaDto.paymentMethod,
-  //         subTotal: updateEntradaDto.subTotal,
-  //         shippingPrice: updateEntradaDto.shippingPrice,
-  //         tax: updateEntradaDto.tax,
-  //         total: updateEntradaDto.total,
-  //         totalBuy: updateEntradaDto.totalBuy,
-  //         libNum: updateEntradaDto.libNum,
-  //         folNum: updateEntradaDto.folNum,
-  //         asiNum: updateEntradaDto.asiNum,
-  //         asiDat: safeDate(updateEntradaDto.asiDat),
-  //         escNum: updateEntradaDto.escNum,
-  //         asieNum: updateEntradaDto.asieNum,
-  //         asieDat: safeDate(updateEntradaDto.asieDat),
-  //         terminado: updateEntradaDto.terminado,
-  //         movpvNum: updateEntradaDto.movpvNum,
-  //         movpvDat: safeDate(updateEntradaDto.movpvDat),
-  //         codConNum: updateEntradaDto.codConNum,
-  //         // codCom: updateEntradaDto.codCom,
-  //         supplier: updateEntradaDto.supplier,
-  //         // remNum: updateEntradaDto.remNum,
-  //         // remNum: 1234,
-  //         remDat: safeDate(updateEntradaDto.remDat),
-  //         dueDat: safeDate(updateEntradaDto.dueDat),
-  //         invNum: updateEntradaDto.invNum,
-  //         invDat: safeDate(updateEntradaDto.invDat),
-  //         recNum: updateEntradaDto.recNum,
-  //         recDat: safeDate(updateEntradaDto.recDat),
-  //         desVal: updateEntradaDto.desVal,
-  //         notes: updateEntradaDto.notes,
-  //         salbuy: updateEntradaDto.salbuy,
-
-  //     // customer: { connect: { id: formattedInvoice.id_client } },
-  //     // parte: { connect: { id: formattedInvoice.id_parte } },
-  //     // instrumento: { connect: { id: formattedInvoice.id_instru } },
-  //     // configuration: { connect: { id: formattedInvoice.id_config } },
-  //     // user1: { connect: { id: formattedInvoice.user } },
-  //     id_client: formattedInvoice.id_client ,
-  //     id_parte: formattedInvoice.id_parte,
-  //     id_instru: formattedInvoice.id_instru,
-  //     id_config: formattedInvoice.id_config,
-  //     user: formattedInvoice.user,
-
-
-  //         orderItems: {
-  //           deleteMany: {orderId: id}, // borra todos los actuales
-  //           create: updateEntradaDto.orderItems?.map((oi) => ({
-  //             title: oi.title,
-  //             medPro: oi.medPro,
-  //             quantity: oi.quantity,
-  //             price: oi.price,
-  //             porIva: oi.porIva,
-  //             venDat: safeDate(oi.venDat),
-  //             observ: oi.observ,
-  //             slug: oi.slug,
-  //             size: oi.size,
-  //             terminado: oi.terminado,
-  //             // productId: oi.productId,  // en lugar de oi._id
-  //             productId: oi._id,
-  //           })),
-  //         },
-  //       },
-  //      })
-  //     );
-  //     return { updateEntradaDto };
-      
-  //   } catch (error) {
-  //     this.handleExceptions( error );
-  //   }
-  // }
 
 async update(updateEntradaDto: any, id: string) {
 
@@ -1039,7 +3241,7 @@ async update(updateEntradaDto: any, id: string) {
       // =========================
       // 🔍 VALIDAR EXISTENCIA
       // =========================
-      const invoice = await tx.order.findUnique({
+      const invoice = await tx.service.findUnique({
         where: { id },
       });
 
@@ -1070,7 +3272,7 @@ async update(updateEntradaDto: any, id: string) {
       // =========================
       // 🧾 UPDATE
       // =========================
-      const order = await tx.order.update({
+      const service = await tx.service.update({
         where: { id },
         data: {
 
@@ -1149,9 +3351,9 @@ async update(updateEntradaDto: any, id: string) {
           // =========================
           // 📦 ITEMS
           // =========================
-          orderItems: {
-            deleteMany: { orderId: id },
-            create: updateEntradaDto.orderItems?.map((oi) => ({
+          serviceItems: {
+            deleteMany: { serviceId: id },
+            create: updateEntradaDto.serviceItems?.map((oi) => ({
               title: oi.title,
               medPro: oi.medPro,
               quantity: oi.quantity,
@@ -1166,13 +3368,13 @@ async update(updateEntradaDto: any, id: string) {
             })) || [],
           },
 
-          itemsInOrder: updateEntradaDto.orderItems?.length || 0,
+          itemsInOrder: updateEntradaDto.serviceItems?.length || 0,
 
         },
-        include: { orderItems: true },
+        include: { serviceItems: true },
       });
 
-      return order;
+      return service;
     });
 
     return {
@@ -1188,13 +3390,30 @@ async update(updateEntradaDto: any, id: string) {
 }
 
 
+async applychasta(updateInvoiceDto: any, id: any) {
+  try {
+      const invoice = await this.prisma.service.update({
+        where: { id: id },
+        data: {
+          staOrd: updateInvoiceDto.staOrd,
+        },
+        include: { serviceItems: true },          
+      });
+
+      return invoice;
+
+  } catch (error) {
+    this.handleExceptions(error);
+  }
+}
+
 
 async remove(id: string) {
   try {
-    await this.prisma.orderItem.deleteMany({
-      where: { orderId: id },
+    await this.prisma.serviceItem.deleteMany({
+      where: { serviceId: id },
     });
-    await this.prisma.order.delete({
+    await this.prisma.service.delete({
       where: { id },
     });
     return { message: `Documento con id ${id} eliminado` };

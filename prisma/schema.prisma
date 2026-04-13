@@ -48,6 +48,7 @@ model User {
   resetToken      String
   address UserAddress?
   order  Order[]  
+  service  Service[]   // 👈 Relación 
   receipt  Receipt[]   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -62,6 +63,7 @@ model Customer {
   cuit      String?
   coniva    String?
   order  Order[]   // 👈 Relación 
+  service  Service[]   // 👈 Relación 
   receipt  Receipt[]   
   maquinas Maquina[]
 
@@ -80,6 +82,7 @@ model Supplier {
   cuit      String?
   coniva    String?
   products   Product[]
+  service  Service[]   // 👈 Relación 
   order  Order[]   // 👈 Relación 
   receipt  Receipt[]   
 
@@ -112,6 +115,7 @@ model Encargado {
   name          String   @unique
   email         String?   
   receipt  Receipt[]   
+  service  Service[]   // 👈 Relación 
   order  Order[]   // 👈 Relación con OrderItem
 
   createdAt     DateTime @default(now())
@@ -126,6 +130,7 @@ model Maquina {
   codCusId    String?         // 👈 Debe ser STRING para coincidir con el UUID del customer.id
   codCus      Customer?  @relation(fields: [codCusId], references: [id], onDelete: Restrict)
 
+  service  Service[]   // 👈 Relación 
   order  Order[]   // 👈 Relación 
 
   createdAt     DateTime @default(now())
@@ -150,6 +155,7 @@ model Comprobante {
   
   codConId    String?         // 👈 Debe ser STRING para coincidir con el UUID del Configuration.id
   codCon      Configuration?  @relation(fields: [codConId], references: [id], onDelete: Restrict)
+  service  Service[]   // 👈 Relación 
   order  Order[]   // 👈 Relación 
   
   createdAt  DateTime      @default(now())
@@ -166,6 +172,7 @@ model Parte {
   domcomer  String?
   cuit      String?
   coniva    String?
+  service  Service[]   // 👈 Relación   
   order  Order[]   // 👈 Relación con OrderItem
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -187,6 +194,8 @@ model Configuration {
   numIntCaj   Int      @default(0)
   numIntMov   Int      @default(0)
   numIntCli   Int      @default(100000)
+  service1       Service[]     @relation("Config1")
+  service2       Service[]     @relation("Config2")
   orders1       Order[]     @relation("Config1")
   orders2       Order[]     @relation("Config2")
   receipt  Receipt[]   
@@ -205,6 +214,7 @@ model Instrumento {
   publico     Boolean       @default(true)
   ecoActive   Boolean?       @default(true)
   paramItems ParamItem[]
+  service  Service[]   // 👈 Relación 
   order  Order[]   // 👈 Relación con OrderItem
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -286,6 +296,7 @@ model Product {
   gender      Gender?
   sizes       String[]
   reviews     Review[]
+  serviceItems  ServiceItem[]   // 👈 Relación con OrderItem
   orderItems  OrderItem[]   // 👈 Relación con OrderItem
   paramItems  ParamItem[]   // 👈 Relación con OrderItem
   ProductImage ProductImage[]
@@ -437,6 +448,8 @@ model Order {
   isDelivered    Boolean      @default(false)
   deliveredAt    DateTime?
 
+  liqNum         Int?
+  liqDat         DateTime?
   remNum         Int?
   remDat         DateTime?
   dueDat         DateTime?
@@ -481,6 +494,158 @@ model Order {
 @@index([id_client, salbuy])
 }
 
+////services
+model ServiceItem {
+  id          String   @id @default(uuid())
+  slug        String?
+  title       String
+  medPro      String
+  quantity    Int
+  image       String?
+  price       Float
+  totalItem   Float?
+  size        String?
+  porIva      Float
+  venDat      DateTime?
+  observ      String?
+  terminado   Boolean?
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  // instrumento Instrumento? @relation(fields: [instrumentoId], references: [id], onDelete: Restrict)
+  // instrumentoId String?
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  serviceId String?
+
+  @@index([serviceId])
+  @@index([productId])
+  @@index([terminado])
+
+}
+
+
+model Service {
+  id             String       @id @default(uuid())
+  serviceItems     ServiceItem[]
+  // orderAddress OrderAddress[]
+  // shippingAddress ShippingAddress[]
+  paymentMethod  String?
+  paymentServiceResult  PaymentServiceResult?
+
+  numberOfItems  Int?
+  subTotal       Float?
+  shippingPrice  Float?
+  tax            Float?
+  total          Float?
+  totalBuy       Float?
+  itemsInOrder Int
+
+  id_client      String?      // relación con Customer
+  customer     Customer?   @relation(fields: [id_client], references: [id], onDelete: Restrict)
+
+  id_maquin      String?      // relación con Maquina
+  maquina     Maquina?   @relation(fields: [id_maquin], references: [id], onDelete: Restrict)
+  
+  supplier      String?      // relación con Customer
+  supplier1     Supplier?   @relation(fields: [supplier], references: [id], onDelete: Restrict)
+
+  id_parte       String?      // relación con Parte
+  parte        Parte?   @relation(fields: [id_parte], references: [id], onDelete: Restrict)
+
+  id_encar       String?      // relación con Encargado
+  encargado        Encargado?   @relation(fields: [id_encar], references: [id], onDelete: Restrict)
+
+  id_instru      String?      // relación con Instrumento
+  instrumento  Instrumento?   @relation(fields: [id_instru], references: [id], onDelete: Restrict)
+
+  id_config       String?
+  configuration   Configuration?  @relation("Config1", fields: [id_config], references: [id], onDelete: Restrict)
+
+  id_config2      String?
+  configuration2  Configuration?  @relation("Config2", fields: [id_config2], references: [id], onDelete: Restrict)
+
+  codConNum      String?
+  codCom         String?
+  comprobante  Comprobante?   @relation(fields: [codCom], references: [id], onDelete: Restrict)
+
+  libNum         Int?
+  folNum         Int?
+  asiNum         Int?
+  asiDat         DateTime?
+  escNum         Int?
+  asieNum        Int?
+  asieDat        DateTime?
+
+  terminado      Boolean      @default(false)
+
+  isHaber        Boolean?
+  ajuste         Boolean?
+  user           String?
+  user1  User?   @relation(fields: [user], references: [id], onDelete: Restrict)
+  id_delivery    String?
+  id_address     String?
+
+  isPaid         Boolean      @default(false)
+  paidAt         DateTime?
+  isDelivered    Boolean      @default(false)
+  deliveredAt    DateTime?
+
+
+  liqNum         Int?
+  liqDat         DateTime?
+  remNum         Int?
+  remDat         DateTime?
+  dueDat         DateTime?
+  movpvNum       Int?
+  movpvDat       DateTime?
+  invNum         Int?
+  invDat         DateTime?
+  recNum         Int?
+  recDat         DateTime?
+
+  desVal         String?
+  ordNum         Int?
+  notes          String?
+  salbuy         String?
+  pedcotNum      Int?
+  pedcotDat      DateTime?
+  cotNum         Int?
+  cotDat         DateTime?
+  ordYes         String?
+  staOrd         String?
+  status         String?
+
+  lat            Float?
+  lng            Float?
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+// filtros por cliente
+@@index([id_client])
+
+// filtros por instrumento
+@@index([id_instru])
+
+// filtros por estado
+@@index([terminado])
+
+// dashboard ventas
+@@index([salbuy, invNum, invDat])
+
+// ventas por cliente
+@@index([id_client, salbuy])
+}
+
+model PaymentServiceResult {
+  id            String   @id @default(uuid())
+  status        String?
+  update_time   String?
+  email_address String?
+  serviceId       String   @unique
+  service         Service    @relation(fields: [serviceId], references: [id])
+}
+
+////services
 
 model OrderAddress {
   id         String  @id @default(uuid())

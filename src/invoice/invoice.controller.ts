@@ -10,37 +10,6 @@ import { ValidRoles } from 'src/auth/interfaces';
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
   
-  @Get('orders/summary/tar')
-  // async dashboard1(@Query() query: any) {
-  @Auth()
-  dashboardTar(@Query() query: any) {
-    return this.invoiceService.dashboardTar(query);
-  }
-  @Get('orders/summary/cli')
-  // async dashboard1(@Query() query: any) {
-  @Auth()
-  dashboardCli(@Query() query: any) {
-    return this.invoiceService.dashboardCli(query);
-  }
-  @Get('orders/summary/par')
-  // async dashboard1(@Query() query: any) {
-  @Auth()
-  dashboardPar(@Query() query: any) {
-    return this.invoiceService.dashboardPar(query);
-  }
-  @Get('orders/summary/maq')
-  // async dashboard1(@Query() query: any) {
-  @Auth()
-  dashboardMaq(@Query() query: any) {
-    return this.invoiceService.dashboardMaq(query);
-  }
-
-  @Get('orders/summary/esc')
-  // async dashboard1(@Query() query: any) {
-  @Auth()
-  dashboardEsc(@Query() query: any) {
-    return this.invoiceService.dashboardEsc(query);
-  }
 
   @Get('orders/summary')
   // async dashboard1(@Query() query: any) {
@@ -49,7 +18,7 @@ export class InvoiceController {
     return this.invoiceService.dashboard(query);
   }
   
-  // @Get('tes/admin')
+    // @Get('tes/admin')
   // @Auth()
   // // async dashboard(@Query() query: any) {
   // dashboard(@Query() query: any) {
@@ -102,6 +71,12 @@ export class InvoiceController {
     return this.invoiceService.ctacus(query);
   }  
   
+@Get('tes/orders/getorderbyid/:_id')
+  @Auth()
+  findOneOrd(@Param('_id') id: string) {
+    return this.invoiceService.findOneOrd(id);
+  }
+
   @Post('invoices')
   @Auth()
   createInv(@Body() createInvoiceDto: any) {
@@ -160,11 +135,6 @@ export class InvoiceController {
     return this.invoiceService.searchOrdUS(id);
   }
 
-  @Get('tes/orders/getservicesbyus/:_id')
-  @Auth()
-  searchSerUS(@Param('_id') id: string) {
-    return this.invoiceService.searchSerUS(id);
-  }
   
   
   @Get('invoices/searchmovS')
@@ -178,15 +148,6 @@ export class InvoiceController {
     return this.invoiceService.searchmovB(query);
   }
   
-  // @Get('invoices/diligencias')
-  // findAlldil(@Query() query: any) {
-    //   return this.invoiceService.findAlldil(query);
-    // }
-    
-    // @Get('tes/orders/getorderbyid/:_id')
-    // findOne(@Param('_id') id: string) {
-      //   return this.invoiceService.findOne(id);
-      // }
       
   @Put('invoices/:Id/applychasta')
   @Auth()
