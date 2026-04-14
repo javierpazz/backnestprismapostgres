@@ -582,6 +582,9 @@ const {
   maquina,
   encargado,
   instru,
+  estado,
+  registro,
+  obser,
 } = query;
 
 
@@ -596,6 +599,53 @@ const {
     
     
     
+  const obserFilter: Prisma.ServiceWhereInput =
+  obser && obser !== 'all'
+    ? {
+        OR: [
+          { notes: { contains: obser, mode: 'insensitive' } },
+          {
+            serviceItems: {
+              some: { observ: { contains: obser, mode: 'insensitive' } },
+            },
+          },
+        ],
+      }
+    : {};
+
+    // --- Estado ---
+    const estadoFilter =
+      estado === 'TOD'
+        ? {}
+        : estado === 'EST'
+        ? { terminado: false }
+        : estado === 'ET'
+        ? { terminado: true }
+        : {};
+
+  const registroFilter =
+    registro === 'TOD'
+      ? {}
+      : registro === 'REGI'
+      ? { libNum: { gt: 0 } }
+      : registro === 'NREGI'
+      ? {
+          OR: [
+            { libNum: { lt: 1 } },
+            { libNum: null }
+          ]
+        }
+      : registro === 'PROT'
+      ? { asiNum: { gt: 0 } }
+      : registro === 'NPROT'
+      ?{
+        OR: [
+          { asiNum: { lt: 1 } },
+          { asiNum: null }
+        ]
+      }
+      : {};
+
     
     
     
@@ -642,6 +692,7 @@ const {
 const resulttarmaq = await this.prisma.serviceItem.findMany({
   where: {
     ...productoFilter,
+    ...estadoFilter,
     service: {
       id_instru: { not: null },
       id_maquin: { not: null },
@@ -653,6 +704,9 @@ const resulttarmaq = await this.prisma.serviceItem.findMany({
       ...parteFilter,
       ...maquinaFilter,
       ...encargadoFilter,
+      ...obserFilter,
+      ...estadoFilter,
+      ...registroFilter,
     },
   },
   select: {
@@ -725,6 +779,7 @@ const TarxMaq = Object.values(groupedTarMaq)
 const resulttarpar = await this.prisma.serviceItem.findMany({
   where: {
     ...productoFilter,
+    ...estadoFilter,
     service: {
       id_instru: { not: null },
       id_parte: { not: null },
@@ -736,6 +791,9 @@ const resulttarpar = await this.prisma.serviceItem.findMany({
       ...parteFilter,
       ...maquinaFilter,
       ...encargadoFilter,
+      ...obserFilter,
+      ...estadoFilter,
+      ...registroFilter,
     },
   },
   select: {
@@ -818,6 +876,9 @@ const topInstrumentosTra = await this.prisma.service.groupBy({
     ...parteFilter,
     ...maquinaFilter,
     ...encargadoFilter,
+    ...obserFilter,
+    ...estadoFilter,
+    ...registroFilter,
     ...productoOrderItemFilter,
   },
   _sum: {
@@ -874,6 +935,9 @@ const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
+          ...obserFilter,
+          ...estadoFilter,
+          ...registroFilter,
           ...productoOrderItemFilter,
         },
         _sum: {
@@ -934,6 +998,9 @@ const servicesData = await this.prisma.service.aggregate({
         ...parteFilter,
         ...maquinaFilter,
         ...encargadoFilter,
+        ...obserFilter,
+        ...estadoFilter,
+        ...registroFilter,
         ...productoOrderItemFilter,
   },
   _count: {
@@ -1005,7 +1072,59 @@ const {
   maquina,
   encargado,
   instru,
+  estado,
+  registro,
+  obser,
 } = query;
+
+
+  const obserFilter: Prisma.ServiceWhereInput =
+  obser && obser !== 'all'
+    ? {
+        OR: [
+          { notes: { contains: obser, mode: 'insensitive' } },
+          {
+            serviceItems: {
+              some: { observ: { contains: obser, mode: 'insensitive' } },
+            },
+          },
+        ],
+      }
+    : {};
+
+    // --- Estado ---
+    const estadoFilter =
+      estado === 'TOD'
+        ? {}
+        : estado === 'EST'
+        ? { terminado: false }
+        : estado === 'ET'
+        ? { terminado: true }
+        : {};
+
+  const registroFilter =
+    registro === 'TOD'
+      ? {}
+      : registro === 'REGI'
+      ? { libNum: { gt: 0 } }
+      : registro === 'NREGI'
+      ? {
+          OR: [
+            { libNum: { lt: 1 } },
+            { libNum: null }
+          ]
+        }
+      : registro === 'PROT'
+      ? { asiNum: { gt: 0 } }
+      : registro === 'NPROT'
+      ?{
+        OR: [
+          { asiNum: { lt: 1 } },
+          { asiNum: null }
+        ]
+      }
+      : {};
+
 
     // --- Fechas ---
     const fechasInvFilter =
@@ -1056,6 +1175,9 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
             
           },
@@ -1112,6 +1234,9 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
             
           },
@@ -1159,6 +1284,7 @@ const {
     const resultdilVal = await this.prisma.serviceItem.findMany({
       where: {
           ...productoFilter,
+          ...estadoFilter,
         service: {
           id_instru: { not: null },
           id_parte: {not: null},
@@ -1170,6 +1296,9 @@ const {
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
+          ...obserFilter,
+          ...estadoFilter,
+          ...registroFilter,
         },
       },
       select: {
@@ -1217,6 +1346,9 @@ const resulttarmaq = await this.prisma.serviceItem.findMany({
       ...parteFilter,
       ...maquinaFilter,
       ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
     },
   },
   select: {
@@ -1298,6 +1430,9 @@ const TarxPar = Object.values(groupedTarMaq)
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
 
           },
@@ -1352,6 +1487,9 @@ const TarxPar = Object.values(groupedTarMaq)
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
           ...productoOrderItemFilter,
         },
         _sum: {
@@ -1411,6 +1549,9 @@ const TarxPar = Object.values(groupedTarMaq)
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
 
           },
           _sum: {
@@ -1464,6 +1605,9 @@ const servicesData = await this.prisma.service.aggregate({
         ...parteFilter,
         ...maquinaFilter,
         ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
         ...productoOrderItemFilter,
   },
   _count: {
@@ -1535,7 +1679,61 @@ const {
   maquina,
   encargado,
   instru,
+  estado,
+  registro,
+  obser,
 } = query;
+
+
+  const obserFilter: Prisma.ServiceWhereInput =
+  obser && obser !== 'all'
+    ? {
+        OR: [
+          { notes: { contains: obser, mode: 'insensitive' } },
+          {
+            serviceItems: {
+              some: { observ: { contains: obser, mode: 'insensitive' } },
+            },
+          },
+        ],
+      }
+    : {};
+
+    // --- Estado ---
+    const estadoFilter =
+      estado === 'TOD'
+        ? {}
+        : estado === 'EST'
+        ? { terminado: false }
+        : estado === 'ET'
+        ? { terminado: true }
+        : {};
+
+  const registroFilter =
+    registro === 'TOD'
+      ? {}
+      : registro === 'REGI'
+      ? { libNum: { gt: 0 } }
+      : registro === 'NREGI'
+      ? {
+          OR: [
+            { libNum: { lt: 1 } },
+            { libNum: null }
+          ]
+        }
+      : registro === 'PROT'
+      ? { asiNum: { gt: 0 } }
+      : registro === 'NPROT'
+      ?{
+        OR: [
+          { asiNum: { lt: 1 } },
+          { asiNum: null }
+        ]
+      }
+      : {};
+
+
+
 
     // --- Fechas ---
     const fechasInvFilter =
@@ -1586,6 +1784,9 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
             
           },
@@ -1642,6 +1843,9 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
             
           },
@@ -1689,6 +1893,7 @@ const {
     const resultdilVal = await this.prisma.serviceItem.findMany({
       where: {
           ...productoFilter,
+          ...estadoFilter,
         service: {
           id_instru: { not: null },
           id_maquin: {not: null},
@@ -1700,6 +1905,9 @@ const {
           ...parteFilter,
           ...maquinaFilter,
           ...encargadoFilter,
+          ...obserFilter,
+          ...estadoFilter,
+          ...registroFilter,
         },
       },
       select: {
@@ -1747,6 +1955,9 @@ const resulttarmaq = await this.prisma.serviceItem.findMany({
       ...parteFilter,
       ...maquinaFilter,
       ...encargadoFilter,
+      ...obserFilter,
+      ...estadoFilter,
+      ...registroFilter,
     },
   },
   select: {
@@ -1828,6 +2039,9 @@ const TarxMaq = Object.values(groupedTarMaq)
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
 
           },
@@ -1881,6 +2095,9 @@ const topInstrumentosTra = await this.prisma.service.groupBy({
     ...parteFilter,
     ...maquinaFilter,
     ...encargadoFilter,
+    ...obserFilter,
+    ...estadoFilter,
+    ...registroFilter,
     ...productoOrderItemFilter,
   },
   _sum: {
@@ -1938,6 +2155,9 @@ const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
             ...instruFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
 
           },
@@ -1992,6 +2212,9 @@ const servicesData = await this.prisma.service.aggregate({
         ...parteFilter,
         ...maquinaFilter,
         ...encargadoFilter,
+        ...obserFilter,
+        ...estadoFilter,
+        ...registroFilter,
         ...productoOrderItemFilter,
   },
   _count: {
@@ -2064,7 +2287,58 @@ const {
   maquina,
   encargado,
   instru,
+  estado,
+  registro,
+  obser,
 } = query;
+
+  const obserFilter: Prisma.ServiceWhereInput =
+  obser && obser !== 'all'
+    ? {
+        OR: [
+          { notes: { contains: obser, mode: 'insensitive' } },
+          {
+            serviceItems: {
+              some: { observ: { contains: obser, mode: 'insensitive' } },
+            },
+          },
+        ],
+      }
+    : {};
+
+    // --- Estado ---
+    const estadoFilter =
+      estado === 'TOD'
+        ? {}
+        : estado === 'EST'
+        ? { terminado: false }
+        : estado === 'ET'
+        ? { terminado: true }
+        : {};
+
+  const registroFilter =
+    registro === 'TOD'
+      ? {}
+      : registro === 'REGI'
+      ? { libNum: { gt: 0 } }
+      : registro === 'NREGI'
+      ? {
+          OR: [
+            { libNum: { lt: 1 } },
+            { libNum: null }
+          ]
+        }
+      : registro === 'PROT'
+      ? { asiNum: { gt: 0 } }
+      : registro === 'NPROT'
+      ?{
+        OR: [
+          { asiNum: { lt: 1 } },
+          { asiNum: null }
+        ]
+      }
+      : {};
+
 
     // --- Fechas ---
     const fechasInvFilter =
@@ -2116,6 +2390,9 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
           },
           _sum: {
@@ -2188,6 +2465,7 @@ const {
     const resultdilVal = await this.prisma.serviceItem.findMany({
       where: {
           ...productoFilter,
+          ...estadoFilter,
         service: {
           id_instru: { not: null },
           ...fechasInvFilter,
@@ -2197,7 +2475,11 @@ const {
           ...instruFilter,
           ...parteFilter,
           ...maquinaFilter,
-          ...encargadoFilter,        },
+          ...encargadoFilter,
+          ...obserFilter,
+          ...estadoFilter,
+          ...registroFilter,
+        },
       },
       select: {
         terminado: true,
@@ -2241,6 +2523,9 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
         },
         _sum: {
@@ -2271,6 +2556,9 @@ const {
                 ...parteFilter,
                 ...maquinaFilter,
                 ...encargadoFilter,
+                ...obserFilter,
+                ...estadoFilter,
+                ...registroFilter,
                 ...productoOrderItemFilter,
               },
               include: {
@@ -2321,6 +2609,9 @@ const {
             ...parteFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
 
           },
@@ -2374,6 +2665,9 @@ const {
             ...instruFilter,
             ...maquinaFilter,
             ...encargadoFilter,
+            ...obserFilter,
+            ...estadoFilter,
+            ...registroFilter,
             ...productoOrderItemFilter,
 
           },
@@ -2440,6 +2734,9 @@ const servicesData = await this.prisma.service.aggregate({
         ...parteFilter,
         ...maquinaFilter,
         ...encargadoFilter,
+        ...obserFilter,
+        ...estadoFilter,
+        ...registroFilter,
         ...productoOrderItemFilter,
   },
   _count: {

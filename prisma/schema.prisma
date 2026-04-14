@@ -193,6 +193,7 @@ model Configuration {
   numIntOdp   Int      @default(0)
   numIntCaj   Int      @default(0)
   numIntMov   Int      @default(0)
+  numIntLiq   Int      @default(0)
   numIntCli   Int      @default(100000)
   service1       Service[]     @relation("Config1")
   service2       Service[]     @relation("Config2")
