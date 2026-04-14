@@ -189,17 +189,21 @@ async searchSerUS(id: string) {
 
       include: {
         customer: true,
+        instrumento: true,
         maquina: true,
         parte: true,
         user1: true,          // usuario si quieres incluirlo
         serviceItems: true,
       },      })
-
+console.log(servicesWork)
   const orders = servicesWork.map((order) => ({
     _id: order.id,
     ...order,
     id_client: order.customer
       ? { _id: order.customer.id, nameCus: order.customer.nameCus, emailCus: order.customer.emailCus }
+      : null,
+    id_instru: order.instrumento
+      ? { _id: order.instrumento.id, name: order.instrumento.name }
       : null,
     id_maquin: order.maquina
       ? { _id: order.maquina.id, name: order.maquina.name }
