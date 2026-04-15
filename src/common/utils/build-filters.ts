@@ -15,6 +15,7 @@ export const buildFilters = (query: any) => {
     estado,
     registro,
     obser,
+    order,
   } = query;
 
   // ========================
@@ -98,7 +99,6 @@ export const buildFilters = (query: any) => {
           ],
         }
       : {};
-
   // ========================
   // PRODUCTO
   // ========================
@@ -111,7 +111,7 @@ export const buildFilters = (query: any) => {
         ? { productId: String(producto) }
         : {}),
     };
-  const productoServiceItemFilter: Prisma.ServiceWhereInput =
+  const productoServiceFilter: Prisma.ServiceWhereInput =
     producto && producto !== 'all'
       ? {
           serviceItems: {
@@ -121,12 +121,19 @@ export const buildFilters = (query: any) => {
           },
         }
       : {};
+  const sortOrder = order === 'newest'
+    ? { remDat: 'desc' as const }
+    : { remDat: 'asc' as const };
+
+  const sortServiceItemOrder: Prisma.ServiceItemOrderByWithRelationInput  = order === 'newest'
+    ? { venDat: 'desc' as const }
+    : { venDat: 'asc' as const };
 
   // ========================
   // BASE SERVICE WHERE
   // ========================
   const baseServiceWhere: Prisma.ServiceWhereInput = {
-    id_instru: { not: null },
+    // id_instru: { not: null },
     ...fechas,
     ...configuracionFilter,
     ...customerFilter,
@@ -135,10 +142,10 @@ export const buildFilters = (query: any) => {
     ...parteFilter,
     ...maquinaFilter,
     ...encargadoFilter,
-    ...estadoFilter,
+    // ...estadoFilter,
     ...registroFilter,
     ...obserFilter,
-    ...productoServiceItemFilter,
+    ...productoServiceFilter,
   };
 
   return {
@@ -153,6 +160,9 @@ export const buildFilters = (query: any) => {
     usuarioFilter,
     fechas,
     estadoFilter,
-    estadoServiceItemFilter
+    estadoServiceItemFilter,
+    productoServiceFilter,
+    sortOrder,
+    sortServiceItemOrder
   };
 };

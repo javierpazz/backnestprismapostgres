@@ -15,73 +15,112 @@ export class EntradasService {
   constructor(private readonly configurationsService: ConfigurationsService,
               private prisma: PrismaService
             ) {}  
+
+
 async searchSerUS(id: string) {
-    
-    /// cambiar filtro por cliente
-    // aqui hago trampa por que estoy enviando el email ya desde el front
 
-    let customer: Customer;
-    if ( id ) {
-      customer = await this.prisma.customer.findFirst({
-      where: { emailCus :id },
-      });
-    }
-    if ( !customer ) 
-      throw new NotFoundException(`Customer with email, name or no "${ id }" not found`);
-    
-    
-    // --- Fechas ---
-    // const usuarioFilter = id && id !== 'all' ? { user: String(id) } : {};
-    const customerFilter = customer.id && customer.id !== 'all' ? { id_client: String(customer.id) } : {};
-    
-    
+  if (!id) {
+    throw new BadRequestException('Email is required');
+  }
 
+  // 🔥 1. Buscar cliente (más eficiente)
+  const customer = await this.prisma.customer.findUnique({
+    where: { emailCus: id },
+    select: { id: true, nameCus: true, emailCus: true },
+  });
 
+  if (!customer) {
+    throw new NotFoundException(`Customer with email "${id}" not found`);
+  }
 
-    const existeIns = {
-      id_instru: {
-        not: null
-      }
-    };
-///////query
+  // 🔥 2. Query optimizada (solo lo necesario)
+  const services = await this.prisma.service.findMany({
+    where: {
+      id_client: customer.id,
+      id_instru: { not: null },
+    },
+    select: {
+      id: true,
+      total: true,
+      terminado: true,
 
-    const servicesWork = await this.prisma.service.findMany({
-      where: {
-        ...customerFilter,
-        ...existeIns,
-        // ordYes: 'Y'
+      customer: {
+        select: {
+          id: true,
+          nameCus: true,
+          emailCus: true,
+        },
       },
 
-      include: {
-        customer: true,
-        instrumento: true,
-        maquina: true,
-        parte: true,
-        user1: true,          // usuario si quieres incluirlo
-        serviceItems: true,
-      },      })
-  const orders = servicesWork.map((order) => ({
-    _id: order.id,
-    ...order,
-    id_client: order.customer
-      ? { _id: order.customer.id, nameCus: order.customer.nameCus, emailCus: order.customer.emailCus }
-      : null,
-    id_instru: order.instrumento
-      ? { _id: order.instrumento.id, name: order.instrumento.name }
-      : null,
-    id_maquin: order.maquina
-      ? { _id: order.maquina.id, name: order.maquina.name }
-      : null,
-    id_parte: order.parte
-      ? { _id: order.parte.id, name: order.parte.name }
-      : null,
-    user: order.user
-      ? { _id: order.user1.id, name: order.user1.name, email: order.user1.email }
-      : null,
+      instrumento: {
+        select: { id: true, name: true },
+      },
 
-    serviceItems: order.serviceItems.map((item) => ({
-      _id: item.productId,
-      slug: item.slug,
+      maquina: {
+        select: { id: true, name: true },
+      },
+
+      parte: {
+        select: { id: true, name: true },
+      },
+
+      user1: {
+        select: { id: true, name: true, email: true },
+      },
+
+      serviceItems: {
+        select: {
+          productId: true,
+          title: true,
+          quantity: true,
+          price: true,
+          porIva: true,
+          size: true,
+          observ: true,
+          terminado: true,
+        },
+      },
+    },
+    orderBy: {
+      remDat: 'desc', // opcional pero recomendado
+    },
+  });
+
+  // 🔥 3. Transform limpio
+  return services.map(order => ({
+    _id: order.id,
+    total: order.total,
+    terminado: order.terminado,
+
+    customer: order.customer && {
+      _id: order.customer.id,
+      nameCus: order.customer.nameCus,
+      emailCus: order.customer.emailCus,
+    },
+
+    instrumento: order.instrumento && {
+      _id: order.instrumento.id,
+      name: order.instrumento.name,
+    },
+
+    maquina: order.maquina && {
+      _id: order.maquina.id,
+      name: order.maquina.name,
+    },
+
+    parte: order.parte && {
+      _id: order.parte.id,
+      name: order.parte.name,
+    },
+
+    user: order.user1 && {
+      _id: order.user1.id,
+      name: order.user1.name,
+      email: order.user1.email,
+    },
+
+    serviceItems: order.serviceItems.map(item => ({
+      productId: item.productId,
       title: item.title,
       quantity: item.quantity,
       price: item.price,
@@ -89,12 +128,9 @@ async searchSerUS(id: string) {
       size: item.size,
       observ: item.observ,
       terminado: item.terminado,
-      productId: item.productId,
     })),
   }));
-
-  return orders;}
-
+}
 
 
 //////dash1esc
@@ -102,7 +138,8 @@ async dashboardEsc(query: any) {
 
   const {
     baseServiceWhere,
-    productoFilter
+    productoFilter,
+    estadoFilter
   } = buildFilters(query);
   // ========================
   // FILTERS
@@ -145,7 +182,8 @@ async dashboardEsc(query: any) {
     // TOP USERS
     this.prisma.service.groupBy({
       by: ['user'],
-      where: baseServiceWhere,
+      // where: baseServiceWhere,
+      where: { ...baseServiceWhere, ...estadoFilter },
       _sum: { total: true },
       _count: { user: true },
       orderBy: { _sum: { total: 'desc' } },
@@ -155,7 +193,9 @@ async dashboardEsc(query: any) {
     // TOP CUSTOMERS
     this.prisma.service.groupBy({
       by: ['id_client'],
-      where: { ...baseServiceWhere, id_client: { not: null } },
+      where: { ...baseServiceWhere,
+               ...estadoFilter,
+                id_client: { not: null } },
       _sum: { total: true },
       _count: { id_client: true },
       orderBy: { _sum: { total: 'desc' } },
@@ -165,7 +205,10 @@ async dashboardEsc(query: any) {
     // TOP PARTES
     this.prisma.service.groupBy({
       by: ['id_parte'],
-      where: { ...baseServiceWhere, id_parte: { not: null } },
+      where: { ...baseServiceWhere,
+               ...estadoFilter,
+              id_parte: { not: null }
+             },
       _sum: { total: true },
       _count: { id_parte: true },
       orderBy: { _sum: { total: 'desc' } },
@@ -175,7 +218,7 @@ async dashboardEsc(query: any) {
     // INST VAL
     this.prisma.service.groupBy({
       by: ['terminado'],
-      where: baseServiceWhere,
+      where: { ...baseServiceWhere, ...estadoFilter },
       _sum: { total: true },
       _count: { id: true },
     }),
@@ -186,11 +229,13 @@ async dashboardEsc(query: any) {
       // where: itemWhere,
       where: {
           ...productoFilter,
-        service: baseServiceWhere,
+        service: {...baseServiceWhere,
+                  ...estadoFilter,
+                },
       },
       _sum: {
-        price: true,
-        quantity: true,
+        totalItem: true,
+        // quantity: true,
       },
       _count: {
         terminado: true,
@@ -199,7 +244,7 @@ async dashboardEsc(query: any) {
 
     // PUBLIC / PRIVATE (LIGHT)
     this.prisma.service.findMany({
-      where: baseServiceWhere,
+      where: { ...baseServiceWhere, ...estadoFilter },
       select: {
         total: true,
         instrumento: {
@@ -216,7 +261,7 @@ async dashboardEsc(query: any) {
 
     // TOTAL SERVICES
     this.prisma.service.aggregate({
-      where: baseServiceWhere,
+      where: { ...baseServiceWhere, ...estadoFilter },
       _count: { _all: true },
       _sum: { total: true },
     }),
@@ -282,7 +327,8 @@ async dashboardEsc(query: any) {
 
   const dilVal = dilValRaw.map(r => ({
     _id: r.terminado ? 'terminado' : 'pendiente',
-    total: (r._sum.price || 0) * (r._sum.quantity || 0),
+    // total: (r._sum.price || 0) * (r._sum.quantity || 0),
+    total: r._sum.totalItem,
     totalCan: r._count.terminado,
   }));
 
@@ -336,84 +382,102 @@ async dashboardEsc(query: any) {
 
   
 //////dashCli
-
 async dashboardCli(query: any) {
 
   const {
     baseServiceWhere,
+    productoFilter,
     estadoServiceItemFilter,
+    estadoFilter
   } = buildFilters(query);
 
-  // ========================
-  // FILTERS
-  // ========================
+  // 🔥 CONTEXTOS
+  const baseWhereMaq = {
+    ...baseServiceWhere,
+    id_maquin: { not: null },
+  };
 
-
-  // const itemWhere: any = {
-  //   ...(producto !== 'all' && { productId: producto }),
-  //   service: baseWhere,
-  // };
+  const baseWherePar = {
+    ...baseServiceWhere,
+    id_parte: { not: null },
+  };
 
   // ========================
   // PARALLEL QUERIES
   // ========================
 
   const [
-    tarGrouped,
-    tarGroupedPar,
-    topInstMaq,
-    topInstPar,
+    tarMaqRaw,
+    tarParRaw,
+    instMaq,
+    instPar,
     servicesData,
     totalUsers,
-    totalCustomers,
+    totalCustomers
   ] = await Promise.all([
 
-    // 🔥 PRODUCTOS x MAQUINA
+    // 🔥 TAR x PRODUCTO (MAQ) ✅ totalItem
     this.prisma.serviceItem.groupBy({
       by: ['productId'],
       where: {
+        ...productoFilter,
         ...estadoServiceItemFilter,
-        service: { ...baseServiceWhere, id_maquin: { not: null }},
+        service: baseWhereMaq,
       },
       _sum: {
-        price: true,
-        quantity: true,
+        totalItem: true,
       },
       _count: {
         productId: true,
       },
+      orderBy: {
+        _sum: { totalItem: 'desc' },
+      },
+      take: 10,
     }),
 
-    // 🔥 PRODUCTOS x PARTE
+    // 🔥 TAR x PRODUCTO (PARTE) ✅ totalItem
     this.prisma.serviceItem.groupBy({
       by: ['productId'],
       where: {
+        ...productoFilter,
         ...estadoServiceItemFilter,
-        service: { ...baseServiceWhere, id_parte: { not: null } },
+        service: baseWherePar,
       },
       _sum: {
-        price: true,
-        quantity: true,
+        totalItem: true,
       },
       _count: {
         productId: true,
       },
+      orderBy: {
+        _sum: { totalItem: 'desc' },
+      },
+      take: 10,
     }),
 
-    // 🔥 INSTRUMENTOS x MAQ
+    // 🔥 INSTRUMENTOS (MAQ)
     this.prisma.service.groupBy({
       by: ['id_instru'],
-      where: { ...baseServiceWhere, id_maquin: { not: null } },
+      // where: baseWhereMaq,
+      where: {
+        ...baseWhereMaq,
+        ...estadoFilter,
+      },
       _sum: { total: true },
       _count: { id_instru: true },
       orderBy: { _sum: { total: 'desc' } },
       take: 10,
     }),
 
-    // 🔥 INSTRUMENTOS x PAR
+    // 🔥 INSTRUMENTOS (PARTE)
     this.prisma.service.groupBy({
       by: ['id_instru'],
-      where: { ...baseServiceWhere, id_parte: { not: null } },
+      // where: baseWherePar,
+      where: {
+        ...baseWherePar,
+        ...estadoFilter,
+      },
       _sum: { total: true },
       _count: { id_instru: true },
       orderBy: { _sum: { total: 'desc' } },
@@ -424,7 +488,11 @@ async dashboardCli(query: any) {
     this.prisma.service.aggregate({
       where: {
         ...baseServiceWhere,
-        OR: [{ id_maquin: { not: null } }, { id_parte: { not: null } }],
+        ...estadoFilter,
+        // OR: [
+        //   { id_maquin: { not: null } },
+        //   { id_parte: { not: null } },
+        // ],
       },
       _count: { _all: true },
       _sum: { total: true },
@@ -435,67 +503,61 @@ async dashboardCli(query: any) {
   ]);
 
   // ========================
-  // PRODUCTS MAP
+  // 🔥 MAP IDS → NAMES
   // ========================
 
-  const allProductIds = [
-    ...new Set([
-      ...tarGrouped.map(x => x.productId),
-      ...tarGroupedPar.map(x => x.productId),
-    ]),
+  const productosIds = [
+    ...tarMaqRaw.map(x => x.productId),
+    ...tarParRaw.map(x => x.productId),
   ];
 
-  const productos = await this.prisma.product.findMany({
-    where: { id: { in: allProductIds } },
-    select: { id: true, title: true },
-  });
+  const instrumentosIds = [
+    ...instMaq.map(x => x.id_instru),
+    ...instPar.map(x => x.id_instru),
+  ];
 
-  const mapProductos = Object.fromEntries(
-    productos.map(p => [p.id, p.title])
-  );
-
-  // ========================
-  // TRANSFORMS
-  // ========================
-
-  const TarxMaq = tarGrouped
-    .map(x => ({
-      productId: x.productId,
-      producto: mapProductos[x.productId] || 'Sin nombre',
-      total: (x._sum.price || 0) * (x._sum.quantity || 0),
-      totalCan: x._count.productId,
-    }))
-    .sort((a, b) => b.total - a.total);
-
-  const TarxPar = tarGroupedPar
-    .map(x => ({
-      productId: x.productId,
-      producto: mapProductos[x.productId] || 'Sin nombre',
-      total: (x._sum.price || 0) * (x._sum.quantity || 0),
-      totalCan: x._count.productId,
-    }))
-    .sort((a, b) => b.total - a.total);
-
-  const mapInst = async (data: any[]) => {
-    const ids = data.map(x => x.id_instru);
-    const inst = await this.prisma.instrumento.findMany({
-      where: { id: { in: ids } },
+  const [productosRaw, instrumentosRaw] = await Promise.all([
+    this.prisma.product.findMany({
+      where: { id: { in: productosIds } },
+      select: { id: true, title: true },
+    }),
+    this.prisma.instrumento.findMany({
+      where: { id: { in: instrumentosIds } },
       select: { id: true, name: true },
-    });
-    const map = Object.fromEntries(inst.map(i => [i.id, i.name]));
-    return data.map(x => ({
-      instrumentoId: x.id_instru,
-      instrumento: map[x.id_instru] || 'Sin nombre',
-      totalSales: x._sum.total || 0,
-      totalOrders: x._count.id_instru,
-    }));
-  };
+    }),
+  ]);
 
-  const [top10InstrumentosxMaq, top10InstrumentosxPar] =
-    await Promise.all([
-      mapInst(topInstMaq),
-      mapInst(topInstPar),
-    ]);
+  const mapProductos = Object.fromEntries(productosRaw.map(x => [x.id, x.title]));
+  const mapInstrumentos = Object.fromEntries(instrumentosRaw.map(x => [x.id, x.name]));
+
+  // ========================
+  // 🔥 TRANSFORMS
+  // ========================
+
+  const TarxMaq = tarMaqRaw.map(x => ({
+    productId: x.productId,
+    producto: mapProductos[x.productId] || '',
+    total: x._sum.totalItem || 0, // ✅ FIX
+    totalCan: x._count.productId,
+  }));
+
+  const TarxPar = tarParRaw.map(x => ({
+    productId: x.productId,
+    producto: mapProductos[x.productId] || '',
+    total: x._sum.totalItem || 0, // ✅ FIX
+    totalCan: x._count.productId,
+  }));
+
+  const mapGroup = (data: any[], map: any, key: string) =>
+    data.map(x => ({
+      id: x[key],
+      name: map[x[key]] || '',
+      total: x._sum.total || 0,
+      count: x._count[key] || 0,
+    }));
+
+  const top10InstrumentosxMaq = mapGroup(instMaq, mapInstrumentos, 'id_instru');
+  const top10InstrumentosxPar = mapGroup(instPar, mapInstrumentos, 'id_instru');
 
   const orders = [{
     numOrders: servicesData._count._all,
@@ -511,7 +573,8 @@ async dashboardCli(query: any) {
     users: [{ numUsers: totalUsers }],
     customers: [{ numCustomers: totalCustomers }],
   };
-}//////dashCli
+}
+//////dashCli
 
 
 
@@ -655,6 +718,7 @@ async create(createEntradaDto: any) {
               quantity: item.quantity,
               image: item.image,
               price: item.price,
+              totalItem: item.totalItem,
               size: item.size,
               porIva: item.porIva,
               venDat: safeDate(item.venDat),
@@ -678,180 +742,96 @@ async create(createEntradaDto: any) {
   }
 }
 
-  async findAll(query: any) {
-  // isAuth,
-  // // isAdmin,
-///////query
-const {
-  order,
-  fech1,
-  fech2,
-  configuracion,
-  usuario,
-  customer,
-  instru,
-  parte,
-  maquina,
-  encargado,
-  producto,
-  estado,
-  registro,
-  obser,
-} = query;
+async findAll(query: any) {
 
-    // --- Fechas ---
-    const fechasFilter =
-      !fech1 && !fech2
-        ? {}
-        : !fech1 && fech2
-        ? { remDat: { lte: new Date(fech2) } }
-        : fech1 && !fech2
-        ? { remDat: { gte: new Date(fech1) } }
-        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+  const { order } = query;
 
-    // --- Otros filtros ---
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const instruFilter = instru && instru !== 'all' ? { id_instru: String(instru) } : {};
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-    const configuracionFilter =
-      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
-
-    const productoFilter =
-      producto && producto !== 'all'
-        ? {
-            serviceItems: {
-              some: {
-                productId: String(producto),
-              },
-            },
-          }
-        : {};
-
-    
-const obserFilter: Prisma.ServiceWhereInput =
-  obser && obser !== 'all'
-    ? {
-        OR: [
-          { notes: { contains: obser, mode: 'insensitive' } },
-          {
-            serviceItems: {
-              some: { observ: { contains: obser, mode: 'insensitive' } },
-            },
-          },
-        ],
-      }
-    : {};
-
-    // --- Estado ---
-    const estadoFilter =
-      estado === 'TOD'
-        ? {}
-        : estado === 'EST'
-        ? { terminado: false }
-        : estado === 'ET'
-        ? { terminado: true }
-        : {};
-
-    const existeIns =
-          { "id_instru": { not : null} };
-
-          // --- Registro ---
-  const registroFilter =
-    registro === 'TOD'
-      ? {}
-      : registro === 'REGI'
-      ? { libNum: { gt: 0 } }
-      : registro === 'NREGI'
-      ? {
-          OR: [
-            { libNum: { lt: 1 } },
-            { libNum: null }
-          ]
-        }
-      : registro === 'PROT'
-      ? { asiNum: { gt: 0 } }
-      : registro === 'NPROT'
-      ?{
-        OR: [
-          { asiNum: { lt: 1 } },
-          { asiNum: null }
-        ]
-      }
-      : {};
+  // 🔥 filtros centralizados
+  const { baseServiceWhere, estadoFilter, sortOrder } = buildFilters(query);
 
 
-    // --- Orden ---
-    // const sortOrder = service === 'newest' ? { createdAt: 'desc' } : { createdAt: 'asc' };
+  // ========================
+  // QUERY
+  // ========================
 
-    const sortOrder = order === 'newest'
-      ? { remDat: 'desc' as const }
-      : { remDat: 'asc' as const };
+  const services = await this.prisma.service.findMany({
+    where: {
+      ...baseServiceWhere,
+      ...estadoFilter
+    },
+    orderBy: sortOrder,
 
+    include: {
+      customer: true,
+      configuration: true,
+      instrumento: true,
+      parte: true,
+      maquina: true,
+      encargado: true,
+      user1: true,
+      serviceItems: true,
+    },
+  });
 
-///////query
+  // ========================
+  // TRANSFORM
+  // ========================
 
-    const services = await this.prisma.service.findMany({
-      where: {
-        ...fechasFilter,
-        ...parteFilter,
-        ...maquinaFilter,
-        ...encargadoFilter,
-        ...instruFilter,
-        ...customerFilter,
-        ...configuracionFilter,
-        ...usuarioFilter,
-        ...obserFilter,
-        ...estadoFilter,
-        ...registroFilter,
-        ...existeIns,
-        // filtro en serviceItem
-        ...productoFilter,
-      },
-        orderBy: sortOrder,
-
-
-      include: {
-        customer: true,       // id_client
-        configuration: true,  // id_config
-        instrumento: true,    // id_instru
-        parte: true,          // id_parte si aplica
-        maquina: true,          // id_parte si aplica
-        encargado: true,          // id_parte si aplica
-        user1: true,          // usuario si quieres incluirlo
-        serviceItems: true,
-      },      })
-
-  const entradas = services.map((service) => ({
+  const entradas = services.map(service => ({
     _id: service.id,
     ...service,
+
     id_client: service.customer
-      ? { _id: service.customer.id, nameCus: service.customer.nameCus }
-      : null,
-    id_config: service.configuration
-      ? { _id: service.configuration.id, name: service.configuration.name }
-      : null,
-    id_instru: service.instrumento
-      ? { _id: service.instrumento.id, name: service.instrumento.name,
-              publico: service.instrumento.publico,
-       }
-      : null,
-    id_parte: service.parte
-      ? { _id: service.parte.id, name: service.parte.name }
-      : null,
-    id_maquin: service.maquina
-      ? { _id: service.maquina.id, name: service.maquina.name }
-      : null,
-    id_encar: service.encargado
-      ? { _id: service.encargado.id, name: service.encargado.name }
-      : null,
-    user: service.user
-      ? { _id: service.user1.id, name: service.user1.name }
+      ? {
+          _id: service.customer.id,
+          nameCus: service.customer.nameCus,
+        }
       : null,
 
-    serviceItems: service.serviceItems.map((item) => ({
+    id_config: service.configuration
+      ? {
+          _id: service.configuration.id,
+          name: service.configuration.name,
+        }
+      : null,
+
+    id_instru: service.instrumento
+      ? {
+          _id: service.instrumento.id,
+          name: service.instrumento.name,
+          publico: service.instrumento.publico,
+        }
+      : null,
+
+    id_parte: service.parte
+      ? {
+          _id: service.parte.id,
+          name: service.parte.name,
+        }
+      : null,
+
+    id_maquin: service.maquina
+      ? {
+          _id: service.maquina.id,
+          name: service.maquina.name,
+        }
+      : null,
+
+    id_encar: service.encargado
+      ? {
+          _id: service.encargado.id,
+          name: service.encargado.name,
+        }
+      : null,
+
+    user: service.user1
+      ? {
+          _id: service.user1.id,
+          name: service.user1.name,
+        }
+      : null,
+
+    serviceItems: service.serviceItems.map(item => ({
       _id: item.productId,
       slug: item.slug,
       title: item.title,
@@ -862,153 +842,51 @@ const obserFilter: Prisma.ServiceWhereInput =
       observ: item.observ,
       terminado: item.terminado,
       productId: item.productId,
-
     })),
   }));
 
-  return { entradas };}
+  return { entradas };
+}
+
 //////dili
+async findAlldil(query: any) {
 
 
-  async findAlldil(query: any) {
+  // 🔥 filtros centralizados
   const {
-    order,
-    fech1,
-    fech2,
-    configuracion,
-    usuario,
-    customer,
-    instru,
-    parte,
-    maquina,
-    encargado,
-    producto,
-    estado,
-    registro,
-    obser,
-  } = query;
-  // --- Fechas ---
-  const fechasFilter =
-    !fech1 && !fech2
-      ? {}
-      : !fech1 && fech2
-      ? { remDat: { lte: new Date(fech2) } }
-      : fech1 && !fech2
-      ? { remDat: { gte: new Date(fech1) } }
-      : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
+    baseServiceWhere, sortServiceItemOrder, estadoServiceItemFilter
+    // productoFilter,      // 👈 para serviceItem
+    // estadoFilterItem,    // 👈 nuevo (terminado en item)
+    // obserServiceItemFilter,     // 👈 nuevo (observ en item)
+  } = buildFilters(query);
 
-  // --- Filtros por relaciones (dentro de order)
-  const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-  const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
-  const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-  const instruFilter = instru && instru !== 'all' ? { id_instru: String(instru) } : {};
-  const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-  const configuracionFilter =
-    configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-  const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
+  // ========================
+  // ORDEN
+  // ========================
 
-  // --- Filtro por producto (en el mismo ServiceItem)
-  const productFilter =
-    producto && producto !== 'all' ? { productId: String(producto) } : {};
 
-  // --- Filtro por observaciones ---
-  const obserFilter: Prisma.ServiceItemWhereInput =
-    obser && obser !== 'all'
-      ? {
-          OR: [
-            { observ: { contains: obser, mode: 'insensitive' } },
-            {
-              service: {
-                notes: { contains: obser, mode: 'insensitive' },
-              },
-            },
-          ],
-        }
-      : {};
+  // ========================
+  // QUERY
+  // ========================
 
-  // --- Estado ---
-  const estadoFilter =
-    estado === 'TOD'
-      ? {}
-      : estado === 'EST'
-      ? { terminado: false }
-      : estado === 'ET'
-      ? { terminado: true } 
-      : {};
-  // const estadoFilter =
-  //   estado === 'TOD'
-  //     ? {}
-  //     : estado === 'EST'
-  //     ? { order: {terminado: false } }
-  //     : estado === 'ET'
-  //     ? { order: {terminado: true } }
-  //     : {};
-  // --- Registro ---
-  const registroFilter =
-    registro === 'TOD'
-      ? {}
-      : registro === 'REGI'
-      ? { libNum: { gt: 0 } }
-      : registro === 'NREGI'
-      ? {
-          OR: [
-            { libNum: { lt: 1 } },
-            { libNum: null }
-          ]
-        }
-      : registro === 'PROT'
-      ? { asiNum: { gt: 0 } }
-      : registro === 'NPROT'
-      ?{
-        OR: [
-          { asiNum: { lt: 1 } },
-          { asiNum: null }
-        ]
-      }
-      : {};
-
-  // --- Instrumentos existentes ---
-  const existeIns = { id_instru: { not: null } };
-    // const existeIns = { 
-    //   orderId: { not: null },  // aseguro que tenga orden
-    //   order: { id_instru: { not: null } },
-    // };
-
-  // --- Ordenamiento ---
-  const sortOrder =
-    order === 'newest'
-      ? { service: { remDat: 'desc' as const } }
-      : { service: { remDat: 'asc' as const } };
-
-  // --- Query final ---
   const serviceItemsWithOrder = await this.prisma.serviceItem.findMany({
-
     where: {
-      ...productFilter,
-      ...obserFilter,
-      ...estadoFilter,
+      // ...productoFilter,
+      // ...estadoFilterItem,
+      ...estadoServiceItemFilter,
+      
       service: {
         is: {
-          // id_instru: { not: null }, // ✅ el filtro se mantiene
-          ...registroFilter,
-          ...existeIns,
-          ...fechasFilter,
-          ...parteFilter,
-          ...maquinaFilter,
-          ...encargadoFilter,
-          ...instruFilter,
-          ...customerFilter,
-          ...configuracionFilter,
-          ...usuarioFilter,
+          ...baseServiceWhere,
         },
       },
     },
+    
+    orderBy: sortServiceItemOrder,
 
-    orderBy: sortOrder,
     include: {
       service: {
         include: {
-          // orderAddress: true,
           customer: true,
           parte: true,
           maquina: true,
@@ -1021,96 +899,90 @@ const obserFilter: Prisma.ServiceWhereInput =
       product: true,
     },
   });
-// Traemos todos los ServiceItems con sus Order relacionados
 
-// Mapeamos cada ServiceItem a un objeto tipo invoice
-const entradas = serviceItemsWithOrder.map(item => ({
-  // _id: item.id, // ID del item
-_id: item.service?.id,
-  serviceItems: {
-    _id: item.id,
-    slug: item.slug,
-    title: item.title,
-    medPro: item.medPro,
-    quantity: item.quantity,
-    image: item.image,
-    price: item.price,
-    size: item.size,
-    porIva: item.porIva,
-    venDat: item.venDat,
-    observ: item.observ,
-    terminado: item.terminado,
-  },
-  // orderAddress: item.service?.serviceAddress?.[0] ?? {
-  //   firstName: '',
-  //   lastName: '',
-  //   address: '',
-  //   address2: '',
-  //   city: '',
-  //   zip: '',
-  //   country: '',
-  //   phone: ''
-  // },
-  paymentMethod: item.service?.paymentMethod ?? '',
-  subTotal: item.service?.subTotal ?? 0,
-  shippingPrice: item.service?.shippingPrice ?? 0,
-  tax: item.service?.tax ?? 0,
-  total: item.service?.total ?? 0,
-  totalBuy: item.service?.totalBuy ?? 0,
-  // id_client: item.service?.id_client ? item.service.id_client : null,
-  id_client: item.service?.customer ?? { nameCus: '' },
-  // id_instru: item.service?.id_instru ? item.service.id_instru : null,
-  id_instru: item.service?.instrumento ?? { name: '' },
-  id_parte: item.service?.parte ?? { name: '' },
-  id_maquin: item.service?.maquina ?? { name: '' },
-  id_encar: item.service?.encargado ?? { name: '' },
+  // ========================
+  // TRANSFORM
+  // ========================
 
+  const entradas = serviceItemsWithOrder.map(item => {
+    const s = item.service;
 
-  // libNum: item.service?.libNum ?? 0,
-  // folNum: item.service?.folNum ?? 0,
-  // asiNum: item.service?.asiNum ?? 0,
-  // asiDat: item.service?.asiDat ?? null,
-  // escNum: item.service?.escNum ?? 0,
-  // asieNum: item.service?.asieNum ?? 0,
-  // asieDat: item.service?.asieDat ?? null,
-  terminado: item.service?.terminado ?? false,
-  // id_config: item.service?.id_config ? item.service.id_config : null,
-  id_config: item.service?.configuration ?? { name: '' },
-  codConNum: item.service?.codConNum ?? '',
-  // user: item.service?.user ? item.service.user : null,
-  user: item.service?.user1 ?? { name: '' },
-  isPaid: item.service?.isPaid ?? false,
-  isDelivered: item.service?.isDelivered ?? false,
-  remNum: item.service?.remNum ?? 0,
-  remDat: item.service?.remDat ?? null,
-  dueDat: item.service?.dueDat ?? null,
-  invNum: item.service?.invNum ?? 0,
-  invDat: item.service?.invDat ?? null,
-  recNum: item.service?.recNum ?? 0,
-  recDat: item.service?.recDat ?? null,
-  desVal: item.service?.desVal ?? '',
-  notes: item.service?.notes ?? '',
-  salbuy: item.service?.salbuy ?? '',
-  createdAt: item.service?.createdAt ?? new Date(),
-  updatedAt: item.service?.updatedAt ?? new Date(),
+    return {
+      _id: s?.id,
 
-  // Campos calculados / alias de relaciones
-  instruName: item.service?.instrumento?.name ?? '',
-  instruPublico: item.service?.instrumento?.publico ?? '',
-  parteName: item.service?.parte?.name ?? '',
-  maquinaName: item.service?.maquina?.name ?? '',
-  encargadoName: item.service?.encargado?.name ?? '',
-  customName: item.service?.customer?.nameCus ?? '',
-  configName: item.service?.configuration?.name ?? '',
-  userName: item.service?.user1?.name ?? '',
-  valor: (item.price * (1 + item.porIva / 100)).toFixed(2),
-  totalOrder: item.service?.total?.toFixed(2) ?? '0.00',
-  __v: 0,
-}));
+      serviceItems: {
+        _id: item.id,
+        slug: item.slug,
+        title: item.title,
+        medPro: item.medPro,
+        quantity: item.quantity,
+        image: item.image,
+        price: item.price,
+        size: item.size,
+        porIva: item.porIva,
+        venDat: item.venDat,
+        observ: item.observ,
+        terminado: item.terminado,
+      },
 
+      paymentMethod: s?.paymentMethod ?? '',
+      subTotal: s?.subTotal ?? 0,
+      shippingPrice: s?.shippingPrice ?? 0,
+      tax: s?.tax ?? 0,
+      total: s?.total ?? 0,
+      totalBuy: s?.totalBuy ?? 0,
+
+      id_client: s?.customer ?? { nameCus: '' },
+      id_instru: s?.instrumento ?? { name: '' },
+      id_parte: s?.parte ?? { name: '' },
+      id_maquin: s?.maquina ?? { name: '' },
+      id_encar: s?.encargado ?? { name: '' },
+
+      terminado: s?.terminado ?? false,
+      id_config: s?.configuration ?? { name: '' },
+
+      codConNum: s?.codConNum ?? '',
+      user: s?.user1 ?? { name: '' },
+
+      isPaid: s?.isPaid ?? false,
+      isDelivered: s?.isDelivered ?? false,
+
+      remNum: s?.remNum ?? 0,
+      remDat: s?.remDat ?? null,
+      dueDat: s?.dueDat ?? null,
+
+      invNum: s?.invNum ?? 0,
+      invDat: s?.invDat ?? null,
+
+      recNum: s?.recNum ?? 0,
+      recDat: s?.recDat ?? null,
+
+      desVal: s?.desVal ?? '',
+      notes: s?.notes ?? '',
+      salbuy: s?.salbuy ?? '',
+
+      createdAt: s?.createdAt ?? new Date(),
+      updatedAt: s?.updatedAt ?? new Date(),
+
+      // 🔥 aliases
+      instruName: s?.instrumento?.name ?? '',
+      instruPublico: s?.instrumento?.publico ?? '',
+      parteName: s?.parte?.name ?? '',
+      maquinaName: s?.maquina?.name ?? '',
+      encargadoName: s?.encargado?.name ?? '',
+      customName: s?.customer?.nameCus ?? '',
+      configName: s?.configuration?.name ?? '',
+      userName: s?.user1?.name ?? '',
+
+      // 🔥 cálculos
+      valor: (item.price * (1 + item.porIva / 100)).toFixed(2),
+      totalOrder: (s?.total ?? 0).toFixed(2),
+
+      __v: 0,
+    };
+  });
 
   return { entradas };
-
 }
 //////dili
 
@@ -1384,6 +1256,7 @@ async update(updateEntradaDto: any, id: string) {
               quantity: oi.quantity,
               price: oi.price,
               porIva: oi.porIva,
+              totalItem: oi.totalItem,
               venDat: safeDate(oi.venDat),
               observ: oi.observ,
               slug: oi.slug,
