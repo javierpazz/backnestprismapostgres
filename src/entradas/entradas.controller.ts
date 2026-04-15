@@ -10,25 +10,10 @@ export class EntradasController {
   constructor(private readonly entradasService: EntradasService) {}
 
 
-  @Get('entradas/summary/tar')
-  @Auth()
-  dashboardTar(@Query() query: any) {
-    return this.entradasService.dashboardTar(query);
-  }
   @Get('entradas/summary/cli')
   @Auth()
   dashboardCli(@Query() query: any) {
     return this.entradasService.dashboardCli(query);
-  }
-  @Get('entradas/summary/par')
-  @Auth()
-  dashboardPar(@Query() query: any) {
-    return this.entradasService.dashboardPar(query);
-  }
-  @Get('entradas/summary/maq')
-  @Auth()
-  dashboardMaq(@Query() query: any) {
-    return this.entradasService.dashboardMaq(query);
   }
 
 

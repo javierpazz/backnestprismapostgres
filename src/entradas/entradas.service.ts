@@ -6,150 +6,15 @@ import { UpdateEntradaDto } from './dto/update-entrada.dto';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { buildFilters } from 'src/common/utils/build-filters';
 
 
 @Injectable()
-// export class EntradasService extends PrismaClient implements OnModuleInit {
-
-//   constructor(private readonly configurationsService: ConfigurationsService) {
-//     super();
-//   }
-//   async onModuleInit() {
-//     await this.$connect();
-//   }
 export class EntradasService {
 
   constructor(private readonly configurationsService: ConfigurationsService,
               private prisma: PrismaService
             ) {}  
-
-// @Injectable()
-// export class EntradasService {
-//   constructor(
-//     private readonly configurationsService: ConfigurationsService,
-//   ) {}
-
-
-
-
-// async create(createEntradaDto: any) {
-//   const { serviceItems, orderAddress, ...serviceData } = createEntradaDto;
-
-//   const safeDate = (dateStr: string | undefined) => dateStr ? new Date(dateStr) : null;
-//     try {
-
-
-// //////////////
-//       let remNumero;
-//       if (serviceData.remNum > 0) {
-//         remNumero = serviceData.remNum;
-//       } else {
-//         const configId = serviceData.codCon;
-//         // const configuracion = await Configuration.findById(configId).session(session);
-//         const configuracion = await this.prisma.configuration.findUnique(
-//           {
-//             where: { id: configId },
-//           }
-//         );
-//         if (configuracion) {
-//           configuracion.numIntRem += 1;
-//           // await configuracion.save({ session });
-//           await this.prisma.configuration.update(
-//             {
-//               where: { id: configId },
-//               data: {
-//                 numIntRem: { increment: 1 },
-//               },
-//             }
-//           );
-//           remNumero = configuracion.numIntRem;
-//         } else {
-//           throw new Error('Configuración no encontrada');
-//         }
-//       }
-//       serviceData.remNum = remNumero;    
-// //////////////
-
-
-
-
-//             const invoice = await this.prisma.service.create({
-//           data: {
-//             paymentMethod: serviceData.paymentMethod,
-//             subTotal: serviceData.subTotal,
-//             shippingPrice: serviceData.shippingPrice,
-//             tax: serviceData.tax,
-//             total: serviceData.total,
-//             totalBuy: serviceData.totalBuy,
-//             itemsInOrder:0,
-//             libNum: serviceData.libNum,
-//             folNum: serviceData.folNum,
-//             asiNum: serviceData.asiNum,
-//             asiDat: safeDate(serviceData.asiDat),
-//             escNum: serviceData.escNum,
-//             asieNum: serviceData.asieNum,
-//             asieDat: safeDate(serviceData.asieDat),
-//             terminado: serviceData.terminado,
-//             movpvNum: serviceData.movpvNum,
-//             movpvDat: safeDate(serviceData.movpvDat),
-//             codConNum: serviceData.codConNum,
-//             // codCom: serviceData.codCom,
-//             // supplier: serviceData.supplier,
-//             remNum: serviceData.remNum,
-//             // remNum: 1234,
-//             remDat: safeDate(serviceData.remDat),
-//             dueDat: safeDate(serviceData.dueDat),
-//             invNum: serviceData.invNum,
-//             invDat: safeDate(serviceData.invDat),
-//             recNum: serviceData.recNum,
-//             recDat: safeDate(serviceData.recDat),
-//             desVal: serviceData.desVal,
-//             notes: serviceData.notes,
-//             salbuy: serviceData.salbuy,
-
-//             // relaciones
-//             customer: serviceData.codCus ? { connect: { id: serviceData.codCus } } : undefined,
-//             parte: serviceData.codPar ? { connect: { id: serviceData.codPar } } : undefined,
-//             instrumento: serviceData.codIns ? { connect: { id: serviceData.codIns } } : undefined,
-//             configuration: serviceData.codCon ? { connect: { id: serviceData.codCon } } : undefined,
-//             user1: serviceData.user ? { connect: { id: serviceData.user } } : undefined,
-
-
-            
-//             // service items
-//             serviceItems: {
-//               create: serviceItems.map(item => ({
-//                 slug: item.slug,
-//                 title: item.title,
-//                 medPro: item.medPro,
-//                 quantity: item.quantity,
-//                 image: item.image,
-//                 price: item.price,
-//                 size: item.size,
-//                 porIva: item.porIva,
-//                 venDat: safeDate(item.venDat),
-//                 observ: item.observ,
-//                 terminado: item.terminado,
-//                 // productId: item.productId,
-//                 productId: item._id,
-//                 // instrumentoId: item.instrumentoId,
-
-
-
-//               }))
-//             }
-//           },
-//           include: { serviceItems: true }, // incluye los items en la respuesta
-//         });
-
-//         return { invoice };
-            
-//     } catch (error) {
-//       this.handleExceptions( error );
-//     }
-
-// }
-
 async searchSerUS(id: string) {
     
     /// cambiar filtro por cliente
@@ -195,7 +60,6 @@ async searchSerUS(id: string) {
         user1: true,          // usuario si quieres incluirlo
         serviceItems: true,
       },      })
-console.log(servicesWork)
   const orders = servicesWork.map((order) => ({
     _id: order.id,
     ...order,
@@ -233,2564 +97,424 @@ console.log(servicesWork)
 
 
 
+//////dash1esc
+async dashboardEsc(query: any) {
 
-//////dashTar
+  const {
+    baseServiceWhere,
+    productoFilter
+  } = buildFilters(query);
+  // ========================
+  // FILTERS
+  // ========================
 
-  async dashboardTar(query: any) {
-
-
-///filtroparaborrar
-const {
-  fech1,
-  fech2,
-  configuracion,
-  usuario,
-  customer,
-  producto,
-  parte,
-  maquina,
-  encargado,
-  instru,
-} = query;
-
-    // --- Fechas ---
-    const fechasInvFilter =
-      !fech1 && !fech2
-        ? {}
-        : !fech1 && fech2
-        ? { remDat: { lte: new Date(fech2) } }
-        : fech1 && !fech2
-        ? { remDat: { gte: new Date(fech1) } }
-        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
-
-    // --- Otros filtros ---
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-    const configuracionFilter =
-      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
-    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
-
-///filtroparaborrar
-
-///////tarxmaq
-// 1. Traer datos
-const result = await this.prisma.serviceItem.findMany({
-  where: {
-    ...productoFilter,
-    service: {
-      id_instru: { not: null },
-      id_maquin: { not: null },
-      ...fechasInvFilter,
-      ...configuracionFilter,
-      ...customerFilter,
-      ...usuarioFilter,
-      ...instruFilter,
-      ...parteFilter,
-    },
-  },
-  select: {
-    price: true,
-    quantity: true,
-    porIva: true,
-    service: {
-      select: {
-        id_maquin: true,
-      },
-    },
-  },
-});
-
-// 2. Agrupar SOLO por máquina
-const grouped = result.reduce((acc, item) => {
-  const idMaquin = item.service?.id_maquin;
-  if (!idMaquin) return acc;
-
-  if (!acc[idMaquin]) {
-    acc[idMaquin] = {
-      id_maquin: idMaquin,
-      total: 0,
-      totalCan: 0,
-    };
-  }
-
-  acc[idMaquin].total +=
-    (item.price || 0) *
-    (item.quantity || 0) *
-    (1 + (item.porIva || 0) / 100);
-
-  acc[idMaquin].totalCan += 1;
-
-  return acc;
-}, {} as Record<string, {
-  id_maquin: string;
-  total: number;
-  totalCan: number;
-}>);
-
-// 3. Convertir a array
-const allData = Object.values(grouped);
-
-// 4. Ordenar y TOP 10
-const top10 = allData
-  .sort((a, b) => b.total - a.total) // 💰 ranking por total
-  .slice(0, 10);
-
-// 5. (OPCIONAL) traer nombre de máquina
-const maquinasIds = top10.map(m => m.id_maquin);
-
-const maquinas = await this.prisma.maquina.findMany({
-  where: {
-    id: { in: maquinasIds },
-  },
-  select: {
-    id: true,
-    // ajustá este campo según tu modelo
-    name: true
-  },
-});
-
-const mapMaquinas = Object.fromEntries(
-  maquinas.map(m => [m.id, m])
-);
-
-// 6. Resultado final
-const MaqxTar = top10.map(m => ({
-  maquinaId: m.id_maquin,
-  maquina: mapMaquinas[m.id_maquin]?.name || '',
-  total: m.total,
-  totalCan: m.totalCan,
-}));
-
-///////tarxmaq
-
-///////tarxpar
-// 1. Traer datos
-const resultTxP = await this.prisma.serviceItem.findMany({
-  where: {
-    ...productoFilter,
-    service: {
-      id_instru: { not: null },
-      id_parte: { not: null },
-      ...fechasInvFilter,
-      ...configuracionFilter,
-      ...customerFilter,
-      ...usuarioFilter,
-      ...instruFilter,
-      ...parteFilter,
-    },
-  },
-  select: {
-    price: true,
-    quantity: true,
-    porIva: true,
-    service: {
-      select: {
-        id_parte: true,
-      },
-    },
-  },
-});
-
-// 2. Agrupar SOLO por máquina
-const groupedTxP = resultTxP.reduce((acc, item) => {
-  const idParte = item.service?.id_parte;
-  if (!idParte) return acc;
-
-  if (!acc[idParte]) {
-    acc[idParte] = {
-      id_parte: idParte,
-      total: 0,
-      totalCan: 0,
-    };
-  }
-
-  acc[idParte].total +=
-    (item.price || 0) *
-    (item.quantity || 0) *
-    (1 + (item.porIva || 0) / 100);
-
-  acc[idParte].totalCan += 1;
-
-  return acc;
-}, {} as Record<string, {
-  id_parte: string;
-  total: number;
-  totalCan: number;
-}>);
-
-// 3. Convertir a array
-const allDataTxP = Object.values(groupedTxP);
-
-// 4. Ordenar y TOP 10
-const top10TxP = allDataTxP
-  .sort((a, b) => b.total - a.total) // 💰 ranking por total
-  .slice(0, 10);
-
-// 5. (OPCIONAL) traer nombre de máquina
-const partesIds = top10TxP.map(m => m.id_parte);
-
-const partes = await this.prisma.parte.findMany({
-  where: {
-    id: { in: partesIds },
-  },
-  select: {
-    id: true,
-    // ajustá este campo según tu modelo
-    name: true
-  },
-});
-
-const mapPartes = Object.fromEntries(
-  partes.map(m => [m.id, m])
-);
-
-// 6. Resultado final
-const TarxPar = top10TxP.map(m => ({
-  parteId: m.id_parte,
-  parte: mapPartes[m.id_parte]?.name || '',
-  total: m.total,
-  totalCan: m.totalCan,
-}));
-
-///////tarxpar
+  // const obserFilter =
+  //   obser && obser !== 'all'
+  //     ? {
+  //         OR: [
+  //           { notes: { contains: obser, mode: 'insensitive' } },
+  //           {
+  //             serviceItems: {
+  //               some: {
+  //                 observ: { contains: obser, mode: 'insensitive' },
+  //               },
+  //             },
+  //           },
+  //         ],
+  //       }
+  //     : {};
 
 
+  // ========================
+  // PARALLEL QUERIES
+  // ========================
 
+  const [
+    topUsers,
+    topCustomers,
+    topPartes,
+    insterValRaw,
+    dilValRaw,
+    pubPriRaw,
+    categories,
+    servicesData,
+    totalUsers,
+    totalCustomers,
+  ] = await Promise.all([
 
-      ///dilval
+    // TOP USERS
+    this.prisma.service.groupBy({
+      by: ['user'],
+      where: baseServiceWhere,
+      _sum: { total: true },
+      _count: { user: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
 
-    const resultdilVal = await this.prisma.serviceItem.findMany({
+    // TOP CUSTOMERS
+    this.prisma.service.groupBy({
+      by: ['id_client'],
+      where: { ...baseServiceWhere, id_client: { not: null } },
+      _sum: { total: true },
+      _count: { id_client: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
+
+    // TOP PARTES
+    this.prisma.service.groupBy({
+      by: ['id_parte'],
+      where: { ...baseServiceWhere, id_parte: { not: null } },
+      _sum: { total: true },
+      _count: { id_parte: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
+
+    // INST VAL
+    this.prisma.service.groupBy({
+      by: ['terminado'],
+      where: baseServiceWhere,
+      _sum: { total: true },
+      _count: { id: true },
+    }),
+
+    // DIL VAL (OPTIMIZADO)
+    this.prisma.serviceItem.groupBy({
+      by: ['terminado'],
+      // where: itemWhere,
       where: {
-    ...productoFilter,
-        service: {
-          id_instru: { not: null },
-          ...fechasInvFilter,
-          ...configuracionFilter,
-          ...customerFilter,
-          ...usuarioFilter,
-          ...instruFilter,
-          ...parteFilter,
-        },
+          ...productoFilter,
+        service: baseServiceWhere,
       },
-      select: {
-        terminado: true,
+      _sum: {
         price: true,
         quantity: true,
-        porIva: true,
       },
-    });
+      _count: {
+        terminado: true,
+      },
+    }),
 
-    const groupedTar = resultdilVal.reduce((acc, item) => {
-      const key = item.terminado ? 'terminado' : 'pendiente';
+    // PUBLIC / PRIVATE (LIGHT)
+    this.prisma.service.findMany({
+      where: baseServiceWhere,
+      select: {
+        total: true,
+        instrumento: {
+          select: { publico: true },
+        },
+      },
+    }),
 
-      if (!acc[key]) {
-        acc[key] = { total: 0, totalCan: 0 };
+    // CATEGORIES
+    this.prisma.product.groupBy({
+      by: ['category'],
+      _count: { category: true },
+    }),
+
+    // TOTAL SERVICES
+    this.prisma.service.aggregate({
+      where: baseServiceWhere,
+      _count: { _all: true },
+      _sum: { total: true },
+    }),
+
+    // COUNTS
+    this.prisma.user.count(),
+    this.prisma.customer.count(),
+  ]);
+
+  // ========================
+  // MAPS
+  // ========================
+
+  const [usersTop, customersTop, partesTop] = await Promise.all([
+    this.prisma.user.findMany({
+      where: { id: { in: topUsers.map(x => x.user!) } },
+      select: { id: true, name: true },
+    }),
+    this.prisma.customer.findMany({
+      where: { id: { in: topCustomers.map(x => x.id_client!) } },
+      select: { id: true, nameCus: true },
+    }),
+    this.prisma.parte.findMany({
+      where: { id: { in: topPartes.map(x => x.id_parte!) } },
+      select: { id: true, name: true },
+    }),
+  ]);
+
+  const mapUsers = Object.fromEntries(usersTop.map(x => [x.id, x.name]));
+  const mapCustomers = Object.fromEntries(customersTop.map(x => [x.id, x.nameCus]));
+  const mapPartes = Object.fromEntries(partesTop.map(x => [x.id, x.name]));
+
+  // ========================
+  // FINAL TRANSFORMS
+  // ========================
+
+  const top10UsersSTVal = topUsers.map(x => ({
+    userId: x.user,
+    user: mapUsers[x.user!],
+    totalSales: x._sum.total || 0,
+    totalOrders: x._count.user,
+  }));
+
+  const top10Clients = topCustomers.map(x => ({
+    customerId: x.id_client,
+    customer: mapCustomers[x.id_client!],
+    totalSales: x._sum.total || 0,
+    totalOrders: x._count.id_client,
+  }));
+
+  const top10Partes = topPartes.map(x => ({
+    parteId: x.id_parte,
+    parte: mapPartes[x.id_parte!],
+    totalSales: x._sum.total || 0,
+    totalOrders: x._count.id_parte,
+  }));
+
+  const insterVal = insterValRaw.map(r => ({
+    _id: r.terminado ? 'terminado' : 'pendiente',
+    total: r._sum.total || 0,
+    count: r._count.id,
+  }));
+
+  const dilVal = dilValRaw.map(r => ({
+    _id: r.terminado ? 'terminado' : 'pendiente',
+    total: (r._sum.price || 0) * (r._sum.quantity || 0),
+    totalCan: r._count.terminado,
+  }));
+
+  const PubPriVal = (() => {
+    let pub = 0, pri = 0, cpub = 0, cpri = 0;
+    for (const s of pubPriRaw) {
+      if (s.instrumento?.publico) {
+        pub += s.total || 0;
+        cpub++;
+      } else {
+        pri += s.total || 0;
+        cpri++;
       }
+    }
+    return [
+      { type: 'Publico', total: pub, totalcont: cpub },
+      { type: 'Privado', total: pri, totalcont: cpri },
+    ];
+  })();
 
-      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
-      acc[key].totalCan += 1;
+  const productCategories = categories.map(c => ({
+    _id: c.category,
+    count: c._count.category,
+  }));
 
-      return acc;
-    }, {} as Record<string, { total: number; totalCan: number }>);
-
-    const dilVal = Object.entries(groupedTar).map(([key, value]) => ({
-      _id: key,
-      total: value.total,
-      totalCan: value.totalCan,
-    }));
-
-      ///dilval
-
-
-
-///orders
-const servicesData = await this.prisma.service.aggregate({
-  where: {
-            id_instru: {not: null},
-        ...fechasInvFilter,
-        ...configuracionFilter,
-        ...customerFilter,
-        ...usuarioFilter,
-        ...instruFilter,
-        ...parteFilter,
-  },
-  _count: {
-    _all: true,
-  },
-  _sum: {
-    total: true,
-  },
-});
-
-const orders = [
-  {
+  const orders = [{
     _id: null,
     numOrders: servicesData._count._all,
     totalSales: servicesData._sum.total || 0,
-  },
-];
-///orders
+  }];
 
-const Users = await this.prisma.user.count();
-const users = [
-  {
-    _id: null,
-    numUsers: Users
-  }
-  ]
-const Customers = await this.prisma.customer.count();
-const customers = [
-  {
-    _id: null,
-    numCustomers: Customers
-  }
-  ]
-      return {
-        MaqxTar,
-        TarxPar,
-          // top10PartesSTVal,
-          // top10PartesTerVal,
-          // top10Maquinas,
-          orders,
-          users,
-          customers,
-          // top10Partes,
-          dilVal,
-      };
+  return {
+    productCategories,
+    orders,
+    users: [{ numUsers: totalUsers }],
+    customers: [{ numCustomers: totalCustomers }],
+    top10Clients,
+    top10Partes,
+    PubPriVal,
+    dilVal,
+    insterVal,
+    top10UsersSTVal,
+  };
+}
+//////dash1Esc
 
 
 
-  }
-//////dashTar
+
 
 
   
 //////dashCli
 
-  async dashboardCli(query: any) {
-
-
-///filtroparaborrar
-const {
-  fech1,
-  fech2,
-  configuracion,
-  usuario,
-  customer,
-  producto,
-  parte,
-  maquina,
-  encargado,
-  instru,
-  estado,
-  registro,
-  obser,
-} = query;
-
-
-    // let userCli: Customer;
-    // if ( usuario ) {
-    //   userCli = await this.prisma.customer.findUnique({
-    //   where: { usuario },
-    //   });
-    // }
-    // if ( !userCli ) 
-    //   throw new NotFoundException(`Usuario with email, name or no "${ usuario }" not found`);
-    
-    
-    
-  const obserFilter: Prisma.ServiceWhereInput =
-  obser && obser !== 'all'
-    ? {
-        OR: [
-          { notes: { contains: obser, mode: 'insensitive' } },
-          {
-            serviceItems: {
-              some: { observ: { contains: obser, mode: 'insensitive' } },
-            },
-          },
-        ],
-      }
-    : {};
-
-    // --- Estado ---
-    const estadoFilter =
-      estado === 'TOD'
-        ? {}
-        : estado === 'EST'
-        ? { terminado: false }
-        : estado === 'ET'
-        ? { terminado: true }
-        : {};
-
-  const registroFilter =
-    registro === 'TOD'
-      ? {}
-      : registro === 'REGI'
-      ? { libNum: { gt: 0 } }
-      : registro === 'NREGI'
-      ? {
-          OR: [
-            { libNum: { lt: 1 } },
-            { libNum: null }
-          ]
-        }
-      : registro === 'PROT'
-      ? { asiNum: { gt: 0 } }
-      : registro === 'NPROT'
-      ?{
-        OR: [
-          { asiNum: { lt: 1 } },
-          { asiNum: null }
-        ]
-      }
-      : {};
-
-    
-    
-    
-    // --- Fechas ---
-    const fechasInvFilter =
-    !fech1 && !fech2
-    ? {}
-    : !fech1 && fech2
-    ? { remDat: { lte: new Date(fech2) } }
-    : fech1 && !fech2
-    ? { remDat: { gte: new Date(fech1) } }
-    : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
-    
-    // --- Otros filtros ---
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
-    const configuracionFilter =
-    configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
-    
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-
-    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
-    const productoOrderItemFilter =
-      producto && producto !== 'all'
-        ? {
-            serviceItems: {
-              some: {
-                productId: String(producto),
-              },
-            },
-          }
-        : {};
-            
-    ///filtroparaborrar
-    
-
-
-
-/////toptentarxmaq
-// 1. Traer datos
-const resulttarmaq = await this.prisma.serviceItem.findMany({
-  where: {
-    ...productoFilter,
-    ...estadoFilter,
-    service: {
-      id_instru: { not: null },
-      id_maquin: { not: null },
-      ...fechasInvFilter,
-      ...configuracionFilter,
-      ...customerFilter,
-      ...usuarioFilter,
-      ...instruFilter,
-      ...parteFilter,
-      ...maquinaFilter,
-      ...encargadoFilter,
-      ...obserFilter,
-      ...estadoFilter,
-      ...registroFilter,
-    },
-  },
-  select: {
-    productId: true,
-    price: true,
-    quantity: true,
-    porIva: true,
-  },
-});
-
-// 2. Agrupar por productId
-const groupedTarMaq = resulttarmaq.reduce((acc, item) => {
-  const key = item.productId;
-
-  if (!acc[key]) {
-    acc[key] = {
-      productId: key,
-      total: 0,
-      totalCan: 0,
-    };
-  }
-
-  acc[key].total +=
-    (item.price || 0) *
-    (item.quantity || 0) *
-    (1 + (item.porIva || 0) / 100);
-
-  acc[key].totalCan += 1;
-
-  return acc;
-}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
-
-// 3. Obtener IDs únicos
-// const productosIds = Object.values(groupedTarMaq).map(p => p.productId);
-const productosIds = [...new Set(
-  Object.values(groupedTarMaq).map(p => String(p.productId))
-)];
-
-// 4. Traer nombres de productos
-const productos = await this.prisma.product.findMany({
-  where: {
-    id: { in: productosIds },
-  },
-  select: {
-    id: true,
-    title: true, // 👈 ajustá si tu campo es distinto
-  },
-});
-
-// 5. Crear mapa id → nombre
-const mapProductos = Object.fromEntries(
-  productos.map(p => [p.id, p.title])
-);
-
-// 6. Resultado final con nombre + ordenado
-const TarxMaq = Object.values(groupedTarMaq)
-  .map(item => ({
-    productId: item.productId,
-    producto: mapProductos[item.productId] || 'Sin nombre',
-    total: item.total,
-    totalCan: item.totalCan,
-  }))
-  .sort((a, b) => b.total - a.total); // 👈 orden por total
-
-/////toptentarxmaq
-
-
-/////toptentarxpar
-// 1. Traer datos
-const resulttarpar = await this.prisma.serviceItem.findMany({
-  where: {
-    ...productoFilter,
-    ...estadoFilter,
-    service: {
-      id_instru: { not: null },
-      id_parte: { not: null },
-      ...fechasInvFilter,
-      ...configuracionFilter,
-      ...customerFilter,
-      ...usuarioFilter,
-      ...instruFilter,
-      ...parteFilter,
-      ...maquinaFilter,
-      ...encargadoFilter,
-      ...obserFilter,
-      ...estadoFilter,
-      ...registroFilter,
-    },
-  },
-  select: {
-    productId: true,
-    price: true,
-    quantity: true,
-    porIva: true,
-  },
-});
-
-// 2. Agrupar por productId
-const groupedTarPar = resulttarpar.reduce((acc, item) => {
-  const key = item.productId;
-
-  if (!acc[key]) {
-    acc[key] = {
-      productId: key,
-      total: 0,
-      totalCan: 0,
-    };
-  }
-
-  acc[key].total +=
-    (item.price || 0) *
-    (item.quantity || 0) *
-    (1 + (item.porIva || 0) / 100);
-
-  acc[key].totalCan += 1;
-
-  return acc;
-}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
-
-// 3. Obtener IDs únicos
-// const productosIds = Object.values(groupedTarPar).map(p => p.productId);
-const productosIdsPar = [...new Set(
-  Object.values(groupedTarPar).map(p => String(p.productId))
-)];
-
-// 4. Traer nombres de productos
-const productosPar = await this.prisma.product.findMany({
-  where: {
-    id: { in: productosIdsPar },
-  },
-  select: {
-    id: true,
-    title: true, // 👈 ajustá si tu campo es distinto
-  },
-});
-
-// 5. Crear mapa id → nombre
-const mapProductosPar = Object.fromEntries(
-  productosPar.map(p => [p.id, p.title])
-);
-
-// 6. Resultado final con nombre + ordenado
-const TarxPar = Object.values(groupedTarPar)
-  .map(item => ({
-    productId: item.productId,
-    producto: mapProductos[item.productId] || 'Sin nombre',
-    total: item.total,
-    totalCan: item.totalCan,
-  }))
-  .sort((a, b) => b.total - a.total); // 👈 orden por total
-
-/////toptentarxpar
-
-
-
-///instrumentostop10
-const topInstrumentosTra = await this.prisma.service.groupBy({
-  by: ['id_instru'],
-  where: {
-    id_instru: { not: null },
-    id_maquin: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
-    ...fechasInvFilter,
-    ...configuracionFilter,
-    ...customerFilter,
-    ...usuarioFilter,
-    ...instruFilter,
-    ...parteFilter,
-    ...maquinaFilter,
-    ...encargadoFilter,
-    ...obserFilter,
-    ...estadoFilter,
-    ...registroFilter,
-    ...productoOrderItemFilter,
-  },
-  _sum: {
-    total: true,
-  },
-  _count: {
-    id_instru: true,
-  },
-  orderBy: {
-    _sum: {
-      total: 'desc',
-    },
-  },
-  take: 10,
-});
-
-// 👉 traer nombres de instrumentos
-const instrumentosTopTra = await this.prisma.instrumento.findMany({
-  where: {
-    id: { in: topInstrumentosTra.map(c => c.id_instru!) },
-  },
-  select: {
-    id: true,
-    name: true,
-  },
-});
-
-// 👉 map id → nombre
-const mapInstrumentosTra = Object.fromEntries(
-  instrumentosTopTra.map(i => [i.id, i.name])
-);
-
-// 👉 resultado final
-const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
-  instrumentoId: c.id_instru,
-  instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
-  totalSales: c._sum.total ?? 0,
-  totalOrders: c._count.id_instru ?? 0,
-}));
-
-///instrumentostop10
-
-      ///instrumentostop10
-      const topInstrumentosTraPar = await this.prisma.service.groupBy({
-        by: ['id_instru'],
-        where: {
-          id_instru: { not: null },
-          id_parte: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
-          ...fechasInvFilter,
-          ...configuracionFilter,
-          ...customerFilter,
-          ...usuarioFilter,
-          ...instruFilter,
-          ...parteFilter,
-          ...maquinaFilter,
-          ...encargadoFilter,
-          ...obserFilter,
-          ...estadoFilter,
-          ...registroFilter,
-          ...productoOrderItemFilter,
-        },
-        _sum: {
-          total: true,
-        },
-        _count: {
-          id_instru: true,
-        },
-        orderBy: {
-          _sum: {
-            total: 'desc',
-          },
-        },
-        take: 10,
-      });
-
-      // 👉 traer nombres de instrumentos
-      const instrumentosTopTraPar = await this.prisma.instrumento.findMany({
-        where: {
-          id: { in: topInstrumentosTraPar.map(c => c.id_instru!) },
-        },
-        select: {
-          id: true,
-          name: true,
-        },
-      });
-
-      // 👉 map id → nombre
-      const mapInstrumentosTraPar = Object.fromEntries(
-        instrumentosTopTraPar.map(i => [i.id, i.name])
-      );
-
-      // 👉 resultado final
-      const top10InstrumentosxPar = topInstrumentosTraPar.map(c => ({
-        instrumentoId: c.id_instru,
-        instrumento: mapInstrumentosTraPar[c.id_instru!] || 'Sin nombre',
-        totalSales: c._sum.total ?? 0,
-        totalOrders: c._count.id_instru ?? 0,
-      }));
-
-      ///instrumentostop10
-
-
-///orders
-const servicesData = await this.prisma.service.aggregate({
-  where: {
-        OR: [
-          { id_maquin: {not: null} },
-          { id_parte: {not: null} },
-        ],
-
-        id_instru: {not: null},
-        ...fechasInvFilter,
-        ...configuracionFilter,
-        ...customerFilter,
-        ...usuarioFilter,
-        ...instruFilter,
-        ...parteFilter,
-        ...maquinaFilter,
-        ...encargadoFilter,
-        ...obserFilter,
-        ...estadoFilter,
-        ...registroFilter,
-        ...productoOrderItemFilter,
-  },
-  _count: {
-    _all: true,
-  },
-  _sum: {
-    total: true,
-  },
-});
-
-const orders = [
-  {
-    _id: null,
-    numOrders: servicesData._count._all,
-    totalSales: servicesData._sum.total || 0,
-  },
-];
-///orders
-
-const Users = await this.prisma.user.count();
-const users = [
-  {
-    _id: null,
-    numUsers: Users
-  }
-  ]
-const Customers = await this.prisma.customer.count();
-const customers = [
-  {
-    _id: null,
-    numCustomers: Customers
-  }
-  ]
-      return {
-          // top10PartesSTVal,
-          // top10PartesTerVal,
-          // top10Maquinas,
-          top10InstrumentosxMaq,
-          top10InstrumentosxPar,
-          orders,
-          // users,
-          // customers,
-          // top10Partes,
-          // dilVal,
-          TarxPar,
-          TarxMaq,
-      };
-
-
-
-  }
-//////dashCli
-
-
-//////dashPar
-
-  async dashboardPar(query: any) {
-
-
-///filtroparaborrar
-const {
-  fech1,
-  fech2,
-  configuracion,
-  usuario,
-  customer,
-  producto,
-  parte,
-  maquina,
-  encargado,
-  instru,
-  estado,
-  registro,
-  obser,
-} = query;
-
-
-  const obserFilter: Prisma.ServiceWhereInput =
-  obser && obser !== 'all'
-    ? {
-        OR: [
-          { notes: { contains: obser, mode: 'insensitive' } },
-          {
-            serviceItems: {
-              some: { observ: { contains: obser, mode: 'insensitive' } },
-            },
-          },
-        ],
-      }
-    : {};
-
-    // --- Estado ---
-    const estadoFilter =
-      estado === 'TOD'
-        ? {}
-        : estado === 'EST'
-        ? { terminado: false }
-        : estado === 'ET'
-        ? { terminado: true }
-        : {};
-
-  const registroFilter =
-    registro === 'TOD'
-      ? {}
-      : registro === 'REGI'
-      ? { libNum: { gt: 0 } }
-      : registro === 'NREGI'
-      ? {
-          OR: [
-            { libNum: { lt: 1 } },
-            { libNum: null }
-          ]
-        }
-      : registro === 'PROT'
-      ? { asiNum: { gt: 0 } }
-      : registro === 'NPROT'
-      ?{
-        OR: [
-          { asiNum: { lt: 1 } },
-          { asiNum: null }
-        ]
-      }
-      : {};
-
-
-    // --- Fechas ---
-    const fechasInvFilter =
-      !fech1 && !fech2
-        ? {}
-        : !fech1 && fech2
-        ? { remDat: { lte: new Date(fech2) } }
-        : fech1 && !fech2
-        ? { remDat: { gte: new Date(fech1) } }
-        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
-
-    // --- Otros filtros ---
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-    const configuracionFilter =
-      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
-    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
-    const productoOrderItemFilter =
-      producto && producto !== 'all'
-        ? {
-            serviceItems: {
-              some: {
-                productId: String(producto),
-              },
-            },
-          }
-        : {};
-
-///filtroparaborrar
-
-
-        ///Maquinastop10STer
-        const topMaquinas = await this.prisma.service.groupBy({
-          by: ['id_parte'],
-          where: {
-            terminado:false,
-            id_instru: {not: null},
-            id_parte: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-            
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_parte: true   // 👈 cantidad de registros por usuario
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const maquinasTop = await this.prisma.parte.findMany({
-          where: {
-            id: { in: topMaquinas.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapMaquinas = Object.fromEntries(
-          maquinasTop.map(c => [c.id, c.name])
-        );
-
-        const top10PartesSTVal = topMaquinas.map(c => ({
-          parteId: c.id_parte,
-          parte: mapMaquinas[c.id_parte!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_parte || 0
-        }));
-
-
-        ///Maquinastop10STer
-
-        ///Maquinastop10Ter
-        const topMaquinasTer = await this.prisma.service.groupBy({
-          by: ['id_parte'],
-          where: {
-            terminado:true,
-            id_instru: {not: null},
-            id_parte: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-            
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_parte: true   // 👈 cantidad de registros por usuario
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const maquinasTopTer = await this.prisma.parte.findMany({
-          where: {
-            id: { in: topMaquinasTer.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapMaquinasTer = Object.fromEntries(
-          maquinasTopTer.map(c => [c.id, c.name])
-        );
-
-        const top10PartesTerVal = topMaquinasTer.map(c => ({
-          parteId: c.id_parte,
-          parte: mapMaquinasTer[c.id_parte!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_parte || 0
-        }));
-
-
-        ///Maquinastop10Ter
-
-
-      ///dilval
-
-    const resultdilVal = await this.prisma.serviceItem.findMany({
+async dashboardCli(query: any) {
+
+  const {
+    baseServiceWhere,
+    estadoServiceItemFilter,
+  } = buildFilters(query);
+
+  // ========================
+  // FILTERS
+  // ========================
+
+
+  // const itemWhere: any = {
+  //   ...(producto !== 'all' && { productId: producto }),
+  //   service: baseWhere,
+  // };
+
+  // ========================
+  // PARALLEL QUERIES
+  // ========================
+
+  const [
+    tarGrouped,
+    tarGroupedPar,
+    topInstMaq,
+    topInstPar,
+    servicesData,
+    totalUsers,
+    totalCustomers,
+  ] = await Promise.all([
+
+    // 🔥 PRODUCTOS x MAQUINA
+    this.prisma.serviceItem.groupBy({
+      by: ['productId'],
       where: {
-          ...productoFilter,
-          ...estadoFilter,
-        service: {
-          id_instru: { not: null },
-          id_parte: {not: null},
-          ...fechasInvFilter,
-          ...configuracionFilter,
-          ...customerFilter,
-          ...usuarioFilter,
-          ...instruFilter,
-          ...parteFilter,
-          ...maquinaFilter,
-          ...encargadoFilter,
-          ...obserFilter,
-          ...estadoFilter,
-          ...registroFilter,
-        },
+        ...estadoServiceItemFilter,
+        service: { ...baseServiceWhere, id_maquin: { not: null }},
       },
-      select: {
-        terminado: true,
+      _sum: {
         price: true,
         quantity: true,
-        porIva: true,
       },
-    });
-
-    const grouped = resultdilVal.reduce((acc, item) => {
-      const key = item.terminado ? 'terminado' : 'pendiente';
-
-      if (!acc[key]) {
-        acc[key] = { total: 0, totalCan: 0 };
-      }
-
-      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
-      acc[key].totalCan += 1;
-
-      return acc;
-    }, {} as Record<string, { total: number; totalCan: number }>);
-
-    const dilVal = Object.entries(grouped).map(([key, value]) => ({
-      _id: key,
-      total: value.total,
-      totalCan: value.totalCan,
-    }));
-
-      ///dilval
-
-/////toptentarxpar
-// 1. Traer datos
-const resulttarmaq = await this.prisma.serviceItem.findMany({
-  where: {
-    ...productoFilter,
-    service: {
-      id_instru: { not: null },
-      id_parte: { not: null },
-      ...fechasInvFilter,
-      ...configuracionFilter,
-      ...customerFilter,
-      ...usuarioFilter,
-      ...instruFilter,
-      ...parteFilter,
-      ...maquinaFilter,
-      ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-    },
-  },
-  select: {
-    productId: true,
-    price: true,
-    quantity: true,
-    porIva: true,
-  },
-});
-
-// 2. Agrupar por productId
-const groupedTarMaq = resulttarmaq.reduce((acc, item) => {
-  const key = item.productId;
-
-  if (!acc[key]) {
-    acc[key] = {
-      productId: key,
-      total: 0,
-      totalCan: 0,
-    };
-  }
-
-  acc[key].total +=
-    (item.price || 0) *
-    (item.quantity || 0) *
-    (1 + (item.porIva || 0) / 100);
-
-  acc[key].totalCan += 1;
-
-  return acc;
-}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
-
-// 3. Obtener IDs únicos
-// const productosIds = Object.values(groupedTarMaq).map(p => p.productId);
-const productosIds = [...new Set(
-  Object.values(groupedTarMaq).map(p => String(p.productId))
-)];
-
-// 4. Traer nombres de productos
-const productos = await this.prisma.product.findMany({
-  where: {
-    id: { in: productosIds },
-  },
-  select: {
-    id: true,
-    title: true, // 👈 ajustá si tu campo es distinto
-  },
-});
-
-// 5. Crear mapa id → nombre
-const mapProductos = Object.fromEntries(
-  productos.map(p => [p.id, p.title])
-);
-
-// 6. Resultado final con nombre + ordenado
-const TarxPar = Object.values(groupedTarMaq)
-  .map(item => ({
-    productId: item.productId,
-    producto: mapProductos[item.productId] || 'Sin nombre',
-    total: item.total,
-    totalCan: item.totalCan,
-  }))
-  .sort((a, b) => b.total - a.total); // 👈 orden por total
-
-/////toptentarxpar
-
-
-    ///maquinastop10
-    const topMaquinasTra = await this.prisma.service.groupBy({
-          by: ['id_parte'],
-          where: {
-            id_instru: {not: null},
-            id_parte: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_parte: true 
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const maquinasTopTra = await this.prisma.parte.findMany({
-          where: {
-            id: { in: topMaquinasTra.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapPartesTra = Object.fromEntries(
-          maquinasTopTra.map(c => [c.id, c.name])
-        );
-
-        const top10PartesxOrd = topMaquinasTra.map(c => ({
-          parteId: c.id_parte,
-          parte: mapPartesTra[c.id_parte!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_parte || 0
-        }));
-
-        ///maquinastop10
-
-      ///instrumentostop10
-      const topInstrumentosTra = await this.prisma.service.groupBy({
-        by: ['id_instru'],
-        where: {
-          id_instru: { not: null },
-          id_parte: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
-          ...fechasInvFilter,
-          ...configuracionFilter,
-          ...customerFilter,
-          ...usuarioFilter,
-          ...instruFilter,
-          ...parteFilter,
-          ...maquinaFilter,
-          ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-          ...productoOrderItemFilter,
-        },
-        _sum: {
-          total: true,
-        },
-        _count: {
-          id_instru: true,
-        },
-        orderBy: {
-          _sum: {
-            total: 'desc',
-          },
-        },
-        take: 10,
-      });
-
-      // 👉 traer nombres de instrumentos
-      const instrumentosTopTra = await this.prisma.instrumento.findMany({
-        where: {
-          id: { in: topInstrumentosTra.map(c => c.id_instru!) },
-        },
-        select: {
-          id: true,
-          name: true,
-        },
-      });
-
-      // 👉 map id → nombre
-      const mapInstrumentosTra = Object.fromEntries(
-        instrumentosTopTra.map(i => [i.id, i.name])
-      );
-
-      // 👉 resultado final
-      const top10InstrumentosxPar = topInstrumentosTra.map(c => ({
-        instrumentoId: c.id_instru,
-        instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
-        totalSales: c._sum.total ?? 0,
-        totalOrders: c._count.id_instru ?? 0,
-      }));
-
-      ///instrumentostop10
-
-
-
-    ///partetop10
-        const topPartes = await this.prisma.service.groupBy({
-          by: ['id_parte'],
-          where: {
-            id_instru: {not: null},
-            id_parte: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...parteFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_parte: true   // 👈 esto cuenta las órdenes
-          },   
-
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const partesTop = await this.prisma.parte.findMany({
-          where: {
-            id: { in: topPartes.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapPartes = Object.fromEntries(
-          partesTop.map(c => [c.id, c.name])
-        );
-
-        const top10Partes = topPartes.map(c => ({
-          parteId: c.id_parte,
-          parte: mapPartes[c.id_parte!],
-          totalSales: c._sum.total || 0
-        }));
-
-        ///partetop10
-
-
-///orders
-const servicesData = await this.prisma.service.aggregate({
-  where: {
-            id_instru: {not: null},
-            id_parte: {not: null},
-        ...fechasInvFilter,
-        ...configuracionFilter,
-        ...customerFilter,
-        ...usuarioFilter,
-        ...instruFilter,
-        ...parteFilter,
-        ...maquinaFilter,
-        ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-        ...productoOrderItemFilter,
-  },
-  _count: {
-    _all: true,
-  },
-  _sum: {
-    total: true,
-  },
-});
-
-const orders = [
-  {
-    _id: null,
-    numOrders: servicesData._count._all,
-    totalSales: servicesData._sum.total || 0,
-  },
-];
-///orders
-
-const Users = await this.prisma.user.count();
-const users = [
-  {
-    _id: null,
-    numUsers: Users
-  }
-  ]
-const Customers = await this.prisma.customer.count();
-const customers = [
-  {
-    _id: null,
-    numCustomers: Customers
-  }
-  ]
-      return {
-          top10PartesSTVal,
-          top10PartesTerVal,
-          top10PartesxOrd,
-          top10InstrumentosxPar,
-          orders,
-          users,
-          customers,
-          top10Partes,
-          dilVal,
-          TarxPar,
-      };
-
-
-
-  }
-//////dashPar
-
-
-
-
-//////dashMaq
-
-  async dashboardMaq(query: any) {
-
-
-///filtroparaborrar
-const {
-  fech1,
-  fech2,
-  configuracion,
-  usuario,
-  customer,
-  producto,
-  parte,
-  maquina,
-  encargado,
-  instru,
-  estado,
-  registro,
-  obser,
-} = query;
-
-
-  const obserFilter: Prisma.ServiceWhereInput =
-  obser && obser !== 'all'
-    ? {
-        OR: [
-          { notes: { contains: obser, mode: 'insensitive' } },
-          {
-            serviceItems: {
-              some: { observ: { contains: obser, mode: 'insensitive' } },
-            },
-          },
-        ],
-      }
-    : {};
-
-    // --- Estado ---
-    const estadoFilter =
-      estado === 'TOD'
-        ? {}
-        : estado === 'EST'
-        ? { terminado: false }
-        : estado === 'ET'
-        ? { terminado: true }
-        : {};
-
-  const registroFilter =
-    registro === 'TOD'
-      ? {}
-      : registro === 'REGI'
-      ? { libNum: { gt: 0 } }
-      : registro === 'NREGI'
-      ? {
-          OR: [
-            { libNum: { lt: 1 } },
-            { libNum: null }
-          ]
-        }
-      : registro === 'PROT'
-      ? { asiNum: { gt: 0 } }
-      : registro === 'NPROT'
-      ?{
-        OR: [
-          { asiNum: { lt: 1 } },
-          { asiNum: null }
-        ]
-      }
-      : {};
-
-
-
-
-    // --- Fechas ---
-    const fechasInvFilter =
-      !fech1 && !fech2
-        ? {}
-        : !fech1 && fech2
-        ? { remDat: { lte: new Date(fech2) } }
-        : fech1 && !fech2
-        ? { remDat: { gte: new Date(fech1) } }
-        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
-
-    // --- Otros filtros ---
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-    const configuracionFilter =
-      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
-    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
-    const productoOrderItemFilter =
-      producto && producto !== 'all'
-        ? {
-            serviceItems: {
-              some: {
-                productId: String(producto),
-              },
-            },
-          }
-        : {};
-
-///filtroparaborrar
-
-
-        ///Maquinastop10STer
-        const topMaquinas = await this.prisma.service.groupBy({
-          by: ['id_maquin'],
-          where: {
-            terminado:false,
-            id_instru: {not: null},
-            id_maquin: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-            
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_maquin: true   // 👈 cantidad de registros por usuario
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const maquinasTop = await this.prisma.maquina.findMany({
-          where: {
-            id: { in: topMaquinas.map(c => c.id_maquin!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapMaquinas = Object.fromEntries(
-          maquinasTop.map(c => [c.id, c.name])
-        );
-
-        const top10MaquinasSTVal = topMaquinas.map(c => ({
-          maquinaId: c.id_maquin,
-          maquina: mapMaquinas[c.id_maquin!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_maquin || 0
-        }));
-
-
-        ///Maquinastop10STer
-
-        ///Maquinastop10Ter
-        const topMaquinasTer = await this.prisma.service.groupBy({
-          by: ['id_maquin'],
-          where: {
-            terminado:true,
-            id_instru: {not: null},
-            id_maquin: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-            
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_maquin: true   // 👈 cantidad de registros por usuario
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const maquinasTopTer = await this.prisma.maquina.findMany({
-          where: {
-            id: { in: topMaquinasTer.map(c => c.id_maquin!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapMaquinasTer = Object.fromEntries(
-          maquinasTopTer.map(c => [c.id, c.name])
-        );
-
-        const top10MaquinasTerVal = topMaquinasTer.map(c => ({
-          maquinaId: c.id_maquin,
-          maquina: mapMaquinasTer[c.id_maquin!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_maquin || 0
-        }));
-
-
-        ///Maquinastop10Ter
-
-
-      ///dilval
-
-    const resultdilVal = await this.prisma.serviceItem.findMany({
+      _count: {
+        productId: true,
+      },
+    }),
+
+    // 🔥 PRODUCTOS x PARTE
+    this.prisma.serviceItem.groupBy({
+      by: ['productId'],
       where: {
-          ...productoFilter,
-          ...estadoFilter,
-        service: {
-          id_instru: { not: null },
-          id_maquin: {not: null},
-          ...fechasInvFilter,
-          ...configuracionFilter,
-          ...customerFilter,
-          ...usuarioFilter,
-          ...instruFilter,
-          ...parteFilter,
-          ...maquinaFilter,
-          ...encargadoFilter,
-          ...obserFilter,
-          ...estadoFilter,
-          ...registroFilter,
-        },
+        ...estadoServiceItemFilter,
+        service: { ...baseServiceWhere, id_parte: { not: null } },
       },
-      select: {
-        terminado: true,
+      _sum: {
         price: true,
         quantity: true,
-        porIva: true,
       },
-    });
-
-    const grouped = resultdilVal.reduce((acc, item) => {
-      const key = item.terminado ? 'terminado' : 'pendiente';
-
-      if (!acc[key]) {
-        acc[key] = { total: 0, totalCan: 0 };
-      }
-
-      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
-      acc[key].totalCan += 1;
-
-      return acc;
-    }, {} as Record<string, { total: number; totalCan: number }>);
-
-    const dilVal = Object.entries(grouped).map(([key, value]) => ({
-      _id: key,
-      total: value.total,
-      totalCan: value.totalCan,
-    }));
-
-      ///dilval
-
-/////toptentarxmaq
-// 1. Traer datos
-const resulttarmaq = await this.prisma.serviceItem.findMany({
-  where: {
-        ...productoFilter,
-    service: {
-      id_instru: { not: null },
-      id_maquin: { not: null },
-      ...fechasInvFilter,
-      ...configuracionFilter,
-      ...customerFilter,
-      ...usuarioFilter,
-      ...instruFilter,
-      ...parteFilter,
-      ...maquinaFilter,
-      ...encargadoFilter,
-      ...obserFilter,
-      ...estadoFilter,
-      ...registroFilter,
-    },
-  },
-  select: {
-    productId: true,
-    price: true,
-    quantity: true,
-    porIva: true,
-  },
-});
-
-// 2. Agrupar por productId
-const groupedTarMaq = resulttarmaq.reduce((acc, item) => {
-  const key = item.productId;
-
-  if (!acc[key]) {
-    acc[key] = {
-      productId: key,
-      total: 0,
-      totalCan: 0,
-    };
-  }
-
-  acc[key].total +=
-    (item.price || 0) *
-    (item.quantity || 0) *
-    (1 + (item.porIva || 0) / 100);
-
-  acc[key].totalCan += 1;
-
-  return acc;
-}, {} as Record<number, { productId: number; total: number; totalCan: number }>);
-
-// 3. Obtener IDs únicos
-// const productosIds = Object.values(groupedTarMaq).map(p => p.productId);
-const productosIds = [...new Set(
-  Object.values(groupedTarMaq).map(p => String(p.productId))
-)];
-
-// 4. Traer nombres de productos
-const productos = await this.prisma.product.findMany({
-  where: {
-    id: { in: productosIds },
-  },
-  select: {
-    id: true,
-    title: true, // 👈 ajustá si tu campo es distinto
-  },
-});
-
-// 5. Crear mapa id → nombre
-const mapProductos = Object.fromEntries(
-  productos.map(p => [p.id, p.title])
-);
-
-// 6. Resultado final con nombre + ordenado
-const TarxMaq = Object.values(groupedTarMaq)
-  .map(item => ({
-    productId: item.productId,
-    producto: mapProductos[item.productId] || 'Sin nombre',
-    total: item.total,
-    totalCan: item.totalCan,
-  }))
-  .sort((a, b) => b.total - a.total); // 👈 orden por total
-
-/////toptentarxmaq
-
-
-    ///maquinastop10
-    const topMaquinasTra = await this.prisma.service.groupBy({
-          by: ['id_maquin'],
-          where: {
-            id_instru: {not: null},
-            id_maquin: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_maquin: true 
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const maquinasTopTra = await this.prisma.maquina.findMany({
-          where: {
-            id: { in: topMaquinasTra.map(c => c.id_maquin!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapMaquinasTra = Object.fromEntries(
-          maquinasTopTra.map(c => [c.id, c.name])
-        );
-
-        const top10MaquinasxOrd = topMaquinasTra.map(c => ({
-          maquinaId: c.id_maquin,
-          maquina: mapMaquinasTra[c.id_maquin!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_maquin || 0
-        }));
-
-        ///maquinastop10
-///instrumentostop10
-const topInstrumentosTra = await this.prisma.service.groupBy({
-  by: ['id_instru'],
-  where: {
-    id_instru: { not: null },
-    id_maquin: { not: null }, // 👈 opcional (dejalo si querés solo órdenes con máquina)
-    ...fechasInvFilter,
-    ...configuracionFilter,
-    ...customerFilter,
-    ...usuarioFilter,
-    ...instruFilter,
-    ...parteFilter,
-    ...maquinaFilter,
-    ...encargadoFilter,
-    ...obserFilter,
-    ...estadoFilter,
-    ...registroFilter,
-    ...productoOrderItemFilter,
-  },
-  _sum: {
-    total: true,
-  },
-  _count: {
-    id_instru: true,
-  },
-  orderBy: {
-    _sum: {
-      total: 'desc',
-    },
-  },
-  take: 10,
-});
-
-// 👉 traer nombres de instrumentos
-const instrumentosTopTra = await this.prisma.instrumento.findMany({
-  where: {
-    id: { in: topInstrumentosTra.map(c => c.id_instru!) },
-  },
-  select: {
-    id: true,
-    name: true,
-  },
-});
-
-// 👉 map id → nombre
-const mapInstrumentosTra = Object.fromEntries(
-  instrumentosTopTra.map(i => [i.id, i.name])
-);
-
-// 👉 resultado final
-const top10InstrumentosxMaq = topInstrumentosTra.map(c => ({
-  instrumentoId: c.id_instru,
-  instrumento: mapInstrumentosTra[c.id_instru!] || 'Sin nombre',
-  totalSales: c._sum.total ?? 0,
-  totalOrders: c._count.id_instru ?? 0,
-}));
-
-///instrumentostop10
-
-    ///partetop10
-        const topPartes = await this.prisma.service.groupBy({
-          by: ['id_parte'],
-          where: {
-            id_instru: {not: null},
-            id_parte: { not: null },
-            id_maquin: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...parteFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_parte: true   // 👈 esto cuenta las órdenes
-          },   
-
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const partesTop = await this.prisma.parte.findMany({
-          where: {
-            id: { in: topPartes.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapPartes = Object.fromEntries(
-          partesTop.map(c => [c.id, c.name])
-        );
-
-        const top10Partes = topPartes.map(c => ({
-          parteId: c.id_parte,
-          parte: mapPartes[c.id_parte!],
-          totalSales: c._sum.total || 0
-        }));
-
-        ///partetop10
-
-
-///orders
-const servicesData = await this.prisma.service.aggregate({
-  where: {
-            id_instru: {not: null},
-            id_maquin: {not: null},
-        ...fechasInvFilter,
-        ...configuracionFilter,
-        ...customerFilter,
-        ...usuarioFilter,
-        ...instruFilter,
-        ...parteFilter,
-        ...maquinaFilter,
-        ...encargadoFilter,
-        ...obserFilter,
-        ...estadoFilter,
-        ...registroFilter,
-        ...productoOrderItemFilter,
-  },
-  _count: {
-    _all: true,
-  },
-  _sum: {
-    total: true,
-  },
-});
-
-const orders = [
-  {
-    _id: null,
-    numOrders: servicesData._count._all,
-    totalSales: servicesData._sum.total || 0,
-  },
-];
-///orders
-
-const Users = await this.prisma.user.count();
-const users = [
-  {
-    _id: null,
-    numUsers: Users
-  }
-  ]
-const Customers = await this.prisma.customer.count();
-const customers = [
-  {
-    _id: null,
-    numCustomers: Customers
-  }
-  ]
-      return {
-          top10MaquinasSTVal,
-          top10MaquinasTerVal,
-          top10MaquinasxOrd,
-          top10InstrumentosxMaq,
-          orders,
-          users,
-          customers,
-          top10Partes,
-          dilVal,
-          TarxMaq,
-      };
-
-
-
-  }
-//////dashMaq
-
-
-
-
-
-//////dash1esc
-
-  async dashboardEsc(query: any) {
-
-
-///filtroparaborrar
-const {
-  fech1,
-  fech2,
-  configuracion,
-  usuario,
-  customer,
-  producto,
-  parte,
-  maquina,
-  encargado,
-  instru,
-  estado,
-  registro,
-  obser,
-} = query;
-
-  const obserFilter: Prisma.ServiceWhereInput =
-  obser && obser !== 'all'
-    ? {
-        OR: [
-          { notes: { contains: obser, mode: 'insensitive' } },
-          {
-            serviceItems: {
-              some: { observ: { contains: obser, mode: 'insensitive' } },
-            },
-          },
-        ],
-      }
-    : {};
-
-    // --- Estado ---
-    const estadoFilter =
-      estado === 'TOD'
-        ? {}
-        : estado === 'EST'
-        ? { terminado: false }
-        : estado === 'ET'
-        ? { terminado: true }
-        : {};
-
-  const registroFilter =
-    registro === 'TOD'
-      ? {}
-      : registro === 'REGI'
-      ? { libNum: { gt: 0 } }
-      : registro === 'NREGI'
-      ? {
-          OR: [
-            { libNum: { lt: 1 } },
-            { libNum: null }
-          ]
-        }
-      : registro === 'PROT'
-      ? { asiNum: { gt: 0 } }
-      : registro === 'NPROT'
-      ?{
-        OR: [
-          { asiNum: { lt: 1 } },
-          { asiNum: null }
-        ]
-      }
-      : {};
-
-
-    // --- Fechas ---
-    const fechasInvFilter =
-      !fech1 && !fech2
-        ? {}
-        : !fech1 && fech2
-        ? { remDat: { lte: new Date(fech2) } }
-        : fech1 && !fech2
-        ? { remDat: { gte: new Date(fech1) } }
-        : { remDat: { gte: new Date(fech1), lte: new Date(fech2) } };
-
-    // --- Otros filtros ---
-    const parteFilter = parte && parte !== 'all' ? { id_parte: String(parte) } : {};
-    const maquinaFilter = maquina && maquina !== 'all' ? { id_maquin: String(maquina) } : {};
-    const encargadoFilter = encargado && encargado !== 'all' ? { id_encar: String(encargado) } : {};
-    const instruFilter = instru && instru !== 'all' ? {id_instru: String(instru)} : {};
-    const customerFilter = customer && customer !== 'all' ? { id_client: String(customer) } : {};
-    const configuracionFilter =
-      configuracion && configuracion !== 'all' ? { id_config: String(configuracion) } : {};
-    const usuarioFilter = usuario && usuario !== 'all' ? { user: String(usuario) } : {};
-
-    const productoFilter = producto && producto !== 'all' ? { productId: String(producto) } : {};
-    const productoOrderItemFilter =
-      producto && producto !== 'all'
-        ? {
-            serviceItems: {
-              some: {
-                productId: String(producto),
-              },
-            },
-          }
-        : {};
-    
-
-///filtroparaborrar
-
-
-        ///Userstop10
-    const topUsers = await this.prisma.service.groupBy({
-          by: ['user'],
-          where: {
-            terminado:false,
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            user: true   // 👈 cantidad de registros por usuario
-          },
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const usersTop = await this.prisma.user.findMany({
-          where: {
-            id: { in: topUsers.map(c => c.user!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapUsers = Object.fromEntries(
-          usersTop.map(c => [c.id, c.name])
-        );
-
-        const top10UsersSTVal = topUsers.map(c => ({
-          userId: c.user,
-          user: mapUsers[c.user!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.user
-        }));
-
-        ///Userstop10
-
-
-    ///dilval
-      // const resultdilVal = await this.prisma.serviceItem.groupBy({
-      //   by: ['terminado'],
-      //   where: {
-      //     order: {
-      //       id_instru: {not: null},
-      //       ...fechasInvFilter,
-      //       ...configuracionFilter,
-      //       ...customerFilter,
-      //       ...usuarioFilter,
-      //       ...comprobanteFilter,
-      //       ...parteFilter,
-
-      //     },
-      //   },
-      //   _sum: {
-      //     price: true,
-      //   },
-      //   _count: {
-      //     terminado: true,
-      //   },
-
-      // });    
-      // const dilVal = resultdilVal.map(r => ({
-      //   _id: r.terminado ? 'terminado' : 'pendiente',
-      //   total: r._sum.price || 0,
-      //   totalCan: r._count.terminado || 0,
-      // }));
-
-    const resultdilVal = await this.prisma.serviceItem.findMany({
+      _count: {
+        productId: true,
+      },
+    }),
+
+    // 🔥 INSTRUMENTOS x MAQ
+    this.prisma.service.groupBy({
+      by: ['id_instru'],
+      where: { ...baseServiceWhere, id_maquin: { not: null } },
+      _sum: { total: true },
+      _count: { id_instru: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
+
+    // 🔥 INSTRUMENTOS x PAR
+    this.prisma.service.groupBy({
+      by: ['id_instru'],
+      where: { ...baseServiceWhere, id_parte: { not: null } },
+      _sum: { total: true },
+      _count: { id_instru: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
+
+    // 🔥 ORDERS
+    this.prisma.service.aggregate({
       where: {
-          ...productoFilter,
-          ...estadoFilter,
-        service: {
-          id_instru: { not: null },
-          ...fechasInvFilter,
-          ...configuracionFilter,
-          ...customerFilter,
-          ...usuarioFilter,
-          ...instruFilter,
-          ...parteFilter,
-          ...maquinaFilter,
-          ...encargadoFilter,
-          ...obserFilter,
-          ...estadoFilter,
-          ...registroFilter,
-        },
+        ...baseServiceWhere,
+        OR: [{ id_maquin: { not: null } }, { id_parte: { not: null } }],
       },
-      select: {
-        terminado: true,
-        price: true,
-        quantity: true,
-        porIva: true,
-      },
+      _count: { _all: true },
+      _sum: { total: true },
+    }),
+
+    this.prisma.user.count(),
+    this.prisma.customer.count(),
+  ]);
+
+  // ========================
+  // PRODUCTS MAP
+  // ========================
+
+  const allProductIds = [
+    ...new Set([
+      ...tarGrouped.map(x => x.productId),
+      ...tarGroupedPar.map(x => x.productId),
+    ]),
+  ];
+
+  const productos = await this.prisma.product.findMany({
+    where: { id: { in: allProductIds } },
+    select: { id: true, title: true },
+  });
+
+  const mapProductos = Object.fromEntries(
+    productos.map(p => [p.id, p.title])
+  );
+
+  // ========================
+  // TRANSFORMS
+  // ========================
+
+  const TarxMaq = tarGrouped
+    .map(x => ({
+      productId: x.productId,
+      producto: mapProductos[x.productId] || 'Sin nombre',
+      total: (x._sum.price || 0) * (x._sum.quantity || 0),
+      totalCan: x._count.productId,
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  const TarxPar = tarGroupedPar
+    .map(x => ({
+      productId: x.productId,
+      producto: mapProductos[x.productId] || 'Sin nombre',
+      total: (x._sum.price || 0) * (x._sum.quantity || 0),
+      totalCan: x._count.productId,
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  const mapInst = async (data: any[]) => {
+    const ids = data.map(x => x.id_instru);
+    const inst = await this.prisma.instrumento.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, name: true },
     });
-
-    const grouped = resultdilVal.reduce((acc, item) => {
-      const key = item.terminado ? 'terminado' : 'pendiente';
-
-      if (!acc[key]) {
-        acc[key] = { total: 0, totalCan: 0 };
-      }
-
-      acc[key].total += (item.price || 0) * (item.quantity || 0) * (1+(item.porIva/100) || 0);
-      acc[key].totalCan += 1;
-
-      return acc;
-    }, {} as Record<string, { total: number; totalCan: number }>);
-
-    const dilVal = Object.entries(grouped).map(([key, value]) => ({
-      _id: key,
-      total: value.total,
-      totalCan: value.totalCan,
+    const map = Object.fromEntries(inst.map(i => [i.id, i.name]));
+    return data.map(x => ({
+      instrumentoId: x.id_instru,
+      instrumento: map[x.id_instru] || 'Sin nombre',
+      totalSales: x._sum.total || 0,
+      totalOrders: x._count.id_instru,
     }));
+  };
 
-      ///dilval
+  const [top10InstrumentosxMaq, top10InstrumentosxPar] =
+    await Promise.all([
+      mapInst(topInstMaq),
+      mapInst(topInstPar),
+    ]);
 
-    ///intterVal
-      const resultinsVal = await this.prisma.service.groupBy({
-        by: ['terminado'],
-        where: {
-            id_instru: {not: null},
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-        },
-        _sum: {
-          total: true,
-        },
-        _count: {
-          id: true,
-        },
-
-      });
-      const insterVal = resultinsVal.map(r => ({
-        _id: r.terminado ? 'terminado' : 'pendiente',
-        total: r._sum.total || 0,
-        count: r._count.id,
-      }));
-    // ///intterVal
-
-    ///intpubpriVal
-
-            const servicesPubPriVal = await this.prisma.service.findMany({
-              where: {
-                id_instru: {not: null},
-                ...fechasInvFilter,
-                ...configuracionFilter,
-                ...customerFilter,
-                ...usuarioFilter,
-                ...instruFilter,
-                ...parteFilter,
-                ...maquinaFilter,
-                ...encargadoFilter,
-                ...obserFilter,
-                ...estadoFilter,
-                ...registroFilter,
-                ...productoOrderItemFilter,
-              },
-              include: {
-                instrumento: {
-                  select: {
-                    publico: true
-                  }
-                }
-              }
-            });
-
-            const resultVal = {
-              publico: 0,
-              privado: 0,
-              countPublico: 0,   // 👈 contador
-              countPrivado: 0    // 👈 contador
-            };
-
-            for (const service of servicesPubPriVal) {
-
-              if (service.instrumento?.publico) {
-                resultVal.publico += service.total ?? 0;
-                resultVal.countPublico += 1;   // 👈 suma cantidad
-              } else {
-                resultVal.privado += service.total ?? 0;
-                resultVal.countPrivado += 1;   // 👈 suma cantidad
-              }
-
-            }
-
-            const PubPriVal = [
-              { type: 'Publico', total: resultVal.publico, totalcont: resultVal.countPublico },
-              { type: 'Privado', total: resultVal.privado, totalcont: resultVal.countPrivado },
-                ]
-          
-    ///intpubpriVal
-    ///clientestop10
-    const topCustomers = await this.prisma.service.groupBy({
-          by: ['id_client'],
-          where: {
-            id_instru: {not: null},
-            id_client: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...parteFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_client: true   // 👈 esto cuenta las órdenes
-          },   
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const customersTop = await this.prisma.customer.findMany({
-          where: {
-            id: { in: topCustomers.map(c => c.id_client!) },
-          },
-          select: {
-            id: true,
-            nameCus: true
-          }
-        });
-
-        const mapCustomers = Object.fromEntries(
-          customersTop.map(c => [c.id, c.nameCus])
-        );
-
-        const top10Clients = topCustomers.map(c => ({
-          customerId: c.id_client,
-          customer: mapCustomers[c.id_client!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_client || 0
-        }));
-
-        ///clientestop10
-    ///partetop10
-        const topPartes = await this.prisma.service.groupBy({
-          by: ['id_parte'],
-          where: {
-            id_instru: {not: null},
-            id_parte: { not: null },
-            ...fechasInvFilter,
-            ...configuracionFilter,
-            ...customerFilter,
-            ...parteFilter,
-            ...usuarioFilter,
-            ...instruFilter,
-            ...maquinaFilter,
-            ...encargadoFilter,
-            ...obserFilter,
-            ...estadoFilter,
-            ...registroFilter,
-            ...productoOrderItemFilter,
-
-          },
-          _sum: {
-            total: true
-          },
-          _count: {
-            id_parte: true   // 👈 esto cuenta las órdenes
-          },          
-          orderBy: {
-            _sum: {
-              total: 'desc'
-            }
-          },
-          take: 10
-        });
-
-        const partesTop = await this.prisma.parte.findMany({
-          where: {
-            id: { in: topPartes.map(c => c.id_parte!) },
-          },
-          select: {
-            id: true,
-            name: true
-          }
-        });
-
-        const mapPartes = Object.fromEntries(
-          partesTop.map(c => [c.id, c.name])
-        );
-
-        const top10Partes = topPartes.map(c => ({
-          parteId: c.id_parte,
-          parte: mapPartes[c.id_parte!],
-          totalSales: c._sum.total || 0,
-          totalOrders: c._count.id_parte || 0
-        }));
-
-        ///partetop10
-
-    ///categorias    
-      const categories = await this.prisma.product.groupBy({
-        by: ['category'],
-        _count: {
-          category: true,
-        },
-      });
-
-      const productCategories = categories.map((item) => ({
-        _id: item.category,
-        count: item._count.category,
-      }));
-///categorias    
-
-///services
-const servicesData = await this.prisma.service.aggregate({
-  where: {
-            id_instru: {not: null},
-        ...fechasInvFilter,
-        ...configuracionFilter,
-        ...customerFilter,
-        ...usuarioFilter,
-        ...instruFilter,
-        ...parteFilter,
-        ...maquinaFilter,
-        ...encargadoFilter,
-        ...obserFilter,
-        ...estadoFilter,
-        ...registroFilter,
-        ...productoOrderItemFilter,
-  },
-  _count: {
-    _all: true,
-  },
-  _sum: {
-    total: true,
-  },
-});
-
-const orders = [
-  {
-    _id: null,
+  const orders = [{
     numOrders: servicesData._count._all,
     totalSales: servicesData._sum.total || 0,
-  },
-];
-///services
+  }];
 
-const Users = await this.prisma.user.count();
-const users = [
-  {
-    _id: null,
-    numUsers: Users
-  }
-  ]
-const Customers = await this.prisma.customer.count();
-const customers = [
-  {
-    _id: null,
-    numCustomers: Customers
-  }
-  ]
-      return {
-          productCategories,
-          orders,
-          users,
-          customers,
-          top10Clients,
-          top10Partes,
-          PubPriVal,
-          dilVal,
-          insterVal,
-          top10UsersSTVal
-      };
+  return {
+    top10InstrumentosxMaq,
+    top10InstrumentosxPar,
+    TarxPar,
+    TarxMaq,
+    orders,
+    users: [{ numUsers: totalUsers }],
+    customers: [{ numCustomers: totalCustomers }],
+  };
+}//////dashCli
 
 
 
-  }
-//////dash1Esc
 
 
 
