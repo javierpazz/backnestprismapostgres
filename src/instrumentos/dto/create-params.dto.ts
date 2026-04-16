@@ -41,6 +41,9 @@ class OrderItemDto {
   @IsNumber()
   porIva: number;
 
+  @IsNumber()
+  totalItem: number;
+
   @IsOptional()
   @IsString()
   venDat?: string;

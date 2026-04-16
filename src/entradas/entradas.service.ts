@@ -42,6 +42,9 @@ async searchSerUS(id: string) {
     select: {
       id: true,
       total: true,
+      remNum: true,
+      remDat: true,
+      staOrd: true,
       terminado: true,
 
       customer: {
@@ -75,6 +78,7 @@ async searchSerUS(id: string) {
           quantity: true,
           price: true,
           porIva: true,
+          totalItem: true,
           size: true,
           observ: true,
           terminado: true,
@@ -89,26 +93,29 @@ async searchSerUS(id: string) {
   // 🔥 3. Transform limpio
   return services.map(order => ({
     _id: order.id,
+    remNum: order.remNum,
+    remDat: order.remDat,
+    staOrd: order.staOrd,
     total: order.total,
     terminado: order.terminado,
 
-    customer: order.customer && {
+    id_client: order.customer && {
       _id: order.customer.id,
       nameCus: order.customer.nameCus,
       emailCus: order.customer.emailCus,
     },
 
-    instrumento: order.instrumento && {
+    id_instru: order.instrumento && {
       _id: order.instrumento.id,
       name: order.instrumento.name,
     },
 
-    maquina: order.maquina && {
+    id_maquin: order.maquina && {
       _id: order.maquina.id,
       name: order.maquina.name,
     },
 
-    parte: order.parte && {
+    id_parte: order.parte && {
       _id: order.parte.id,
       name: order.parte.name,
     },
@@ -125,6 +132,7 @@ async searchSerUS(id: string) {
       quantity: item.quantity,
       price: item.price,
       porIva: item.porIva,
+      totalItem: item.totalItem,
       size: item.size,
       observ: item.observ,
       terminado: item.terminado,
@@ -718,9 +726,9 @@ async create(createEntradaDto: any) {
               quantity: item.quantity,
               image: item.image,
               price: item.price,
-              totalItem: item.totalItem,
               size: item.size,
               porIva: item.porIva,
+              totalItem: item.totalItem,
               venDat: safeDate(item.venDat),
               observ: item.observ,
               terminado: item.terminado,
@@ -838,6 +846,7 @@ async findAll(query: any) {
       quantity: item.quantity,
       price: item.price,
       porIva: item.porIva,
+      totalItem: item.totalItem,
       size: item.size,
       observ: item.observ,
       terminado: item.terminado,
@@ -920,6 +929,7 @@ async findAlldil(query: any) {
         price: item.price,
         size: item.size,
         porIva: item.porIva,
+        totalItem: item.totalItem,
         venDat: item.venDat,
         observ: item.observ,
         terminado: item.terminado,
@@ -1112,6 +1122,7 @@ async findOneSer(id: string) {
       quantity: item.quantity,
       price: item.price,
       porIva: item.porIva,
+      totalItem: item.totalItem,
       venDat: item.venDat,
       size: item.size,
       observ: item.observ,

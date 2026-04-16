@@ -189,6 +189,7 @@ async update(updateInstrumentoDto: UpdateInstrumentoDto) {
               quantity: oi.quantity,
               price: oi.price,
               porIva: oi.porIva,
+              totalItem: oi.totalItem,
               venDat: oi.venDat,
               observ: oi.observ,
               slug: oi.slug,

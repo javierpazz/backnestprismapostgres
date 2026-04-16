@@ -233,6 +233,7 @@ model ParamItem {
   price       Float
   size        String?
   porIva      Float
+  totalItem   Float
   venDat      DateTime?
   observ      String?
   terminado   Boolean?
@@ -363,7 +364,7 @@ model OrderItem {
   quantity    Int
   image       String?
   price       Float
-  totalItem   Float?
+  totalItem   Float
   size        String?
   porIva      Float
   venDat      DateTime?
@@ -504,7 +505,7 @@ model ServiceItem {
   quantity    Int
   image       String?
   price       Float
-  totalItem   Float?
+  totalItem   Float
   size        String?
   porIva      Float
   venDat      DateTime?
