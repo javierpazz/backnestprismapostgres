@@ -20,6 +20,11 @@ export class ServiciosController {
 
 
 
+  @Get('entradas/summary/tra')
+  @Auth()
+  dashboardTra(@Query() query: any) {
+    return this.serviciosService.dashboardTra(query);
+  }
   @Get('entradas/summary/tar')
   @Auth()
   dashboardTar(@Query() query: any) {

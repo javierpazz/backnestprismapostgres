@@ -29,6 +29,241 @@ export class ServiciosService {
 
 
 
+//////dashTra
+
+async dashboardTra(query: any) {
+
+  const {
+    baseServiceWhere,
+    productoFilter,
+    estadoFilter
+  } = buildFilters(query);
+
+  // 🔥 CONTEXTO PARTE (clave para no mezclar con máquina)
+  const baseWherePar = {
+    ...baseServiceWhere,
+    // id_parte: { not: null },
+  };
+
+  // ========================
+  // PARALLEL QUERIES
+  // ========================
+
+  const [
+    insterValRaw,
+    maqAll,
+    partesAll,
+    instrumentos,
+    dilValRaw,
+    tarRaw,
+    servicesData,
+    totalUsers,
+    totalCustomers
+  ] = await Promise.all([
+
+
+    // INST VAL
+    this.prisma.service.groupBy({
+      by: ['terminado'],
+      where: { ...baseServiceWhere, ...estadoFilter },
+      _sum: { total: true },
+      _count: { id: true },
+    }),
+    
+    
+    // 🔥 MAQ GENERAL
+    this.prisma.service.groupBy({
+      by: ['id_maquin'],
+      where: {
+            ...baseWherePar,
+            ...estadoFilter,
+            },
+      _sum: { total: true },
+      _count: { id_maquin: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
+
+
+    // 🔥 PARTES GENERAL
+    this.prisma.service.groupBy({
+      by: ['id_parte'],
+      where: {
+            ...baseWherePar,
+            ...estadoFilter,
+            },
+      _sum: { total: true },
+      _count: { id_parte: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
+
+    // 🔥 INSTRUMENTOS x PARTE
+    this.prisma.service.groupBy({
+      by: ['id_instru'],
+      where: {
+            ...baseWherePar,
+            ...estadoFilter,
+            },
+      _sum: { total: true },
+      _count: { id_instru: true },
+      orderBy: { _sum: { total: 'desc' } },
+      take: 10,
+    }),
+
+    // 🔥 DIL VAL (usar totalItem ✅)
+    this.prisma.serviceItem.groupBy({
+      by: ['terminado'],
+      where: {
+        ...productoFilter,
+        // service: baseWherePar,
+        service: {
+            ...baseWherePar,
+            ...estadoFilter,
+            },
+      },
+      _sum: {
+        totalItem: true,
+      },
+      _count: {
+        terminado: true,
+      },
+    }),
+
+    // 🔥 TAR x PRODUCTO (usar totalItem ✅)
+    this.prisma.serviceItem.groupBy({
+      by: ['productId'],
+      where: {
+        ...productoFilter,
+        service: {
+            ...baseWherePar,
+            ...estadoFilter,
+            },
+      },
+      _sum: {
+        totalItem: true,
+      },
+      _count: {
+        productId: true,
+      },
+      orderBy: {
+        _sum: { totalItem: 'desc' },
+      },
+      take: 10,
+    }),
+
+    // 🔥 ORDERS
+    this.prisma.service.aggregate({
+      where: {
+        ...baseWherePar,
+        ...estadoFilter,
+      },
+      _count: { _all: true },
+      _sum: { total: true },
+    }),
+
+    this.prisma.user.count(),
+    this.prisma.customer.count(),
+  ]);
+
+  // ========================
+  // MAP NOMBRES
+  // ========================
+
+  const partesIds = [
+    ...partesAll.map(x => x.id_parte),
+    ...maqAll.map(x => x.id_maquin),
+
+  ];
+
+  const instrumentosIds = instrumentos.map(x => x.id_instru);
+  const productosIds = tarRaw.map(x => x.productId);
+
+  const [
+    maquinasMapRaw,
+    partesMapRaw,
+    instrumentosMapRaw,
+    productosMapRaw] =
+     await Promise.all([
+      this.prisma.maquina.findMany({
+      where: { id: { in: partesIds } },
+      select: { id: true, name: true },
+    }),
+
+    this.prisma.parte.findMany({
+      where: { id: { in: partesIds } },
+      select: { id: true, name: true },
+    }),
+    this.prisma.instrumento.findMany({
+      where: { id: { in: instrumentosIds } },
+      select: { id: true, name: true },
+    }),
+    this.prisma.product.findMany({
+      where: { id: { in: productosIds } },
+      select: { id: true, title: true },
+    }),
+  ]);
+
+  const mapMaquinas = Object.fromEntries(maquinasMapRaw.map(x => [x.id, x.name]));
+  const mapPartes = Object.fromEntries(partesMapRaw.map(x => [x.id, x.name]));
+  const mapInstrumentos = Object.fromEntries(instrumentosMapRaw.map(x => [x.id, x.name]));
+  const mapProductos = Object.fromEntries(productosMapRaw.map(x => [x.id, x.title]));
+
+  // ========================
+  // TRANSFORMS
+  // ========================
+
+
+  const insterVal = insterValRaw.map(r => ({
+    _id: r.terminado ? 'terminado' : 'pendiente',
+    total: r._sum.total || 0,
+    count: r._count.id,
+  }));
+
+  const mapGroup = (data: any[], map: any, key: string) =>
+    data.map(x => ({
+      id: x[key],
+      name: map[x[key]] || '',
+      total: x._sum.total || 0,
+      count: x._count[key] || 0,
+    }));
+
+  const top10MaquinasxOrd = mapGroup(maqAll, mapMaquinas, 'id_maquin');
+  const top10PartesxOrd = mapGroup(partesAll, mapPartes, 'id_parte');
+
+  const TarxPar = tarRaw.map(x => ({
+    productId: x.productId,
+    producto: mapProductos[x.productId] || '',
+    total: x._sum.totalItem || 0, // ✅ FIX
+    totalCan: x._count.productId,
+  }));
+
+  const dilVal = dilValRaw.map(r => ({
+    _id: r.terminado === true ? 'terminado' : 'pendiente', // ✅ FIX null-safe
+    total: r._sum.totalItem || 0, // ✅ FIX
+    totalCan: r._count.terminado,
+  }));
+
+  const orders = [{
+    numOrders: servicesData._count._all,
+    totalSales: servicesData._sum.total || 0,
+  }];
+
+  return {
+    insterVal,
+    top10MaquinasxOrd,
+    top10PartesxOrd,
+    TarxPar,
+    dilVal,
+    orders,
+    users: [{ numUsers: totalUsers }],
+    customers: [{ numCustomers: totalCustomers }],
+  };
+
+
+
+}
+//////dashTra
 //////dashTar
 
 async dashboardTar(query: any) {

@@ -1141,7 +1141,6 @@ async findOneSer(id: string) {
 async update(updateEntradaDto: any, id: string) {
 
   const safeDate = (dateStr?: string) => dateStr ? new Date(dateStr) : null;
-
   try {
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -1234,15 +1233,36 @@ async update(updateEntradaDto: any, id: string) {
             ? { connect: { id: id_client } }
             : undefined,
 
-          parte: id_parte
-            ? { connect: { id: id_parte } }
-            : undefined,
-          maquina: id_maquin
-            ? { connect: { id: id_maquin } }
-            : undefined,
-          encargado: id_encar
-            ? { connect: { id: id_encar } }
-            : undefined,
+          // parte: id_parte
+          //   ? { connect: { id: id_parte } }
+          //   : undefined,
+          parte:
+            id_parte === null
+              ? { disconnect: true }
+              : id_parte
+              ? { connect: { id: id_parte } }
+              : undefined,
+
+          // maquina: id_maquin
+          //   ? { connect: { id: id_maquin } }
+          //   : undefined,
+          maquina:
+            id_maquin === null
+              ? { disconnect: true }
+              : id_maquin
+              ? { connect: { id: id_maquin } }
+              : undefined,
+
+          // encargado: id_encar
+          //   ? { connect: { id: id_encar } }
+          //   : undefined,
+          encargado:
+            id_encar === null
+              ? { disconnect: true }
+              : id_encar
+              ? { connect: { id: id_encar } }
+              : undefined,
+
 
           instrumento: id_instru
             ? { connect: { id: id_instru } }

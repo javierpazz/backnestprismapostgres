@@ -506,8 +506,11 @@ model ServiceItem {
   image       String?
   price       Float
   totalItem   Float
+  priceBuy    Float
+  totalItemBuy Float
   size        String?
   porIva      Float
+  terDat      DateTime?
   venDat      DateTime?
   observ      String?
   terminado   Boolean?
@@ -517,6 +520,9 @@ model ServiceItem {
   // instrumentoId String?
   service Service? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   serviceId String?
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([serviceId])
   @@index([productId])
@@ -539,6 +545,8 @@ model Service {
   tax            Float?
   total          Float?
   totalBuy       Float?
+  totalCobro     Float?
+  totalPago      Float?
   itemsInOrder Int
 
   id_client      String?      // relación con Customer
