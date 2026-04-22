@@ -398,6 +398,8 @@ model Order {
   tax            Float?
   total          Float?
   totalBuy       Float?
+  // totalCobro     Float?
+  // totalPago      Float?
   itemsInOrder Int
 
   id_client      String?      // relación con Customer
@@ -506,11 +508,11 @@ model ServiceItem {
   image       String?
   price       Float
   totalItem   Float
-  priceBuy    Float
-  totalItemBuy Float
+  // priceBuy    Float
+  // totalItemBuy Float
   size        String?
   porIva      Float
-  terDat      DateTime?
+  // terDat      DateTime?
   venDat      DateTime?
   observ      String?
   terminado   Boolean?
@@ -545,8 +547,8 @@ model Service {
   tax            Float?
   total          Float?
   totalBuy       Float?
-  totalCobro     Float?
-  totalPago      Float?
+  // totalCobro     Float?
+  // totalPago      Float?
   itemsInOrder Int
 
   id_client      String?      // relación con Customer

@@ -1,0 +1,1 @@
+import{j as e,B as s,a as n,w as r}from"./mui-a4a62447.js";const a=()=>e.jsxs(s,{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",height:"calc(100vh - 200px)",children:[e.jsx(n,{sx:{mb:3},variant:"h2",fontWeight:200,fontSize:20,children:"Cargando..."}),e.jsx(r,{thickness:2})]});export{a as F};

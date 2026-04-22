@@ -157,7 +157,7 @@ interface SeedData {
 }
 
 
-export const initialData: SeedData = {
+export const initialDataService: SeedData = {
 
   valuees: [
     {

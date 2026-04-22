@@ -1,14 +1,22 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { SeedService } from './seed.service';
 
-@Controller('seed')
+@Controller()
 export class SeedController {
   constructor(private readonly seedService: SeedService) {}
 
 
-  @Get()
+  @Get('seedvinos')
   executeSeed() {
-    return this.seedService.runSeed();
+    return this.seedService.runSeedVinos();
+  }
+  @Get('seedservices')
+  runSeedServices() {
+    return this.seedService.runSeedServices();
+  }
+  @Get('seedescri')
+  runSeedEscri() {
+    return this.seedService.runSeedEscri();
   }
 
 }

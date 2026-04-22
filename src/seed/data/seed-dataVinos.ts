@@ -157,7 +157,7 @@ interface SeedData {
 }
 
 
-export const initialData: SeedData = {
+export const initialDataVinos: SeedData = {
 
   valuees: [
     {
@@ -545,7 +545,7 @@ export const initialData: SeedData = {
       category: 'Tinto',
       tags: [ 'tinto' ],
       title: "Tannat Stutz",
-      ecoActive: false,
+      ecoActive: true,
       gender: 'men'
     },
     {
@@ -568,7 +568,7 @@ export const initialData: SeedData = {
       category: 'Blanco',
       tags: [ 'blanco' ],
       title: "Torrontés Stutz",
-      ecoActive: false,
+      ecoActive: true,
       gender: 'men'
     },
 
@@ -592,7 +592,7 @@ export const initialData: SeedData = {
       category: 'Blanco',
       tags: [ 'blanco' ],
       title: "Tardío Stutz",
-      ecoActive: false,
+      ecoActive: true,
       gender: 'men'
     },
 
@@ -616,7 +616,7 @@ export const initialData: SeedData = {
       category: 'Tinto',
       tags: [ 'tinto' ],
       title: "Cabernet Sauvignon Stutz",
-      ecoActive: false,
+      ecoActive: true,
       gender: 'men'
     },
     {
@@ -639,7 +639,7 @@ export const initialData: SeedData = {
       category: 'Tinto',
       tags: [ 'tinto' ],
       title: "Gran Corte Stutz",
-      ecoActive: false,
+      ecoActive: true,
       gender: 'men'
     },
     {
@@ -662,7 +662,7 @@ export const initialData: SeedData = {
       category: 'Tinto',
       tags: [ 'tinto' ],
       title: "Malbec Stutz",
-      ecoActive: false,
+      ecoActive: true,
       gender: 'men'
     },
     {
@@ -685,7 +685,7 @@ export const initialData: SeedData = {
       category: 'Tinto',
       tags: [ 'tinto' ],
       title: "Garnacha Stutz",
-      ecoActive: false,
+      ecoActive: true,
       gender: 'men'
     },
 
