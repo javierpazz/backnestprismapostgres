@@ -403,17 +403,22 @@ export const initialDataVinos: SeedData = {
   instrumentos: [
       {
         codIns: '1',
-        name: 'ESCRITURA',
+        name: 'VISITA BODEGA',
         publico: true,
       },
       {
         codIns: '2',
-        name: 'BOLETO',
+        name: 'VISITA VIÑEDOS',
         publico: true,
       },
       {
         codIns: '3',
-        name: 'CERTIFICACION',
+        name: 'ALMUERZO BODEGA',
+        publico: true,
+          },
+      {
+        codIns: '4',
+        name: 'ALMUERZO VIÑEDO',
         publico: true,
           },
     ],
