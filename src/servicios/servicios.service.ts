@@ -170,11 +170,20 @@ async dashboardTra(query: any) {
   // MAP NOMBRES
   // ========================
 
-  const partesIds = [
-    ...partesAll.map(x => x.id_parte),
-    ...maqAll.map(x => x.id_maquin),
+  // const partesIds = [
+  //   ...partesAll.map(x => x.id_parte),
+  //   ...maqAll.map(x => x.id_maquin),
 
-  ];
+  // ];
+
+const partesIds = partesAll
+  .map(x => x.id_parte)
+  .filter((id): id is string => !!id); // elimina null/undefined
+
+const maquinasIds = maqAll
+  .map(x => x.id_maquin)
+  .filter((id): id is string => !!id); // elimina null/undefined
+
 
   const instrumentosIds = instrumentos.map(x => x.id_instru);
   const productosIds = tarRaw.map(x => x.productId);
@@ -186,7 +195,7 @@ async dashboardTra(query: any) {
     productosMapRaw] =
      await Promise.all([
       this.prisma.maquina.findMany({
-      where: { id: { in: partesIds } },
+      where: { id: { in: maquinasIds } },
       select: { id: true, name: true },
     }),
 
