@@ -154,7 +154,7 @@ async listByConfig(configId: string): Promise<any[]> {
         _id: id,
         ...rest,
               images: ProductImage.map(
-                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/PRODUCTS/${ image.url }`
+                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/products/${ image.url }`
       )
 
       }));
@@ -342,7 +342,7 @@ async listByConfig(configId: string): Promise<any[]> {
       ...rest,
       // images: ProductImage.map( image => image.url )
               images: ProductImage.map(
-                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/PRODUCTS/${ image.url }`
+                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/products/${ image.url }`
       )
 
 

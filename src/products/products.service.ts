@@ -226,7 +226,7 @@ export class ProductsService {
         ...rest,
       // images: ProductImage.map( image => image.url )
       images: ProductImage.map(
-         image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/PRODUCTS/${ image.url }`
+         image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/products/${ image.url }`
          )
 
 
@@ -273,7 +273,7 @@ export class ProductsService {
         _id: id,
       // images: ProductImage.map( image => image.url )
       images: ProductImage.map(
-                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/PRODUCTS/${ image.url }`
+                 image => image.url.includes('http') ? image.url : `${ process.env.HOST_NAME}/products/${ image.url }`
       )
       }));
 
