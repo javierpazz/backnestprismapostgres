@@ -25,6 +25,12 @@ export class MaquinasController {
     return this.maquinasService.create(createMaquinaDto, maquina);
   }
   
+  @Get('/mpcliente')
+  findAllmpc(@Query() query: any) {
+    return this.maquinasService.findAllmpc(query);
+  }
+
+
   @Get()
   @Auth()
   // findAllAdm( @Query() paginationDto: PaginationDto ) {

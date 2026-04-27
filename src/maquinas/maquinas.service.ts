@@ -48,6 +48,25 @@ export class MaquinasService {
   async findAll(query: any) {
     // isAuth,
     // // isAdmin,
+
+    const maquinas = await this.prisma.maquina.findMany({
+        orderBy: {
+          name: 'asc',
+        },
+      include: {
+        codCus: true,
+      },     
+      })
+      return maquinas.map(c => ({
+        _id: c.id,  // duplicamos el id en _id
+        codMaq: c.codMaq,
+        ...c,
+      }));
+
+  }
+  async findAllmpc(query: any) {
+    // isAuth,
+    // // isAdmin,
     const {
       id_custom,
     } = query;
@@ -66,6 +85,9 @@ export class MaquinasService {
         orderBy: {
           name: 'asc',
         },
+      include: {
+        codCus: true,
+      },     
       })
       return maquinas.map(c => ({
         _id: c.id,  // duplicamos el id en _id
@@ -82,7 +104,10 @@ export class MaquinasService {
     if ( id ) {
       maquina = await this.prisma.maquina.findUnique({
       where: { id },
-      });
+        include: {
+          codCus: true,
+        },  
+    });
     }
 
     if ( !maquina ) 

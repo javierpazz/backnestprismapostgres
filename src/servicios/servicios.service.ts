@@ -604,6 +604,7 @@ async dashboardPar(query: any) {
       },
       _sum: {
         totalItem: true,
+        quantity: true,
       },
       _count: {
         productId: true,
@@ -681,6 +682,7 @@ async dashboardPar(query: any) {
     productId: x.productId,
     producto: mapProductos[x.productId] || '',
     total: x._sum.totalItem || 0, // ✅ FIX
+    totalQuantity: x._sum.quantity || 0, // ✅ FIX
     totalCan: x._count.productId,
   }));
 
@@ -844,6 +846,7 @@ async dashboardMaq(query: any) {
       },
       _sum: {
         totalItem: true,
+        quantity: true,
       },
       _count: {
         productId: true,
@@ -938,6 +941,7 @@ async dashboardMaq(query: any) {
     productId: x.productId,
     producto: mapProductos[x.productId] || '',
     total: x._sum.totalItem || 0, // ✅ FIX
+    totalQuantity: x._sum.quantity || 0, // ✅ FIX
     totalCan: x._count.productId,
   }));
 
